@@ -9,3 +9,5 @@ const openSearchClient = new Client({
 })
 
 export default openSearchClient
+
+// ok

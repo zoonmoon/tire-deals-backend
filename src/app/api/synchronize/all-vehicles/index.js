@@ -534,6 +534,8 @@ function transformVehicle(
 
 
 
+
+
 async function bulkUploadToOpenSearch(
   vehicles,
   attempt = 1
