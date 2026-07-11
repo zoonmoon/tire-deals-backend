@@ -1,4 +1,3 @@
-
 import { syncAllVehiclesFromAutoSync } from ".";
 
 export async function GET(){

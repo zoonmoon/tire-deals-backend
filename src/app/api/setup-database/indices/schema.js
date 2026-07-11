@@ -233,7 +233,6 @@ export const allVehiclesSchema = {
 
     properties: {
 
-
       // =====================================
       // Identity
       // =====================================
@@ -245,6 +244,15 @@ export const allVehiclesSchema = {
       default_chassis_id: {
         type: "keyword"
       },
+
+      vehicle_key: {
+        type: "keyword"
+      },
+
+      ymm_key: {
+        type: "keyword"
+      },
+
 
 
       // =====================================
@@ -275,6 +283,11 @@ export const allVehiclesSchema = {
         type: "keyword"
       },
 
+      make_model: {
+        type: "keyword"
+      },
+
+
 
       // =====================================
       // Vehicle Details
@@ -291,6 +304,7 @@ export const allVehiclesSchema = {
       drw: {
         type: "boolean"
       },
+
 
 
       // =====================================
@@ -320,6 +334,14 @@ export const allVehiclesSchema = {
         type: "integer"
       },
 
+      load_rating: {
+        type: "integer"
+      },
+
+      load_rating_rear: {
+        type: "integer"
+      },
+
 
 
       // =====================================
@@ -330,7 +352,6 @@ export const allVehiclesSchema = {
         type: "keyword"
       },
 
-
       images: {
         type: "object"
       },
@@ -338,7 +359,7 @@ export const allVehiclesSchema = {
 
 
       // =====================================
-      // Factory Tire Fitments
+      // Factory Fitments
       // =====================================
 
       fitments: {
@@ -347,28 +368,25 @@ export const allVehiclesSchema = {
 
         properties: {
 
-
           id: {
             type: "keyword"
           },
-
 
           chassis_id: {
             type: "keyword"
           },
 
-
           format: {
             type: "keyword"
           },
-
 
           name: {
             type: "keyword"
           },
 
 
-          // Front
+
+          // ---------- FRONT ----------
 
           tire_size: {
             type: "keyword"
@@ -386,46 +404,34 @@ export const allVehiclesSchema = {
             type: "integer"
           },
 
-
           rim_width: {
             type: "scaled_float",
             scaling_factor: 10
           },
-
 
           inch_width: {
             type: "scaled_float",
             scaling_factor: 100
           },
 
-
           diameter: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
-
           speed_rating: {
             type: "keyword"
           },
-
-
-          load_rating: {
-            type: "keyword"
-          },
-
 
           offset: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
-
           min_offset: {
             type: "scaled_float",
             scaling_factor: 10
           },
-
 
           max_offset: {
             type: "scaled_float",
@@ -434,47 +440,54 @@ export const allVehiclesSchema = {
 
 
 
-          // Rear (staggered vehicles)
+          // ---------- REAR ----------
 
           tire_size_rear: {
             type: "keyword"
           },
 
-
           section_width_rear: {
             type: "integer"
           },
-
 
           aspect_ratio_rear: {
             type: "integer"
           },
 
-
           rim_diameter_rear: {
             type: "integer"
           },
-
 
           rim_width_rear: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
-
           inch_width_rear: {
             type: "scaled_float",
             scaling_factor: 100
           },
-
 
           diameter_rear: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
+          speed_rating_rear: {
+            type: "keyword"
+          },
 
           offset_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          min_offset_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          max_offset_rear: {
             type: "scaled_float",
             scaling_factor: 10
           }
@@ -486,7 +499,139 @@ export const allVehiclesSchema = {
 
 
       // =====================================
-      // Plus Size Options
+      // Optional Factory Fitments
+      // =====================================
+
+      optional_fitments: {
+
+        type: "nested",
+
+        properties: {
+
+          id: {
+            type: "keyword"
+          },
+
+          chassis_id: {
+            type: "keyword"
+          },
+
+          format: {
+            type: "keyword"
+          },
+
+          tire_size: {
+            type: "keyword"
+          },
+
+          section_width: {
+            type: "integer"
+          },
+
+          aspect_ratio: {
+            type: "integer"
+          },
+
+          rim_diameter: {
+            type: "integer"
+          },
+
+          rim_width: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          inch_width: {
+            type: "scaled_float",
+            scaling_factor: 100
+          },
+
+          diameter: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          speed_rating: {
+            type: "keyword"
+          },
+
+          offset: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          min_offset: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          max_offset: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+
+
+          // Rear
+
+          tire_size_rear: {
+            type: "keyword"
+          },
+
+          section_width_rear: {
+            type: "integer"
+          },
+
+          aspect_ratio_rear: {
+            type: "integer"
+          },
+
+          rim_diameter_rear: {
+            type: "integer"
+          },
+
+          rim_width_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          inch_width_rear: {
+            type: "scaled_float",
+            scaling_factor: 100
+          },
+
+          diameter_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          speed_rating_rear: {
+            type: "keyword"
+          },
+
+          offset_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          min_offset_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
+
+          max_offset_rear: {
+            type: "scaled_float",
+            scaling_factor: 10
+          }
+
+        }
+
+      },
+
+
+
+      // =====================================
+      // Plus Sizes
       // =====================================
 
       plus_sizes: {
@@ -495,54 +640,58 @@ export const allVehiclesSchema = {
 
         properties: {
 
-
           chassis_id: {
             type: "keyword"
           },
-
 
           type: {
             type: "keyword"
           },
 
+          format: {
+            type: "keyword"
+          },
 
           tire_size: {
             type: "keyword"
           },
 
-
           section_width: {
             type: "integer"
           },
-
 
           aspect_ratio: {
             type: "integer"
           },
 
-
           rim_diameter: {
             type: "integer"
           },
-
 
           rim_width: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
+          inch_width: {
+            type: "scaled_float",
+            scaling_factor: 100
+          },
+
+          diameter: {
+            type: "scaled_float",
+            scaling_factor: 10
+          },
 
           min_offset: {
             type: "scaled_float",
             scaling_factor: 10
           },
 
-
           max_offset: {
             type: "scaled_float",
             scaling_factor: 10
           },
-
 
           notes: {
             type: "keyword"
@@ -562,16 +711,13 @@ export const allVehiclesSchema = {
         type: "boolean"
       },
 
-
       staggered: {
         type: "boolean"
       },
 
-
       staggered_diameter: {
         type: "boolean"
       },
-
 
       staggered_width: {
         type: "boolean"
@@ -582,6 +728,8 @@ export const allVehiclesSchema = {
   }
 
 };
+
+
 
       
 export const categoriesSchema = {

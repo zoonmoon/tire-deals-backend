@@ -3,27 +3,35 @@ import openSearchClient from "../../setup-database/_lib/route";
 
 const INDEX_NAME = "all_vehicles";
 
+
 const AUTOSYNC_URL =
   "https://api.autosyncstudio.com/vehicles";
 
 
 const PAGE_SIZE = 500;
+
 const MAX_RETRIES = 5;
 
 
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(ms){
+
+  return new Promise(resolve =>
+    setTimeout(resolve, ms)
+  );
+
 }
 
 
 
-
 // ======================================================
-// Fetch vehicles page with retry
+// Fetch Vehicles Page
 // ======================================================
 
-async function fetchVehiclesPage(page, attempt = 1) {
+async function fetchVehiclesPage(
+  page,
+  attempt = 1
+){
 
 
   try {
@@ -41,11 +49,13 @@ async function fetchVehiclesPage(page, attempt = 1) {
 
 
 
-    const response = await fetch(url, {
+    const response =
+      await fetch(url, {
 
-      signal: AbortSignal.timeout(30000)
+        signal:
+          AbortSignal.timeout(30000)
 
-    });
+      });
 
 
 
@@ -70,7 +80,7 @@ async function fetchVehiclesPage(page, attempt = 1) {
     ){
 
       throw new Error(
-        "Invalid AutoSync response: Vehicles missing"
+        "Invalid AutoSync response"
       );
 
     }
@@ -81,11 +91,11 @@ async function fetchVehiclesPage(page, attempt = 1) {
 
 
 
-  } catch(error){
+  }catch(error){
 
 
     console.error(
-      `❌ Vehicle page ${page} failed attempt ${attempt}/${MAX_RETRIES}`,
+      `Vehicle page ${page} failed ${attempt}/${MAX_RETRIES}`,
       error.message
     );
 
@@ -93,22 +103,15 @@ async function fetchVehiclesPage(page, attempt = 1) {
 
     if(attempt >= MAX_RETRIES){
 
-      console.error(
-        `💀 Vehicle import stopped. Page ${page} failed`
-      );
-
       throw error;
 
     }
 
 
 
-    const delay =
-      1000 * Math.pow(2, attempt - 1);
-
-
-
-    await sleep(delay);
+    await sleep(
+      1000 * Math.pow(2, attempt - 1)
+    );
 
 
 
@@ -125,57 +128,280 @@ async function fetchVehiclesPage(page, attempt = 1) {
 
 
 
-
-
 // ======================================================
-// Transform Vehicle
+// Fitment Transformer
 // ======================================================
 
-function transformVehicle(vehicle, meta){
+function transformFitment(item){
 
 
   return {
 
 
-    // ==========================
-    // Identity
-    // ==========================
-
-
     id:
-      vehicle.Id,
+      item.Id,
 
 
     chassis_id:
-      vehicle.DefaultChassisId,
+      item.ChassisId,
 
 
 
-    // ==========================
-    // YMM SEARCH
-    // ==========================
+    format:
+      item.Format,
 
+
+
+    name:
+      item.Name || null,
+
+
+
+    tire_size:
+      item.TireSize || null,
+
+
+    section_width:
+      item.SectionWidth,
+
+
+    aspect_ratio:
+      item.AspectRatio,
+
+
+    rim_diameter:
+      item.RimDiameter,
+
+
+    rim_width:
+      item.RimWidth,
+
+
+    inch_width:
+      item.InchWidth,
+
+
+    diameter:
+      item.Diameter,
+
+
+
+    speed_rating:
+      item.SpeedRating,
+
+
+
+    offset:
+      item.Offset,
+
+
+    min_offset:
+      item.MinOffset,
+
+
+    max_offset:
+      item.MaxOffset,
+
+
+
+    tire_size_rear:
+      item.TireSizeRear,
+
+
+    section_width_rear:
+      item.SectionWidthRear,
+
+
+    aspect_ratio_rear:
+      item.AspectRatioRear,
+
+
+    rim_diameter_rear:
+      item.RimDiameterRear,
+
+
+    rim_width_rear:
+      item.RimWidthRear,
+
+
+    inch_width_rear:
+      item.InchWidthRear,
+
+
+    diameter_rear:
+      item.DiameterRear,
+
+
+    speed_rating_rear:
+      item.SpeedRatingRear,
+
+
+
+    offset_rear:
+      item.OffsetRear,
+
+
+    min_offset_rear:
+      item.MinOffsetRear,
+
+
+    max_offset_rear:
+      item.MaxOffsetRear
+
+
+  };
+
+
+}
+
+
+
+
+
+// ======================================================
+// Plus Size Transformer
+// ======================================================
+
+function transformPlusSize(item){
+
+
+  return {
+
+
+    chassis_id:
+      item.ChassisId,
+
+
+    type:
+      item.Type,
+
+    format:
+    item.Format,
+
+    tire_size:
+      item.TireSize,
+
+
+
+    section_width:
+      item.SectionWidth,
+
+
+    aspect_ratio:
+      item.AspectRatio,
+
+
+    rim_diameter:
+      item.RimDiameter,
+
+
+    rim_width:
+      item.RimWidth,
+
+
+
+    inch_width:
+      item.InchWidth,
+
+
+    diameter:
+      item.Diameter,
+
+
+
+    min_offset:
+      item.MinOffset,
+
+
+    max_offset:
+      item.MaxOffset,
+
+
+
+    notes:
+      item.Notes || []
+
+  };
+
+}
+
+
+
+
+
+// ======================================================
+// Vehicle Transformer
+// ======================================================
+
+function transformVehicle(
+  vehicle,
+  meta
+){
+
+
+  const make =
+    vehicle.Make || "";
+
+
+  const model =
+    vehicle.Model || "";
+
+
+
+  return {
+
+
+    // Identity
+
+    id:
+      vehicle.Id.toString(),
+
+
+    default_chassis_id:
+      vehicle.DefaultChassisId?.toString(),
+
+
+
+    vehicle_key:
+      `${vehicle.Year}-${make}-${model}-${vehicle.Submodel || ""}`
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g,"-"),
+
+
+
+    ymm_key:
+      `${vehicle.Year}-${make}-${model}`
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g,"-"),
+
+
+
+
+    // YMM
 
     year:
       vehicle.Year,
 
 
-    make:
-      vehicle.Make,
+    make,
 
 
-    model:
-      vehicle.Model,
+    model,
 
 
     submodel:
       vehicle.Submodel,
 
 
+    make_model:
+      `${make} ${model}`.trim(),
 
-    vehicle_type:
+
+
+    type:
       vehicle.Type,
-
 
 
     body:
@@ -183,20 +409,16 @@ function transformVehicle(vehicle, meta){
 
 
 
+    doors:
+      vehicle.Doors,
+
+
     bed:
       vehicle.Bed,
 
 
 
-    doors:
-      vehicle.Doors,
-
-
-
-    // ==========================
-    // Vehicle Specs
-    // ==========================
-
+    // Specs
 
     bolt_circle:
       vehicle.BoltCircle,
@@ -214,35 +436,62 @@ function transformVehicle(vehicle, meta){
       vehicle.LugCount,
 
 
+    max_wheel_load:
+      vehicle.MaxWheelLoad,
+
+
     drw:
       vehicle.Drw,
 
 
 
-    // ==========================
-    // Fitments
-    // ==========================
+    // Images
 
+    img_url_base:
+      meta.ImgUrlBase,
+
+
+    images: {
+
+      img_001:
+        vehicle.Img001 || null,
+
+
+      img_014:
+        vehicle.Img014 || null,
+
+
+      img_032:
+        vehicle.Img032 || null
+
+
+    },
+
+
+
+
+    // Fitments
 
     fitments:
-      vehicle.Fitments || [],
+      (vehicle.Fitments || [])
+      .map(transformFitment),
 
 
 
     optional_fitments:
-      vehicle.OptionalFitments || [],
+      (vehicle.OptionalFitments || [])
+      .map(transformFitment),
 
 
 
     plus_sizes:
-      vehicle.PlusSizes || [],
+      (vehicle.PlusSizes || [])
+      .map(transformPlusSize),
 
 
 
-    // ==========================
+
     // Flags
-    // ==========================
-
 
     staggered:
       vehicle.Staggered,
@@ -256,41 +505,9 @@ function transformVehicle(vehicle, meta){
       vehicle.StaggeredWidth,
 
 
-
     race_tires:
       vehicle.RaceTires,
 
-
-
-    // ==========================
-    // Images
-    // ==========================
-
-
-    img_url_base:
-      meta.ImgUrlBase,
-
-
-    img_001:
-      vehicle.Img001 || null,
-
-
-    img_014:
-      vehicle.Img014 || null,
-
-
-    img_032:
-      vehicle.Img032 || null,
-
-
-    img_color_id:
-      vehicle.ImgColorId,
-
-
-
-    // ==========================
-    // Meta
-    // ==========================
 
 
     load_rating:
@@ -298,11 +515,8 @@ function transformVehicle(vehicle, meta){
 
 
     load_rating_rear:
-      vehicle.LoadRatingRear,
+      vehicle.LoadRatingRear
 
-
-    max_wheel_load:
-      vehicle.MaxWheelLoad
 
 
   };
@@ -314,11 +528,10 @@ function transformVehicle(vehicle, meta){
 
 
 
-
-
 // ======================================================
 // Bulk Upload
 // ======================================================
+
 
 
 async function bulkUploadToOpenSearch(
@@ -344,7 +557,7 @@ async function bulkUploadToOpenSearch(
           _index: INDEX_NAME,
 
           _id:
-            vehicle.id.toString()
+            vehicle.id
 
         }
 
@@ -364,12 +577,10 @@ async function bulkUploadToOpenSearch(
     }
 
 
-
-
     const response =
       await openSearchClient.bulk({
-
-        refresh:false,
+    
+        refresh:true,
 
         body
 
@@ -379,19 +590,35 @@ async function bulkUploadToOpenSearch(
 
     if(response.errors){
 
+
+      const failed =
+        response.items
+        .filter(
+          item =>
+          item.update?.error
+        );
+
+
+
+      console.error(
+        failed.slice(0,3)
+      );
+
+
+
       throw new Error(
-        "OpenSearch bulk insert failed"
+        "Bulk insert failed"
       );
 
     }
 
 
 
-  } catch(error){
+  }catch(error){
 
 
     console.error(
-      `❌ OpenSearch bulk error attempt ${attempt}/${MAX_RETRIES}`,
+      `Bulk failed ${attempt}/${MAX_RETRIES}`,
       error.message
     );
 
@@ -426,15 +653,11 @@ async function bulkUploadToOpenSearch(
 
 
 
-
-
 // ======================================================
 // MAIN SYNC
 // ======================================================
 
-
 export async function syncAllVehiclesFromAutoSync(){
-
 
 
   let page = 1;
@@ -443,127 +666,91 @@ export async function syncAllVehiclesFromAutoSync(){
 
 
 
-  try {
+  while(true){
+
+
+    console.log(
+      `Fetching vehicle page ${page}`
+    );
 
 
 
-    while(true){
+    const data =
+      await fetchVehiclesPage(page);
 
 
 
-      console.log(
-        `📥 Fetching vehicle page ${page}`
-      );
+    if(
+      data.Vehicles.length === 0
+    ){
 
-
-
-      const data =
-        await fetchVehiclesPage(page);
-
-
-
-
-      if(data.Vehicles.length === 0){
-
-        throw new Error(
-          `Empty vehicle response page ${page}`
-        );
-
-      }
-
-
-
-
-      const transformed =
-        data.Vehicles.map(vehicle =>
-          transformVehicle(
-            vehicle,
-            data
-          )
-        );
-
-
-
-        console.log(transformed[0]) 
-
-        return ;
-
-
-
-      await bulkUploadToOpenSearch(
-        transformed
-      );
-
-
-
-      totalImported += transformed.length;
-
-
-
-      console.log(
-        `✅ Imported ${transformed.length} vehicles | Total ${totalImported}`
-      );
-
-
-
-
-
-      if(!data.MoreItems){
-
-        console.log(
-          "🎉 Vehicle import completed"
-        );
-
-        break;
-
-      }
-
-
-
-
-      page++;
-
-
-
-      // stay safe below API limit
-
-      await sleep(50);
-
-
+      break;
 
     }
 
 
 
+    const vehicles =
+      data.Vehicles.map(vehicle =>
+        transformVehicle(
+          vehicle,
+          data
+        )
+      );
 
 
-    await openSearchClient.indices.refresh({
 
-      index: INDEX_NAME
+    console.log(vehicles[0])
 
-    });
+     
 
+
+    await bulkUploadToOpenSearch(
+      vehicles
+    );
+
+
+
+    totalImported +=
+      vehicles.length;
 
 
 
     console.log(
-      `🔥 Finished vehicles import ${totalImported}`
+      `Imported ${vehicles.length} | Total ${totalImported}`
     );
 
 
 
-  }catch(error){
+    if(!data.MoreItems){
+
+      break;
+
+    }
 
 
-    console.error(
-      "💀 Vehicle sync stopped:",
-      error.message
-    );
+
+    page++;
 
 
-    throw error;
+    await sleep(50);
+
 
   }
+
+
+
+  await openSearchClient.indices.refresh({
+
+    index: INDEX_NAME
+
+  });
+
+
+
+  console.log(
+    `Vehicle import completed ${totalImported}`
+  );
 
 
 }
