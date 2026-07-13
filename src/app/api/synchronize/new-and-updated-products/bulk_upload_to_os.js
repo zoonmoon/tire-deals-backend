@@ -1,11 +1,7 @@
-import { Client } from '@opensearch-project/opensearch';
 
-const openSearchClient = new Client({
-  node: `https://${process.env.OPENSEARCH_USERNAME}:${process.env.OPENSEARCH_PASSWORD}@${process.env.OPENSEARCH_HOST}:${process.env.OPENSEARCH_PORT}`,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+import openSearchClient from '../../setup-database/_lib/route';
+
+
 
 const INDEX_NAME = 'products';
 
