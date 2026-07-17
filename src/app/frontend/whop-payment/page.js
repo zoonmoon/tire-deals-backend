@@ -41,11 +41,15 @@ export default function WhopCheckoutWidget() {
 
 	if(!checkoutConfig) return ("failed")
 	
+	console.log(checkoutConfig)
+
+
 	return (
 		<div style={{width:"400px"}}>
 
 		<WhopCheckoutEmbed
 		    sessionId={checkoutConfig.id}
+			planId={checkoutConfig.plan.id}
 			hideEmail
 			hideAddressForm
 			returnUrl="https://yoursite.com/checkout/complete"
