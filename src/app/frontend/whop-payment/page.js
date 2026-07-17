@@ -48,10 +48,7 @@ export default function WhopCheckoutWidget() {
 		<div style={{width:"400px"}}>
 
 		<WhopCheckoutEmbed
-		    sessionId={checkoutConfig.id}
-			planId={checkoutConfig.plan.id}
-			hideEmail
-			hideAddressForm
+		    sessionId={checkoutConfig.id}			
 			returnUrl="https://yoursite.com/checkout/complete"
 			onComplete={(paymentId) => {
 				console.log("Payment complete:", paymentId);
@@ -63,3 +60,4 @@ export default function WhopCheckoutWidget() {
 
 	);
 }
+
