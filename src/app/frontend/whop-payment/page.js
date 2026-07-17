@@ -46,6 +46,8 @@ export default function WhopCheckoutWidget() {
 
 		<WhopCheckoutEmbed
 		    sessionId={checkoutConfig.id}
+			hideEmail
+			hideAddressForm
 			returnUrl="https://yoursite.com/checkout/complete"
 			onComplete={(paymentId) => {
 				console.log("Payment complete:", paymentId);

@@ -14,7 +14,7 @@ export async function GET(){
         const checkoutConfig = await client.checkoutConfigurations.create(
             {
                 plan: {
-                    initial_price: 1,
+                    initial_price: 231,
                     company_id: process.env.WHOP_BUSINESS_ID,
                     currency: "usd" ,
                     plan_type: "one_time",
