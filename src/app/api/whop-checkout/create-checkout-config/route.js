@@ -14,13 +14,13 @@ export async function GET(){
         const checkoutConfig = await client.checkoutConfigurations.create(
             {
                 plan: {
-                    initial_price: 231,
+                    initial_price: 1,
                     company_id: process.env.WHOP_BUSINESS_ID,
                     currency: "usd" ,
                     plan_type: "one_time",
                 },
                 metadata: {
-                    order_id: "order_12345",
+                    order_id: "order_4444",
                 },
             }
         );

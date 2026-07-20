@@ -42,8 +42,7 @@ export default function WhopCheckoutWidget() {
 	if(!checkoutConfig) return ("failed")
 	
 	console.log(checkoutConfig)
-
-
+	
 	return (
 		<div style={{width:"400px"}}>
 
