@@ -37,6 +37,6 @@ async function handlePaymentSucceeded(webhookData) {
 
   // webhookData.metadata.order_id 
   
-  // mark this order as paid :) 
+  // mark this order as paid :) okay
 
 }
