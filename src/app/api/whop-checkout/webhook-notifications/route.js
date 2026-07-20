@@ -14,7 +14,7 @@ export async function POST(request) {
   
 
   console.log(webhookData)
-    
+
   // Handle the webhook event
   if (webhookData.type === "payment.succeeded") {
     await handlePaymentSucceeded(webhookData.data);
@@ -27,10 +27,16 @@ export async function POST(request) {
 }
 
 
-async function handlePaymentSucceeded(invoice) {
+async function handlePaymentSucceeded(webhookData) {
 
   // This is a placeholder for a potentially long-running operation.
   // In a real scenario, you might fetch user data, update a database, etc.
-  console.log("[PAYMENT SUCCEEDED]", invoice);
+  console.log("[PAYMENT SUCCEEDED]", webhookData);
+
+  //  metadata: { order_id: 'order_4444' },
+
+  // webhookData.metadata.order_id 
+  
+  // mark this order as paid :) 
 
 }
