@@ -7,15 +7,15 @@ export const whopsdk = new Whop({
 });
 
 export async function POST(request) {
-
+  
   // Validate the webhook to ensure it's from Whop
   const requestBodyText = await request.text();
   const headers = Object.fromEntries(request.headers);
   const webhookData = whopsdk.webhooks.unwrap(requestBodyText, { headers });
-
+  
   // Handle the webhook event
   if (webhookData.type === "payment.succeeded") {
-    waitUntil(handlePaymentSucceeded(webhookData.data));
+    await handlePaymentSucceeded(webhookData.data);
   }
   
   // Make sure to return a 2xx status code quickly.
@@ -25,6 +25,7 @@ export async function POST(request) {
 }
 
 async function handlePaymentSucceeded(invoice) {
+
   // This is a placeholder for a potentially long-running operation.
   // In a real scenario, you might fetch user data, update a database, etc.
   console.log("[PAYMENT SUCCEEDED]", invoice);
