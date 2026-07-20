@@ -1,4 +1,3 @@
-import { waitUntil } from "@vercel/functions";
 import { Whop } from "@whop/sdk";
 
 export const whopsdk = new Whop({
@@ -23,6 +22,7 @@ export async function POST(request) {
   return new Response("OK", { status: 200 });
 
 }
+
 
 async function handlePaymentSucceeded(invoice) {
 
