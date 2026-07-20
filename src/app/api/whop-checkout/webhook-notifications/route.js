@@ -12,11 +12,14 @@ export async function POST(request) {
   const headers = Object.fromEntries(request.headers);
   const webhookData = whopsdk.webhooks.unwrap(requestBodyText, { headers });
   
+
+  console.log(webhookData)
+    
   // Handle the webhook event
   if (webhookData.type === "payment.succeeded") {
     await handlePaymentSucceeded(webhookData.data);
   }
-  
+
   // Make sure to return a 2xx status code quickly.
   // Otherwise the webhook will be retried.
   return new Response("OK", { status: 200 });
