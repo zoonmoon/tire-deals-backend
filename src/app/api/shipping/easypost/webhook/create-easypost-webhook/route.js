@@ -6,7 +6,7 @@ const client = new EasyPostClient(EASYPOST_API_KEY);
 
 export async function POST() {
 
-  try {
+  try { 
 
     const webhook = await client.Webhook.create({
         url: 'https://yourdomain.com/api/webhooks/easypost',
@@ -20,6 +20,7 @@ export async function POST() {
     });
 
   } catch (error) {
+    
     console.error('Webhook error:', error);
 
     return Response.json(
