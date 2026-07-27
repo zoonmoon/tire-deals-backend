@@ -1,1 +1,7 @@
 /synchronize/map-mysql-prods-to-os
+-- when matching use canonical brand names
+-- ⚠️ No OpenSearch match for MySQL 3537 (VANTAGE / VT 11370) → in_review
+-- '1969', 'SUPERMAX', 'UHP-1707-VR', '225/45ZR17', '225/45ZR17 SUPERMAX 91V TM-1 3418/540/AA', NULL, '65.96', '0.00', '2', '2026-07-27 06:21:15', '2026-07-27 11:24:00', 'in_review', 'active'
+
+
+-- when updating matched opensearch, also save price and quANTITY all 
