@@ -1,0 +1,1 @@
+export const EASYPOST_API_KEY = process.env.EASYPOST_TEST_API_KEY
