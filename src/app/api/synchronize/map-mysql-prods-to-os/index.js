@@ -1,6 +1,7 @@
 import mysql from "mysql2/promise";
 import openSearchClient from "../../setup-database/_lib/route";
-import { MYSQL_CONFIG } from "../../utils";
+
+import { MYSQL_CONFIG } from "../../setup-database/mysql-db/utils";
 
 const INDEX_NAME = "all_tires";
 
@@ -41,9 +42,8 @@ function sleep(ms) {
 // Fetch pending MySQL inventory
 // ======================================================
 
-async function fetchPendingInventory(
-    connection
-) {
+
+async function fetchPendingInventory(connection) {
 
     const [rows] = await connection.execute(
         `
@@ -63,15 +63,14 @@ async function fetchPendingInventory(
 
             ORDER BY id ASC
 
-            LIMIT ?
-        `,
-        [BATCH_SIZE]
+            LIMIT ${BATCH_SIZE}
+        `
     );
-
 
     return rows;
 
 }
+
 
 
 // ======================================================
@@ -534,6 +533,8 @@ async function processBatch(
     );
 
 
+
+
     // --------------------------------------------------
     // Group OpenSearch results
     // --------------------------------------------------
@@ -596,6 +597,7 @@ async function processBatch(
                 ` → OpenSearch ${match.id}`
 
             );
+
 
 
             // ------------------------------------------------
@@ -728,12 +730,13 @@ async function processBatch(
 export async function mapPendingTireInventory() {
 
     let connection;
-    
+
     let totalProcessed = 0;
 
     let totalMatched = 0;
 
     let totalInReview = 0;
+
 
 
     try {
@@ -752,7 +755,6 @@ export async function mapPendingTireInventory() {
 
         while (true) {
 
-
             // ==============================================
             // FETCH 100 PENDING MYSQL ROWS
             // ==============================================
@@ -763,29 +765,29 @@ export async function mapPendingTireInventory() {
                 );
 
 
+            console.log(rows[0])
+            console.log("hello")
+            console.log(rows.length)
+
+            // break; 
+
             // ==============================================
             // NO MORE PENDING ROWS
             // ==============================================
 
             if (rows.length === 0) {
 
-
                 console.log(
                     "🎉 No more pending inventory rows"
                 );
-
 
                 break;
 
             }
 
-
             console.log(
-
                 `📦 Processing batch of ${rows.length} rows`
-
             );
-
 
             // ==============================================
             // PROCESS BATCH
@@ -799,7 +801,6 @@ export async function mapPendingTireInventory() {
                     rows
 
                 );
-
 
             // ==============================================
             // UPDATE TOTALS
@@ -889,7 +890,7 @@ export async function mapPendingTireInventory() {
 
     } catch (error) {
 
-
+        
         console.error(
 
             "💀 Tire mapping pipeline failed:",
