@@ -133,7 +133,10 @@ const getCachedMakes = unstable_cache(
 
         return {
 
-          value:
+          key:
+            bucket.key,
+
+          label: 
             bucket.key,
 
           count:
@@ -275,19 +278,7 @@ export async function GET(request) {
     }
 
 
-    if (submodel) {
 
-      filters.push({
-
-        term: {
-
-          submodel: submodel
-
-        }
-
-      });
-
-    }
 
 
 
@@ -320,12 +311,8 @@ export async function GET(request) {
 
       level = "submodel";
 
-    }
-
-    else {
-
-      level = "vehicles";
-
+    }else{
+        level = "vehicles";
     }
 
 
@@ -338,99 +325,269 @@ export async function GET(request) {
     // Return ALL matching vehicle documents
     // ==================================================
 
+
+
     if (level === "vehicles") {
 
+        const response =
+            await openSearchClient.search({
 
-      const response =
-        await openSearchClient.search({
+            index: INDEX_NAME,
 
-          index: INDEX_NAME,
+            body: {
 
+                size: 1,
 
-          body: {
+                query: {
 
-            size: 10000,
+                term: {
 
-            track_total_hits: true,
-
-
-            query: {
-
-              bool: {
-
-                filter: filters
-
-              }
-
-            },
-
-
-            sort: [
-
-              {
-
-                id: {
-
-                  order: "asc"
+                    id: submodel
 
                 }
 
-              }
+                }
 
-            ]
+            }
 
-          }
+            });
+
+
+        const vehicles =
+            response.body?.hits?.hits?.map(
+            hit => ({
+                ...hit._source,
+                _id: hit._id
+            })
+            ) || [];
+
+
+        return NextResponse.json({
+
+            success: true,
+
+            level: "vehicles",
+
+            selection: {
+
+            make,
+            model,
+            year,
+
+            // This is actually vehicle ID
+            submodel
+
+            },
+
+            count:
+            vehicles.length,
+
+            vehicles
 
         });
 
-
-
-      const vehicles =
-        response.body.hits.hits.map(
-
-          hit => ({
-
-            ...hit._source,
-
-            _id: hit._id
-
-          })
-
-        );
-
-
-
-      return NextResponse.json({
-
-        success: true,
-
-        level: "vehicles",
-
-
-        selection: {
-
-          make,
-
-          model,
-
-          year,
-
-          submodel
-
-        },
-
-
-        count:
-
-          vehicles.length,
-
-
-        vehicles
-
-      });
-
     }
 
+
+
+    if (level === "submodel") {
+
+        const response =
+            await openSearchClient.search({
+
+            index: INDEX_NAME,
+
+            body: {
+
+                size: 10000,
+
+                track_total_hits: true,
+
+                query: {
+
+                bool: {
+
+                    filter: filters
+
+                }
+
+                },
+
+                sort: [
+
+                {
+
+                    id: {
+
+                    order: "asc"
+
+                    }
+
+                }
+
+                ]
+
+            }
+
+            });
+
+
+        // ==================================================
+        // Get all matching vehicle documents
+        // ==================================================
+
+            const vehicles =
+            response.body.hits.hits.map(
+
+            hit => ({
+
+                ...hit._source,
+
+                _id: hit._id
+
+            })
+
+            );
+
+
+        // ==================================================
+        // Count occurrences of each submodel
+        //
+        // Example:
+        //
+        // Komfort -> 2
+        // Premium -> 1
+        //
+        // If a submodel occurs more than once,
+        // Body + Doors will be added to its label.
+        // ==================================================
+
+        const submodelCounts =
+            new Map();
+
+
+        for (const vehicle of vehicles) {
+
+            const submodel =
+            vehicle.submodel || "";
+
+
+            submodelCounts.set(
+
+            submodel,
+
+            (submodelCounts.get(submodel) || 0) + 1
+
+            );
+
+        }
+
+
+        // ==================================================
+        // Generate submodel options
+        // ==================================================
+
+        const options =
+            vehicles.map(
+
+            vehicle => {
+
+                const submodel =
+                vehicle.submodel || "";
+
+
+                const isDuplicate =
+                submodelCounts.get(submodel) > 1;
+
+
+                // ----------------------------------------------
+                // If submodel occurs once:
+                //
+                // Komfort
+                //
+                // If submodel occurs multiple times:
+                //
+                // Komfort Convertible 2 Door
+                // Komfort Sedan 4 Door
+                // ----------------------------------------------
+
+                let label =
+                submodel;
+
+
+                if (isDuplicate) {
+
+                const parts = [
+
+                    submodel,
+
+                    vehicle.body || null,
+
+                    vehicle.doors
+                    ? `${vehicle.doors} Door`
+                    : null
+
+                ];
+
+
+                label =
+                    parts
+                    .filter(Boolean)
+                    .join(" ");
+
+                }
+
+
+                return {
+
+                    // Actual AutoSync vehicle ID
+                    key:
+                        vehicle.id,
+
+                    // User-facing label
+                    label,
+
+                    // One exact vehicle represented
+                    count:
+                        1
+
+                };
+
+            }
+
+            );
+
+
+        // ==================================================
+        // Return Submodel Options
+        // ==================================================
+
+        return NextResponse.json({
+
+            success: true,
+
+            level: "submodel",
+
+            selection: {
+
+            make,
+
+            model,
+
+            year,
+
+            submodel: null
+
+            },
+
+            count:
+            options.length,
+
+            options
+
+        });
+
+    }
 
 
     // ==================================================
@@ -547,7 +704,10 @@ export async function GET(request) {
 
         bucket => ({
 
-          value:
+          key:
+            bucket.key,
+
+          label:
             bucket.key,
 
           count:
