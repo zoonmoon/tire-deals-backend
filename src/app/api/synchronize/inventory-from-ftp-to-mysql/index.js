@@ -25,7 +25,7 @@ export default async function synchronizeInventory() {
 
     let connection;
 
-
+    
     try {
 
         // =====================================================
@@ -224,43 +224,41 @@ export default async function synchronizeInventory() {
 
 
 
-        const grouped = new Map();
+        // const grouped = new Map();
 
-        for (const row of rows) {
+        // for (const row of rows) {
 
-            const manufacturer = row.Mfg?.trim();
-            const item = row.Item?.trim();
+        //     const manufacturer = row.Mfg?.trim();
+        //     const item = row.Item?.trim();
 
-            const key = `${manufacturer}|||${item}`;
+        //     const key = `${manufacturer}|||${item}`;
 
-            if (!grouped.has(key)) {
-                grouped.set(key, []);
-            }
+        //     if (!grouped.has(key)) {
+        //         grouped.set(key, []);
+        //     }
 
-            grouped.get(key).push(row);
-        }
-
-
-        const duplicates = [...grouped.entries()]
-            .filter(([key, rows]) => rows.length > 1)
-            .map(([key, rows]) => ({
-                manufacturer: rows[0].Mfg,
-                item: rows[0].Item,
-                rows
-            }));
+        //     grouped.get(key).push(row);
+        // }
 
 
-        console.log(
-            'Duplicate manufacturer + item combinations:',
-            duplicates.length
-        );
-
-        console.dir(
-            duplicates,
-            { depth: null }
-        );
+        // const duplicates = [...grouped.entries()]
+        //     .filter(([key, rows]) => rows.length > 1)
+        //     .map(([key, rows]) => ({
+        //         manufacturer: rows[0].Mfg,
+        //         item: rows[0].Item,
+        //         rows
+        //     }));
 
 
+        // console.log(
+        //     'Duplicate manufacturer + item combinations:',
+        //     duplicates.length
+        // );
+
+        // console.dir(
+        //     duplicates,
+        //     { depth: null }
+        // );
 
 
 

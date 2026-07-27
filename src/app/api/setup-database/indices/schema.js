@@ -236,6 +236,10 @@ fet: {
 },
 
 
+status: {
+    type: "keyword"
+},
+
       
       // ===========================
       // Flexible Attributes
