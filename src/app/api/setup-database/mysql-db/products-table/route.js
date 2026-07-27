@@ -40,8 +40,7 @@ export async function GET(){
         );
 
         console.log(rows);
-
-
+        
 
         const [columns] = await connection.execute(`
             SHOW COLUMNS FROM tire_inventory LIKE 'opensearch_mapping_status'
