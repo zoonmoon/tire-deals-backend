@@ -220,6 +220,50 @@ export default async function synchronizeInventory() {
         );
 
 
+        // find duplicates
+
+
+
+        const grouped = new Map();
+
+        for (const row of rows) {
+
+            const manufacturer = row.Mfg?.trim();
+            const item = row.Item?.trim();
+
+            const key = `${manufacturer}|||${item}`;
+
+            if (!grouped.has(key)) {
+                grouped.set(key, []);
+            }
+
+            grouped.get(key).push(row);
+        }
+
+
+        const duplicates = [...grouped.entries()]
+            .filter(([key, rows]) => rows.length > 1)
+            .map(([key, rows]) => ({
+                manufacturer: rows[0].Mfg,
+                item: rows[0].Item,
+                rows
+            }));
+
+
+        console.log(
+            'Duplicate manufacturer + item combinations:',
+            duplicates.length
+        );
+
+        console.dir(
+            duplicates,
+            { depth: null }
+        );
+
+
+
+
+
         // =====================================================
         // 6. Connect to MySQL
         // =====================================================

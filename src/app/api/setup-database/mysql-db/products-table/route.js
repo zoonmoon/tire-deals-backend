@@ -47,11 +47,37 @@ export async function GET(){
         `);
 
         if (columns.length === 0) {
+
+            // pending
+            // matched
+            // review
+            // not_found
+
             await connection.execute(`
                 ALTER TABLE tire_inventory
                 ADD COLUMN opensearch_mapping_status VARCHAR(255) NOT NULL DEFAULT 'pending'
             `);
         }
+
+
+
+        const [columns2] = await connection.execute(`
+            SHOW COLUMNS FROM tire_inventory LIKE 'status'
+        `);
+
+        if (columns2.length === 0) {
+
+            // active
+            // archived
+            
+            await connection.execute(`
+                ALTER TABLE tire_inventory
+                ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'active'
+            `);
+            
+
+        }
+
 
 
         return new Response("success")
