@@ -162,6 +162,12 @@ function transformTire(tire, meta) {
   }
 
 
+  const normalize = (value) => {
+      return String(value ?? '')
+          .trim()
+          .toLowerCase();
+  };
+
 
   return {
     
@@ -173,12 +179,15 @@ function transformTire(tire, meta) {
     handle: generateHandle(tire) || tire.Uid.toLowerCase(),
 
     part_number: tire.PartNumber,
+    normalized_part_number: normalize(tire.PartNumber),
 
 
     // Basic
 
     brand: tire.Brand,
+    normalized_brand: normalize(tire.Brand),
 
+    
     model: tire.Model,
 
     title: tire.DisplayName,

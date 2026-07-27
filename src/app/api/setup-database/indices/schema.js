@@ -20,6 +20,14 @@ export const allTiresSchema = {
         type: "keyword"
       },
 
+      normalized_brand: {
+          type: "keyword"
+      },
+
+      normalized_part_number: {
+          type: "keyword"
+      },
+
 
       // ===========================
       // Basic Information
@@ -201,6 +209,34 @@ export const allTiresSchema = {
       },
 
 
+
+
+// ===========================
+// MySQL Inventory Mapping
+// ===========================
+
+is_mysql_mapped: {
+    type: "boolean"
+},
+
+mysql_id: {
+    type: "keyword"
+},
+
+price: {
+    type: "float"
+},
+
+quantity: {
+    type: "integer"
+},
+
+fet: {
+    type: "float"
+},
+
+
+      
       // ===========================
       // Flexible Attributes
       // ===========================

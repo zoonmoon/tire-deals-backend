@@ -19,7 +19,7 @@ export async function GET(){
                 description TEXT NOT NULL,
 
                 opensearch_id VARCHAR(1000) NULL,
-                
+
                 price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
                 fet DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
                 quantity INT NOT NULL DEFAULT 0,
@@ -40,6 +40,20 @@ export async function GET(){
         );
 
         console.log(rows);
+
+
+
+        const [columns] = await connection.execute(`
+            SHOW COLUMNS FROM tire_inventory LIKE 'opensearch_mapping_status'
+        `);
+
+        if (columns.length === 0) {
+            await connection.execute(`
+                ALTER TABLE tire_inventory
+                ADD COLUMN opensearch_mapping_status VARCHAR(255) NOT NULL DEFAULT 'pending'
+            `);
+        }
+
 
         return new Response("success")
 
