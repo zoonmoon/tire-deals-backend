@@ -20,6 +20,7 @@ export async function GET(request) {
       {
         success: false,
         message: "Order not found",
+        order: {}
       },
       { status: 200 }
     );
@@ -27,6 +28,7 @@ export async function GET(request) {
 
   return Response.json({
     success: true,
+    message: "order found",
     order: orders[orderNumber],
   });
 }
