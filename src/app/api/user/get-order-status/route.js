@@ -21,7 +21,7 @@ export async function GET(request) {
         success: false,
         message: "Order not found",
       },
-      { status: 404 }
+      { status: 200 }
     );
   }
 
