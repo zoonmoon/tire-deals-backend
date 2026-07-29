@@ -162,11 +162,12 @@ function transformTire(tire, meta) {
   }
 
 
-  const normalize = (value) => {
-      return String(value ?? '')
-          .trim()
-          .toLowerCase();
-  };
+const normalize = (value) => {
+    return String(value ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+};
 
 
   return {

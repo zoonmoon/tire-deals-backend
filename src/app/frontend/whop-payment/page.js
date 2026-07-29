@@ -45,7 +45,7 @@ export default function WhopCheckoutWidget() {
 	
 	return (
 		<div style={{width:"400px"}}>
-
+			
 		<WhopCheckoutEmbed
 		    sessionId={checkoutConfig.id}			
 			returnUrl="https://yoursite.com/checkout/complete"

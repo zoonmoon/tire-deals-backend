@@ -47,7 +47,7 @@ export async function POST(request) {
       shipment,
       rates: shipment.rates,
     });
-
+      
   } catch (error) {
 
     console.log(error);
