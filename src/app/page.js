@@ -24,6 +24,11 @@ export default function Page(){
             <Button variant={'contained'}> 
               Test Y/M/M search 
             </Button>
+          </Link>          <div style={{marginTop:'20px'}}></div>
+          <Link href={'/frontend/vehicle-fitment'}>
+            <Button variant={'contained'}> 
+              Vehicle Fitment Data 
+            </Button>
           </Link>
 
 
