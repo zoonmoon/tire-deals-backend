@@ -1,6 +1,6 @@
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const orderNumber = searchParams.get("orderNumber");
+  const orderNumber = searchParams.get("order_number");
 
   const orders = {
     "678": {
