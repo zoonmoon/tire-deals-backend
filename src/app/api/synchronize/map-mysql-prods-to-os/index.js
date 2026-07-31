@@ -1,6 +1,8 @@
 import mysql from "mysql2/promise";
 import openSearchClient from "../../setup-database/_lib/route";
 
+import manufacturerMapping from "./mapping";
+
 import { MYSQL_CONFIG } from "../../setup-database/mysql-db/utils";
 
 const INDEX_NAME = "all_tires";
@@ -18,12 +20,14 @@ const MAX_RETRIES = 5;
 
 function normalize(value) {
 
-    return String(value ?? "")
+    const mappedValue = manufacturerMapping[value] ?? value;
+
+    return String(mappedValue)
         .trim()
-        .toLowerCase();
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
 
 }
-
 
 // ======================================================
 // Sleep
@@ -370,7 +374,7 @@ async function updateOpenSearchMapping(
 
                     is_mysql_mapped:
                         true,
-
+                    status: 'active',
                     mysql_id:
                         String(mysqlId)
 
@@ -581,7 +585,7 @@ async function processBatch(
         // EXACTLY ONE MATCH
         // ==================================================
 
-        if (matches.length === 1) {
+        if (matches.length > 0) {
 
 
             const match =

@@ -1,0 +1,2002 @@
+/* =====================================================
+   GLOBAL / PAGE
+===================================================== */
+
+.products-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #f5f6f8;
+  color: #17191c;
+  -webkit-font-smoothing: antialiased;
+}
+
+.products-page *,
+.products-page *::before,
+.products-page *::after {
+  box-sizing: border-box;
+}
+
+.products-page button,
+.products-page input,
+.products-page select {
+  font: inherit;
+}
+
+.products-page button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.products-page img {
+  max-width: 100%;
+}
+
+
+/* =====================================================
+   CUSTOM SCROLLBARS
+===================================================== */
+
+.products-page ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.products-page ::-webkit-scrollbar-track {
+  background: #f1f2f4;
+  border-radius: 10px;
+}
+
+.products-page ::-webkit-scrollbar-thumb {
+  background: #c8cbd0;
+  border-radius: 10px;
+}
+
+.products-page ::-webkit-scrollbar-thumb:hover {
+  background: #aeb2b8;
+}
+
+
+/* =====================================================
+   MAIN CONTAINER
+===================================================== */
+
+.products-container {
+  width: 100%;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.products-header {
+  position: relative;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e7e8eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.header-inner {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.header-info {
+  min-width: 0;
+}
+
+.header-info h1 {
+  margin: 0;
+  color: #111315;
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  line-height: 1.2;
+}
+
+.header-info p {
+  margin: 7px 0 0;
+  color: #7b8088;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.sort-label {
+  color: #777d85;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sort-select {
+  min-width: 205px;
+  height: 44px;
+  padding: 0 40px 0 14px;
+  appearance: auto;
+  background: #ffffff;
+  border: 1px solid #dfe1e5;
+  border-radius: 8px;
+  color: #202327;
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.sort-select:hover {
+  border-color: #bfc3c9;
+}
+
+.sort-select:focus {
+  border-color: #17191c;
+  box-shadow: 0 0 0 3px rgba(23, 25, 28, 0.08);
+}
+
+
+/* =====================================================
+   MAIN LAYOUT
+===================================================== */
+
+.products-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  gap: 42px;
+  padding-top: 34px;
+  padding-bottom: 70px;
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.filter-sidebar {
+  width: 100%;
+  min-width: 0;
+}
+
+.sidebar-header {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  color: #16181b;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.25px;
+}
+
+.sidebar-header p {
+  margin: 4px 0 0;
+  color: #8a8f97;
+  font-size: 11px;
+}
+
+.mobile-close-button {
+  display: none;
+}
+
+.clear-all-button {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #dedfe2;
+  border-radius: 8px;
+  color: #35383d;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.clear-all-button:hover {
+  background: #f7f7f8;
+  border-color: #c9ccd1;
+}
+
+.clear-all-button:active {
+  transform: scale(0.98);
+}
+
+
+/* =====================================================
+   ACTIVE FILTERS SIDEBAR
+===================================================== */
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0 0 20px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #e5e6e8;
+}
+
+.active-filter-chip {
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  background: #191b1f;
+  border: 1px solid #191b1f;
+  border-radius: 7px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.active-filter-chip:hover {
+  background: #303338;
+}
+
+.active-filter-chip:active {
+  transform: scale(0.96);
+}
+
+.active-filter-chip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 10px;
+}
+
+
+/* =====================================================
+   FILTER GROUPS
+===================================================== */
+
+.filter-groups {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.filter-group {
+  width: 100%;
+  padding: 0 0 23px;
+  margin: 0 0 23px;
+  border-bottom: 1px solid #e7e8ea;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.filter-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.filter-group-header h3 {
+  margin: 0;
+  color: #24272b;
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -0.1px;
+}
+
+.filter-clear-button {
+  padding: 3px 0;
+  background: transparent;
+  border: 0;
+  color: #969ba3;
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.filter-clear-button:hover {
+  color: #17191c;
+}
+
+
+/* =====================================================
+   FILTER OPTIONS
+===================================================== */
+
+.filter-options {
+  width: 100%;
+  max-height: 245px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.filter-option {
+  width: 100%;
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #555a62;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.filter-option:hover {
+  background: #eceef1;
+  color: #17191c;
+}
+
+.filter-option-selected {
+  background: #e9eaed;
+  color: #17191c;
+  font-weight: 650;
+}
+
+.filter-option-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.filter-option-left input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #17191c;
+  cursor: pointer;
+}
+
+.filter-option-left span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-count {
+  flex: 0 0 auto;
+  min-width: 22px;
+  color: #9a9fa6;
+  font-size: 10px;
+  font-weight: 550;
+  text-align: right;
+}
+
+
+/* =====================================================
+   PRODUCT AREA
+===================================================== */
+
+.product-area {
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* =====================================================
+   ACTIVE FILTER SUMMARY
+===================================================== */
+
+.active-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px 17px;
+  margin-bottom: 23px;
+  background: #ffffff;
+  border: 1px solid #e4e5e8;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+}
+
+.active-summary-title {
+  flex: 0 0 auto;
+  color: #454950;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.active-summary-list {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  flex: 1;
+}
+
+.summary-chip {
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  background: #f4f5f6;
+  border: 1px solid #e3e4e7;
+  border-radius: 6px;
+  color: #4b4f55;
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.summary-chip:hover {
+  background: #eceef0;
+  border-color: #d5d7da;
+}
+
+.summary-chip span {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.summary-clear {
+  flex: 0 0 auto;
+  padding: 5px;
+  background: transparent;
+  border: 0;
+  color: #c43434;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.summary-clear:hover {
+  color: #9f1f1f;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.updating-bar {
+  width: 100%;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e4e5e8;
+  border-radius: 8px;
+  color: #737880;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.loading-spinner,
+.small-spinner {
+  flex: 0 0 auto;
+  border: 2px solid #e2e3e5;
+  border-top-color: #191b1f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+}
+
+.small-spinner {
+  width: 15px;
+  height: 15px;
+}
+
+.initial-loading {
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: #747980;
+  font-size: 13px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =====================================================
+   PRODUCT GRID
+===================================================== */
+
+.product-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+
+/* =====================================================
+   PRODUCT CARD
+===================================================== */
+
+.product-card {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e3e4e7;
+  border-radius: 11px;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.025);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  border-color: #d4d6da;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.08),
+    0 2px 5px rgba(0, 0, 0, 0.03);
+}
+
+
+/* =====================================================
+   PRODUCT IMAGE
+===================================================== */
+
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 0.92;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at center,
+      #ffffff 0%,
+      #fafafa 50%,
+      #f3f4f5 100%
+    );
+  border-bottom: 1px solid #eeeeef;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.35s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.055);
+}
+
+.no-image {
+  color: #a1a5ab;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+/* =====================================================
+   PRODUCT CONTENT
+===================================================== */
+
+.product-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 18px;
+}
+
+.product-brand {
+  min-height: 16px;
+  margin: 0 0 7px;
+  color: #8a8f97;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.8px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.product-title {
+  min-height: 43px;
+  margin: 0;
+  overflow: hidden;
+  color: #202327;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.42;
+  letter-spacing: -0.15px;
+}
+
+.product-size {
+  margin: 9px 0 0;
+  color: #777d85;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.product-price {
+  color: #15171a;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.view-product-button {
+  height: 37px;
+  padding: 0 16px;
+  background: #191b1f;
+  border: 1px solid #191b1f;
+  border-radius: 7px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.view-product-button:hover {
+  background: #303237;
+}
+
+.view-product-button:active {
+  transform: scale(0.97);
+}
+
+
+/* =====================================================
+   PAGINATION
+===================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 45px;
+}
+
+.pagination-button {
+  min-width: 92px;
+  height: 42px;
+  padding: 0 17px;
+  background: #ffffff;
+  border: 1px solid #dcdfe3;
+  border-radius: 8px;
+  color: #3e4248;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #f7f7f8;
+  border-color: #bfc3c8;
+}
+
+.pagination-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.pagination-info {
+  color: #7d8289;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pagination-info strong {
+  color: #25282c;
+  font-weight: 750;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-state {
+  width: 100%;
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px 30px;
+  background: #ffffff;
+  border: 1px solid #e3e4e7;
+  border-radius: 11px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+}
+
+.empty-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  background: #f1f2f4;
+  border-radius: 50%;
+  font-size: 28px;
+  opacity: 0.7;
+}
+
+.empty-state h2 {
+  margin: 0;
+  color: #202327;
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.empty-state p {
+  max-width: 380px;
+  margin: 9px 0 0;
+  color: #7d8289;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.empty-clear-button {
+  height: 42px;
+  padding: 0 20px;
+  margin-top: 22px;
+  background: #191b1f;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.empty-clear-button:hover {
+  background: #303237;
+}
+
+.empty-clear-button:active {
+  transform: scale(0.97);
+}
+
+
+/* =====================================================
+   MOBILE FILTER BUTTON
+===================================================== */
+
+.mobile-filter-button {
+  display: none;
+}
+
+.filter-count {
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  background: #191b1f;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+
+/* =====================================================
+   MOBILE OVERLAY
+===================================================== */
+
+.filter-overlay {
+  display: none;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 1200px) {
+
+  .products-container {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .products-layout {
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE / TABLET FILTER DRAWER
+===================================================== */
+
+@media (max-width: 800px) {
+
+  .products-container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .header-inner {
+    min-height: 76px;
+  }
+
+  .products-layout {
+    display: block;
+    padding-top: 22px;
+    padding-bottom: 50px;
+  }
+
+  .mobile-filter-button {
+    height: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 15px;
+    background: #191b1f;
+    border: 1px solid #191b1f;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .mobile-filter-button:hover {
+    background: #303237;
+  }
+
+  .mobile-filter-button:active {
+    transform: scale(0.97);
+  }
+
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    width: min(370px, 90vw);
+    height: 100dvh;
+    padding: 24px 22px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #ffffff;
+    box-shadow:
+      12px 0 40px rgba(0, 0, 0, 0.18);
+    transform: translateX(-105%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overscroll-behavior: contain;
+  }
+
+  .filter-sidebar-open {
+    transform: translateX(0);
+  }
+
+  .mobile-close-button {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background: #f1f2f4;
+    border: 0;
+    border-radius: 50%;
+    color: #25282c;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .mobile-close-button:hover {
+    background: #e6e7e9;
+  }
+
+  .mobile-close-button:active {
+    transform: scale(0.92);
+  }
+
+  .filter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: block;
+    background: rgba(10, 11, 13, 0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .products-container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .header-inner {
+    min-height: auto;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 17px;
+    padding-bottom: 17px;
+  }
+
+  .header-info h1 {
+    font-size: 21px;
+  }
+
+  .header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .mobile-filter-button {
+    width: 100%;
+  }
+
+  .sort-wrapper {
+    min-width: 0;
+    width: 100%;
+    display: block;
+  }
+
+  .sort-label {
+    display: none;
+  }
+
+  .sort-select {
+    width: 100%;
+    min-width: 0;
+    height: 43px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .product-image-wrapper {
+    aspect-ratio: 1 / 0.82;
+    padding: 28px;
+  }
+
+  .product-content {
+    padding: 17px;
+  }
+
+  .product-title {
+    min-height: auto;
+  }
+
+  .active-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px;
+  }
+
+  .active-summary-list {
+    width: 100%;
+  }
+
+  .summary-clear {
+    align-self: flex-start;
+  }
+
+  .pagination {
+    gap: 9px;
+    margin-top: 35px;
+  }
+
+  .pagination-button {
+    min-width: 80px;
+    padding: 0 12px;
+  }
+
+  .pagination-info {
+    font-size: 11px;
+  }
+
+  .empty-state {
+    min-height: 360px;
+    padding: 35px 20px;
+  }
+
+}
+
+
+/* =====================================================
+   VERY SMALL MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+  .products-container {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .filter-sidebar {
+    width: 92vw;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .header-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .product-image-wrapper {
+    padding: 22px;
+  }
+
+}
+
+
+/* =====================================================
+   REDUCE MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .products-page *,
+  .products-page *::before,
+  .products-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+}
+
+
+/* =========================================================
+   SELECTED VEHICLE + OEM TIRE SIZES
+========================================================= */
+
+.selected-vehicle-section {
+  padding: 24px 0;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-section .products-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+/* =========================================================
+   SELECTED VEHICLE CARD
+========================================================= */
+
+.selected-vehicle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  padding: 24px 28px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.selected-vehicle-content {
+  min-width: 0;
+}
+
+.selected-vehicle-label {
+  margin-bottom: 6px;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  color: #6b7280;
+}
+
+.selected-vehicle-content h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  color: #111827;
+}
+
+.selected-vehicle-content p {
+  margin: 7px 0 0;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   VEHICLE ID
+========================================================= */
+
+.selected-vehicle-id {
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  padding-left: 24px;
+
+  border-left: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-id span {
+  font-size: 11px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  color: #9ca3af;
+}
+
+.selected-vehicle-id strong {
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #374151;
+}
+
+
+/* =========================================================
+   OEM TIRE SIZES
+========================================================= */
+
+.oem-tire-sizes {
+  padding: 22px 28px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.oem-tire-sizes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 18px;
+}
+
+.oem-tire-sizes-header h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.4;
+
+  color: #111827;
+}
+
+.oem-tire-sizes-header p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   FITMENT COUNT
+========================================================= */
+
+.oem-size-count {
+  flex-shrink: 0;
+
+  padding: 6px 11px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  color: #374151;
+  background: #f3f4f6;
+
+  border-radius: 999px;
+}
+
+
+/* =========================================================
+   TIRE SIZE LIST
+========================================================= */
+
+.oem-tire-size-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+/* =========================================================
+   TIRE SIZE CHIP
+========================================================= */
+
+.oem-tire-size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+  padding: 9px 16px;
+
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+
+  color: #111827;
+
+  background: #f9fafb;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.oem-tire-size-chip:hover {
+  background: #ffffff;
+  border-color: #9ca3af;
+
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .selected-vehicle-section {
+    padding: 16px 0;
+  }
+
+  .selected-vehicle-card {
+    align-items: flex-start;
+    flex-direction: column;
+
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .selected-vehicle-content h2 {
+    font-size: 19px;
+  }
+
+  .selected-vehicle-id {
+    align-items: flex-start;
+
+    width: 100%;
+
+    padding-left: 0;
+    padding-top: 14px;
+
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .oem-tire-sizes {
+    padding: 20px;
+  }
+
+  .oem-tire-sizes-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .oem-tire-size-list {
+    gap: 8px;
+  }
+
+  .oem-tire-size-chip {
+    width: 100%;
+  }
+
+}
+
+
+
+/* =========================================================
+   SELECTED VEHICLE + OEM TIRE SIZES
+========================================================= */
+
+.selected-vehicle-section {
+  padding: 16px 0;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-section .products-container {
+  width: 100%;
+}
+
+
+/* =========================================================
+   MAIN COMPACT CARD
+========================================================= */
+
+.selected-vehicle-card {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+
+  padding: 18px 24px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   VEHICLE INFORMATION - LEFT
+========================================================= */
+
+.selected-vehicle-content {
+  flex: 0 0 35%;
+  min-width: 0;
+}
+
+.selected-vehicle-label {
+  margin-bottom: 4px;
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+
+  color: #6b7280;
+}
+
+.selected-vehicle-content h2 {
+  margin: 0;
+
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.35;
+
+  color: #111827;
+}
+
+.selected-vehicle-content p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+  line-height: 1.4;
+
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   VEHICLE ID
+========================================================= */
+
+.selected-vehicle-id {
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  padding-left: 24px;
+
+  border-left: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-id span {
+  font-size: 10px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  color: #9ca3af;
+}
+
+.selected-vehicle-id strong {
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #374151;
+}
+
+
+/* =========================================================
+   OEM TIRE SIZES - RIGHT
+========================================================= */
+
+.oem-tire-sizes {
+  flex: 1;
+  min-width: 0;
+
+  padding-left: 32px;
+
+  border-left: 1px solid #e5e7eb;
+}
+
+.oem-tire-sizes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.oem-tire-sizes-header h3 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.oem-tire-sizes-header p {
+  display: none;
+}
+
+
+/* =========================================================
+   FITMENT COUNT
+========================================================= */
+
+.oem-size-count {
+  flex-shrink: 0;
+
+  padding: 4px 9px;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  color: #4b5563;
+  background: #f3f4f6;
+
+  border-radius: 999px;
+}
+
+
+/* =========================================================
+   TIRE SIZE LIST
+========================================================= */
+
+.oem-tire-size-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+
+/* =========================================================
+   TIRE SIZE CHIP
+========================================================= */
+
+.oem-tire-size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+  padding: 7px 12px;
+
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+
+  color: #1f2937;
+
+  background: #f9fafb;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  white-space: nowrap;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.oem-tire-size-chip:hover {
+  background: #ffffff;
+  border-color: #9ca3af;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .selected-vehicle-card {
+    gap: 20px;
+    padding: 16px 20px;
+  }
+
+  .selected-vehicle-content {
+    flex: 0 0 40%;
+  }
+
+  .oem-tire-sizes {
+    padding-left: 20px;
+  }
+
+  .selected-vehicle-id {
+    padding-left: 16px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .selected-vehicle-section {
+    padding: 12px 0;
+  }
+
+  .selected-vehicle-card {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+
+    padding: 16px;
+  }
+
+  .selected-vehicle-content {
+    flex: none;
+  }
+
+  .selected-vehicle-content h2 {
+    font-size: 18px;
+  }
+
+  .selected-vehicle-id {
+    padding-left: 0;
+    padding-top: 12px;
+
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .oem-tire-sizes {
+    padding-left: 0;
+    padding-top: 16px;
+
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .oem-tire-sizes-header {
+    margin-bottom: 10px;
+  }
+
+  .oem-tire-size-chip {
+    font-size: 12px;
+  }
+
+}
+
+/* =========================================================
+   SELECTED VEHICLE + OEM TIRE SIZES
+   CURRENT HTML STRUCTURE:
+   
+   .selected-vehicle-section
+     .products-container
+       .selected-vehicle-card
+       .oem-tire-sizes
+========================================================= */
+
+.selected-vehicle-section {
+  padding: 15px 0;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-section > .products-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 15px !important;
+}
+
+
+/* =========================================================
+   SELECTED VEHICLE
+========================================================= */
+
+.selected-vehicle-card {
+  flex: 1 1 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-width: 0;
+
+  padding: 16px 20px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  box-shadow: none;
+}
+
+.selected-vehicle-content {
+  min-width: 0;
+}
+
+.selected-vehicle-label {
+  margin-bottom: 4px;
+
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  color: #6b7280;
+}
+
+.selected-vehicle-content h2 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+
+  color: #111827;
+}
+
+.selected-vehicle-content p {
+  margin: 4px 0 0;
+
+  font-size: 12px;
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   VEHICLE ID
+========================================================= */
+
+.selected-vehicle-id {
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  margin-left: 15px;
+  padding-left: 15px;
+
+  border-left: 1px solid #e5e7eb;
+}
+
+.selected-vehicle-id span {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.selected-vehicle-id strong {
+  font-size: 13px;
+  color: #374151;
+}
+
+
+/* =========================================================
+   OEM TIRE SIZES
+========================================================= */
+
+.oem-tire-sizes {
+  flex: 1 1 50%;
+
+  min-width: 0;
+
+  padding: 16px 20px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   OEM HEADER
+========================================================= */
+
+.oem-tire-sizes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.oem-tire-sizes-header h3 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.oem-tire-sizes-header p {
+  display: none;
+}
+
+.oem-size-count {
+  flex-shrink: 0;
+
+  padding: 4px 8px;
+
+  font-size: 10px;
+  font-weight: 600;
+
+  color: #4b5563;
+  background: #f3f4f6;
+
+  border-radius: 20px;
+}
+
+
+/* =========================================================
+   OEM SIZE LIST
+========================================================= */
+
+.oem-tire-size-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.oem-tire-size-chip {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 7px 10px;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+
+  color: #1f2937;
+
+  background: #f9fafb;
+
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .selected-vehicle-section > .products-container {
+    flex-direction: column !important;
+  }
+
+  .selected-vehicle-card,
+  .oem-tire-sizes {
+    width: 100%;
+    flex: none;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+  .selected-vehicle-section {
+    padding: 10px 0;
+  }
+
+  .selected-vehicle-section > .products-container {
+    gap: 10px !important;
+  }
+
+  .selected-vehicle-card {
+    align-items: flex-start;
+    flex-direction: column;
+
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .selected-vehicle-content h2 {
+    font-size: 16px;
+  }
+
+  .selected-vehicle-id {
+    align-items: flex-start;
+
+    width: 100%;
+
+    margin-left: 0;
+    padding-left: 0;
+    padding-top: 10px;
+
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .oem-tire-sizes {
+    padding: 14px;
+  }
+
+  .oem-tire-size-chip {
+    font-size: 11px;
+  }
+
+}

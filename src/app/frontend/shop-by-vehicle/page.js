@@ -32,13 +32,13 @@ export default function ShopByVehicleTest() {
     useState("");
 
   // IMPORTANT:
-  // This contains the VEHICLE ID.
+  // submodel.key = VEHICLE ID
   //
   // Example:
   // submodel.key = "18590"
   //
-  // We send:
-  // ?submodel=18590
+  // selectedSubmodel will therefore contain:
+  // "18590"
 
   const [selectedSubmodel, setSelectedSubmodel] =
     useState("");
@@ -72,7 +72,6 @@ export default function ShopByVehicleTest() {
     useState(null);
 
 
-
   // ==================================================
   // Load Makes
   // ==================================================
@@ -92,10 +91,8 @@ export default function ShopByVehicleTest() {
 
       setError(null);
 
-
       const response =
         await fetch(API_URL);
-
 
       if (!response.ok) {
 
@@ -105,21 +102,17 @@ export default function ShopByVehicleTest() {
 
       }
 
-
       const data =
         await response.json();
-
 
       console.log(
         "Makes:",
         data
       );
 
-
       setMakes(
         data.options || []
       );
-
 
     } catch (error) {
 
@@ -138,17 +131,14 @@ export default function ShopByVehicleTest() {
   }
 
 
-
   // ==================================================
   // Make Changed
   // ==================================================
 
   async function handleMakeChange(event) {
 
-    // make.key
     const make =
       event.target.value;
-
 
     setSelectedMake(make);
 
@@ -158,7 +148,6 @@ export default function ShopByVehicleTest() {
 
     setSelectedSubmodel("");
 
-
     setModels([]);
 
     setYears([]);
@@ -167,20 +156,17 @@ export default function ShopByVehicleTest() {
 
     setVehicles([]);
 
-
     if (!make) {
 
       return;
 
     }
 
-
     try {
 
       setLoadingModels(true);
 
       setError(null);
-
 
       const params =
         new URLSearchParams({
@@ -189,12 +175,10 @@ export default function ShopByVehicleTest() {
 
         });
 
-
       const response =
         await fetch(
           `${API_URL}?${params.toString()}`
         );
-
 
       if (!response.ok) {
 
@@ -204,21 +188,17 @@ export default function ShopByVehicleTest() {
 
       }
 
-
       const data =
         await response.json();
-
 
       console.log(
         "Models:",
         data
       );
 
-
       setModels(
         data.options || []
       );
-
 
     } catch (error) {
 
@@ -237,17 +217,14 @@ export default function ShopByVehicleTest() {
   }
 
 
-
   // ==================================================
   // Model Changed
   // ==================================================
 
   async function handleModelChange(event) {
 
-    // model.key
     const model =
       event.target.value;
-
 
     setSelectedModel(model);
 
@@ -255,13 +232,11 @@ export default function ShopByVehicleTest() {
 
     setSelectedSubmodel("");
 
-
     setYears([]);
 
     setSubmodels([]);
 
     setVehicles([]);
-
 
     if (!model) {
 
@@ -269,13 +244,11 @@ export default function ShopByVehicleTest() {
 
     }
 
-
     try {
 
       setLoadingYears(true);
 
       setError(null);
-
 
       const params =
         new URLSearchParams({
@@ -287,12 +260,10 @@ export default function ShopByVehicleTest() {
 
         });
 
-
       const response =
         await fetch(
           `${API_URL}?${params.toString()}`
         );
-
 
       if (!response.ok) {
 
@@ -302,21 +273,17 @@ export default function ShopByVehicleTest() {
 
       }
 
-
       const data =
         await response.json();
-
 
       console.log(
         "Years:",
         data
       );
 
-
       setYears(
         data.options || []
       );
-
 
     } catch (error) {
 
@@ -335,27 +302,22 @@ export default function ShopByVehicleTest() {
   }
 
 
-
   // ==================================================
   // Year Changed
   // ==================================================
 
   async function handleYearChange(event) {
 
-    // year.key
     const year =
       event.target.value;
-
 
     setSelectedYear(year);
 
     setSelectedSubmodel("");
 
-
     setSubmodels([]);
 
     setVehicles([]);
-
 
     if (!year) {
 
@@ -363,13 +325,11 @@ export default function ShopByVehicleTest() {
 
     }
 
-
     try {
 
       setLoadingSubmodels(true);
 
       setError(null);
-
 
       const params =
         new URLSearchParams({
@@ -384,12 +344,10 @@ export default function ShopByVehicleTest() {
 
         });
 
-
       const response =
         await fetch(
           `${API_URL}?${params.toString()}`
         );
-
 
       if (!response.ok) {
 
@@ -399,21 +357,17 @@ export default function ShopByVehicleTest() {
 
       }
 
-
       const data =
         await response.json();
-
 
       console.log(
         "Submodel options:",
         data
       );
 
-
       setSubmodels(
         data.options || []
       );
-
 
     } catch (error) {
 
@@ -432,26 +386,24 @@ export default function ShopByVehicleTest() {
   }
 
 
-
   // ==================================================
   // Submodel Changed
   //
-  // IMPORTANT
+  // IMPORTANT:
   //
   // submodel.key = VEHICLE ID
   //
+  // Therefore:
+  //
+  // selectedSubmodel = VEHICLE ID
+  //
   // Example:
   //
-  // key:
-  // "18590"
+  // selectedSubmodel = "18590"
   //
-  // label:
-  // "Komfort Convertible 2 Door"
+  // Shop Tires URL:
   //
-  // The backend receives:
-  //
-  // ?submodel=18590
-  //
+  // /frontend/product-grid-and-filters?vehicleId=18590
   // ==================================================
 
   async function handleSubmodelChange(event) {
@@ -460,14 +412,11 @@ export default function ShopByVehicleTest() {
     const vehicleId =
       event.target.value;
 
-
     setSelectedSubmodel(
       vehicleId
     );
 
-
     setVehicles([]);
-
 
     if (!vehicleId) {
 
@@ -475,13 +424,11 @@ export default function ShopByVehicleTest() {
 
     }
 
-
     try {
 
       setLoadingVehicles(true);
 
       setError(null);
-
 
       const params =
         new URLSearchParams({
@@ -501,18 +448,15 @@ export default function ShopByVehicleTest() {
 
         });
 
-
       console.log(
-        "Fetching vehicle:",
+        "Fetching vehicle ID:",
         vehicleId
       );
-
 
       const response =
         await fetch(
           `${API_URL}?${params.toString()}`
         );
-
 
       if (!response.ok) {
 
@@ -522,21 +466,17 @@ export default function ShopByVehicleTest() {
 
       }
 
-
       const data =
         await response.json();
-
 
       console.log(
         "Selected vehicle:",
         data
       );
 
-
       setVehicles(
         data.vehicles || []
       );
-
 
     } catch (error) {
 
@@ -555,6 +495,25 @@ export default function ShopByVehicleTest() {
   }
 
 
+  // ==================================================
+  // SHOP TIRES
+  // ==================================================
+
+  function handleShopTires() {
+
+    if (!selectedSubmodel) {
+
+      return;
+
+    }
+
+    window.location.href =
+      `/frontend/product-grid-and-filters?vehicleId=${encodeURIComponent(
+        selectedSubmodel
+      )}`;
+
+  }
+
 
   // ==================================================
   // Render
@@ -564,477 +523,615 @@ export default function ShopByVehicleTest() {
 
     <div
       style={{
-        padding: "40px",
-        maxWidth: "1200px",
-        margin: "0 auto"
+        width: "100%",
+        minHeight: "100vh",
+        padding: "40px 20px",
+        boxSizing: "border-box",
+        background: "#f6f7f9"
       }}
     >
 
-      <h1>
-        Shop By Vehicle Test
-      </h1>
-
-
-
-      {/* ============================================ */}
-      {/* MAKE */}
-      {/* ============================================ */}
-
       <div
         style={{
-          marginBottom: "20px"
+          width: "100%",
+          maxWidth: "900px",
+          margin: "0 auto"
         }}
       >
 
-        <label>
-          Make
-        </label>
-
-        <br />
-
-        <select
-          value={selectedMake}
-          onChange={handleMakeChange}
-          disabled={loadingMakes}
-          style={{
-            width: "300px",
-            padding: "10px"
-          }}
-        >
-
-          <option value="">
-
-            {loadingMakes
-              ? "Loading makes..."
-              : "Select Make"
-            }
-
-          </option>
-
-
-          {makes.map(
-            (make) => (
-
-              <option
-                key={make.key}
-                value={make.key}
-              >
-
-                {make.label}
-
-              </option>
-
-            )
-          )}
-
-        </select>
-
-      </div>
-
-
-
-      {/* ============================================ */}
-      {/* MODEL */}
-      {/* ============================================ */}
-
-      <div
-        style={{
-          marginBottom: "20px"
-        }}
-      >
-
-        <label>
-          Model
-        </label>
-
-        <br />
-
-        <select
-          value={selectedModel}
-          onChange={handleModelChange}
-          disabled={
-            !selectedMake ||
-            loadingModels
-          }
-          style={{
-            width: "300px",
-            padding: "10px"
-          }}
-        >
-
-          <option value="">
-
-            {loadingModels
-              ? "Loading models..."
-              : "Select Model"
-            }
-
-          </option>
-
-
-          {models.map(
-            (model) => (
-
-              <option
-                key={model.key}
-                value={model.key}
-              >
-
-                {model.label}
-
-              </option>
-
-            )
-          )}
-
-        </select>
-
-      </div>
-
-
-
-      {/* ============================================ */}
-      {/* YEAR */}
-      {/* ============================================ */}
-
-      <div
-        style={{
-          marginBottom: "20px"
-        }}
-      >
-
-        <label>
-          Year
-        </label>
-
-        <br />
-
-        <select
-          value={selectedYear}
-          onChange={handleYearChange}
-          disabled={
-            !selectedModel ||
-            loadingYears
-          }
-          style={{
-            width: "300px",
-            padding: "10px"
-          }}
-        >
-
-          <option value="">
-
-            {loadingYears
-              ? "Loading years..."
-              : "Select Year"
-            }
-
-          </option>
-
-
-          {years.map(
-            (year) => (
-
-              <option
-                key={year.key}
-                value={year.key}
-              >
-
-                {year.label}
-
-              </option>
-
-            )
-          )}
-
-        </select>
-
-      </div>
-
-
-
-      {/* ============================================ */}
-      {/* SUBMODEL */}
-      {/* ============================================ */}
-
-      <div
-        style={{
-          marginBottom: "30px"
-        }}
-      >
-
-        <label>
-          Submodel / Vehicle Configuration
-        </label>
-
-        <br />
-
-        <select
-          value={selectedSubmodel}
-          onChange={
-            handleSubmodelChange
-          }
-          disabled={
-            !selectedYear ||
-            loadingSubmodels
-          }
-          style={{
-            width: "400px",
-            padding: "10px"
-          }}
-        >
-
-          <option value="">
-
-            {loadingSubmodels
-              ? "Loading submodels..."
-              : "Select Submodel"
-            }
-
-          </option>
-
-
-          {submodels.map(
-            (submodel) => (
-
-              <option
-                key={submodel.key}
-                value={submodel.key}
-              >
-
-                {submodel.label}
-
-              </option>
-
-            )
-          )}
-
-        </select>
-
-      </div>
-
-
-
-      {/* ============================================ */}
-      {/* ERROR */}
-      {/* ============================================ */}
-
-      {error && (
+        {/* ============================================
+            HEADER
+        ============================================ */}
 
         <div
           style={{
-            padding: "15px",
-            marginBottom: "20px",
-            border: "1px solid red",
-            color: "red"
+            textAlign: "center",
+            marginBottom: "35px"
           }}
         >
 
-          Error:
-          {" "}
-          {error}
+          <h1
+            style={{
+              margin: "0 0 10px",
+              fontSize: "32px",
+              fontWeight: "700"
+            }}
+          >
+            Shop By Vehicle
+          </h1>
+
+          <p
+            style={{
+              margin: 0,
+              color: "#6b7280",
+              fontSize: "15px"
+            }}
+          >
+            Select your vehicle to find compatible tires
+          </p>
 
         </div>
 
-      )}
+
+        {/* ============================================
+            VEHICLE SELECTOR
+        ============================================ */}
+
+        <div
+          style={{
+            background: "#ffffff",
+            padding: "30px",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            boxShadow:
+              "0 8px 30px rgba(0, 0, 0, 0.06)"
+          }}
+        >
+
+          {/* MAKE */}
+
+          <div
+            style={{
+              marginBottom: "20px"
+            }}
+          >
+
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontSize: "14px",
+                fontWeight: "600"
+              }}
+            >
+              Make
+            </label>
+
+            <select
+              value={selectedMake}
+              onChange={handleMakeChange}
+              disabled={loadingMakes}
+              style={selectStyle}
+            >
+
+              <option value="">
+
+                {loadingMakes
+                  ? "Loading makes..."
+                  : "Select Make"
+                }
+
+              </option>
+
+              {makes.map(
+                (make) => (
+
+                  <option
+                    key={make.key}
+                    value={make.key}
+                  >
+
+                    {make.label}
+
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
 
 
+          {/* MODEL */}
 
-      {/* ============================================ */}
-      {/* LOADING VEHICLE */}
-      {/* ============================================ */}
+          <div
+            style={{
+              marginBottom: "20px"
+            }}
+          >
 
-      {loadingVehicles && (
+            <label
+              style={labelStyle}
+            >
+              Model
+            </label>
 
-        <div>
+            <select
+              value={selectedModel}
+              onChange={handleModelChange}
+              disabled={
+                !selectedMake ||
+                loadingModels
+              }
+              style={selectStyle}
+            >
 
-          Loading selected vehicle...
+              <option value="">
 
-        </div>
+                {loadingModels
+                  ? "Loading models..."
+                  : "Select Model"
+                }
 
-      )}
+              </option>
+
+              {models.map(
+                (model) => (
+
+                  <option
+                    key={model.key}
+                    value={model.key}
+                  >
+
+                    {model.label}
+
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
 
 
+          {/* YEAR */}
 
-      {/* ============================================ */}
-      {/* VEHICLE RESULTS */}
-      {/* ============================================ */}
+          <div
+            style={{
+              marginBottom: "20px"
+            }}
+          >
 
-      {!loadingVehicles &&
-       selectedSubmodel && (
+            <label
+              style={labelStyle}
+            >
+              Year
+            </label>
 
-        <div>
+            <select
+              value={selectedYear}
+              onChange={handleYearChange}
+              disabled={
+                !selectedModel ||
+                loadingYears
+              }
+              style={selectStyle}
+            >
 
-          <h2>
+              <option value="">
 
-            Selected Vehicle:
-            {" "}
-            {vehicles.length}
+                {loadingYears
+                  ? "Loading years..."
+                  : "Select Year"
+                }
 
-          </h2>
+              </option>
+
+              {years.map(
+                (year) => (
+
+                  <option
+                    key={year.key}
+                    value={year.key}
+                  >
+
+                    {year.label}
+
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
 
 
-          {vehicles.length === 0 && (
+          {/* SUBMODEL */}
 
-            <div>
+          <div
+            style={{
+              marginBottom: "10px"
+            }}
+          >
 
-              No vehicle found.
+            <label
+              style={labelStyle}
+            >
+              Submodel / Vehicle Configuration
+            </label>
+
+            <select
+              value={selectedSubmodel}
+              onChange={
+                handleSubmodelChange
+              }
+              disabled={
+                !selectedYear ||
+                loadingSubmodels
+              }
+              style={selectStyle}
+            >
+
+              <option value="">
+
+                {loadingSubmodels
+                  ? "Loading submodels..."
+                  : "Select Submodel"
+                }
+
+              </option>
+
+              {submodels.map(
+                (submodel) => (
+
+                  <option
+                    key={submodel.key}
+                    value={submodel.key}
+                  >
+
+                    {submodel.label}
+
+                  </option>
+
+                )
+              )}
+
+            </select>
+
+          </div>
+
+
+          {/* ==========================================
+              SELECTED VEHICLE ID
+          ========================================== */}
+
+          {selectedSubmodel && (
+
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "14px 16px",
+                background: "#f9fafb",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px"
+              }}
+            >
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  marginBottom: "4px"
+                }}
+              >
+                Selected Vehicle ID
+              </div>
+
+              <strong
+                style={{
+                  fontSize: "16px"
+                }}
+              >
+                {selectedSubmodel}
+              </strong>
 
             </div>
 
           )}
 
 
-          {vehicles.map(
-            (vehicle, index) => (
+          {/* ==========================================
+              SHOP TIRES BUTTON
+          ========================================== */}
 
-              <div
-                key={
-                  vehicle._id ||
-                  vehicle.id ||
-                  index
-                }
-                style={{
-                  marginBottom: "20px",
-                  padding: "20px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px"
-                }}
-              >
+          {selectedSubmodel && (
 
-                <h3>
+            <button
+              type="button"
+              onClick={handleShopTires}
+              style={{
+                width: "100%",
+                height: "52px",
+                marginTop: "20px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#111827",
+                color: "#ffffff",
+                fontSize: "15px",
+                fontWeight: "700",
+                cursor: "pointer",
+                transition:
+                  "background 0.2s ease"
+              }}
+            >
+              Shop Tires
+            </button>
 
-                  Vehicle #{index + 1}
-
-                </h3>
-
-
-                <div>
-
-                  <strong>
-                    ID:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.id}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Chassis ID:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.default_chassis_id}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Vehicle:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.year}
-                  {" "}
-                  {vehicle.make}
-                  {" "}
-                  {vehicle.model}
-                  {" "}
-                  {vehicle.submodel}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Body:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.body || "N/A"}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Doors:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.doors || "N/A"}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Type:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.type || "N/A"}
-
-                </div>
-
-
-                <div>
-
-                  <strong>
-                    Default Chassis:
-                  </strong>
-
-                  {" "}
-
-                  {vehicle.default_chassis_id || "N/A"}
-
-                </div>
-
-
-                <pre
-                  style={{
-                    marginTop: "15px",
-                    padding: "15px",
-                    background: "#f5f5f5",
-                    overflow: "auto",
-                    maxHeight: "500px"
-                  }}
-                >
-
-                  {JSON.stringify(
-                    vehicle,
-                    null,
-                    2
-                  )}
-
-                </pre>
-
-              </div>
-
-            )
           )}
 
         </div>
 
-      )}
+
+        {/* ============================================
+            ERROR
+        ============================================ */}
+
+        {error && (
+
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "15px",
+              borderRadius: "8px",
+              border:
+                "1px solid #fecaca",
+              background:
+                "#fef2f2",
+              color: "#dc2626"
+            }}
+          >
+
+            Error:
+            {" "}
+            {error}
+
+          </div>
+
+        )}
+
+
+        {/* ============================================
+            LOADING VEHICLE
+        ============================================ */}
+
+        {loadingVehicles && (
+
+          <div
+            style={{
+              marginTop: "25px",
+              textAlign: "center",
+              color: "#6b7280"
+            }}
+          >
+
+            Loading selected vehicle...
+
+          </div>
+
+        )}
+
+
+        {/* ============================================
+            VEHICLE RESULTS
+        ============================================ */}
+
+        {!loadingVehicles &&
+         selectedSubmodel && (
+
+          <div
+            style={{
+              marginTop: "30px"
+            }}
+          >
+
+            <h2>
+              Selected Vehicle:
+              {" "}
+              {vehicles.length}
+            </h2>
+
+
+            {vehicles.length === 0 && (
+
+              <div
+                style={{
+                  padding: "20px",
+                  background: "#ffffff",
+                  borderRadius: "8px",
+                  border:
+                    "1px solid #e5e7eb"
+                }}
+              >
+
+                No vehicle found.
+
+              </div>
+
+            )}
+
+
+            {vehicles.map(
+              (vehicle, index) => (
+
+                <div
+                  key={
+                    vehicle._id ||
+                    vehicle.id ||
+                    index
+                  }
+                  style={{
+                    marginBottom: "20px",
+                    padding: "20px",
+                    background: "#ffffff",
+                    border:
+                      "1px solid #e5e7eb",
+                    borderRadius: "8px"
+                  }}
+                >
+
+                  <h3>
+                    Vehicle #{index + 1}
+                  </h3>
+
+
+                  <div>
+                    <strong>
+                      ID:
+                    </strong>
+                    {" "}
+                    {vehicle.id}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Chassis ID:
+                    </strong>
+                    {" "}
+                    {vehicle.default_chassis_id}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Vehicle:
+                    </strong>
+                    {" "}
+                    {vehicle.year}
+                    {" "}
+                    {vehicle.make}
+                    {" "}
+                    {vehicle.model}
+                    {" "}
+                    {vehicle.submodel}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Body:
+                    </strong>
+                    {" "}
+                    {vehicle.body || "N/A"}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Doors:
+                    </strong>
+                    {" "}
+                    {vehicle.doors || "N/A"}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Type:
+                    </strong>
+                    {" "}
+                    {vehicle.type || "N/A"}
+                  </div>
+
+
+                  <div>
+                    <strong>
+                      Default Chassis:
+                    </strong>
+                    {" "}
+                    {vehicle.default_chassis_id || "N/A"}
+                  </div>
+
+
+                  <pre
+                    style={{
+                      marginTop: "15px",
+                      padding: "15px",
+                      background: "#f5f5f5",
+                      overflow: "auto",
+                      maxHeight: "500px"
+                    }}
+                  >
+
+                    {JSON.stringify(
+                      vehicle,
+                      null,
+                      2
+                    )}
+
+                  </pre>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        )}
+
+      </div>
 
     </div>
 
   );
 
 }
+
+
+// ==================================================
+// Shared Styles
+// ==================================================
+
+const labelStyle = {
+
+  display: "block",
+
+  marginBottom: "8px",
+
+  fontSize: "14px",
+
+  fontWeight: "600"
+
+};
+
+
+const selectStyle = {
+
+  width: "100%",
+
+  height: "48px",
+
+  padding: "0 14px",
+
+  border:
+    "1px solid #d1d5db",
+
+  borderRadius: "7px",
+
+  background: "#ffffff",
+
+  color: "#111827",
+
+  fontSize: "14px",
+
+  outline: "none",
+
+  cursor: "pointer",
+
+  boxSizing: "border-box"
+
+};
