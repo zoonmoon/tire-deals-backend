@@ -63,8 +63,8 @@ async function fetchPendingInventory(connection) {
 
             FROM tire_inventory
 
-            WHERE opensearch_mapping_status = 'pending'
-
+            WHERE opensearch_mapping_status = 'pending' AND status = 'active'
+        
             ORDER BY id ASC
 
             LIMIT ${BATCH_SIZE}
