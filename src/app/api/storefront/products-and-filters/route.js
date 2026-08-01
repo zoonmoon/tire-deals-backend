@@ -325,6 +325,7 @@ function parseFilterParams(searchParams) {
 
   const filters = {};
 
+
   for (
     const [key, config]
     of Object.entries(FILTER_CONFIG)
@@ -760,13 +761,15 @@ function buildVehicleFitmentQuery(
 //
 // ======================================================
 
+
+
 function buildFilterQueries(
   filters,
-  excludeFilter = null
+  excludeFilter = null,
+  priceRange = {}
 ) {
 
   const queries = [];
-
 
   for (
     const [
@@ -776,40 +779,45 @@ function buildFilterQueries(
     of Object.entries(filters)
   ) {
 
-    // Skip current aggregation filter
-
     if (
-      filterName ===
-      excludeFilter
+      filterName === excludeFilter
     ) {
-
       continue;
-
     }
 
-
     const config =
-      FILTER_CONFIG[
-        filterName
-      ];
-
+      FILTER_CONFIG[filterName];
 
     if (!config) {
       continue;
     }
 
-
     if (!values.length) {
       continue;
     }
 
+    queries.push({
+      terms: {
+        [config.field]: values,
+      },
+    });
+
+  }
+
+  // ==========================================
+  // PRICE RANGE
+  // ==========================================
+
+  if (
+    Object.keys(priceRange).length > 0
+  ) {
 
     queries.push({
 
-      terms: {
+      range: {
 
-        [config.field]:
-          values,
+        price:
+          priceRange,
 
       },
 
@@ -817,10 +825,10 @@ function buildFilterQueries(
 
   }
 
-
   return queries;
 
 }
+
 
 
 // ======================================================
@@ -874,7 +882,8 @@ function buildFilterQueries(
 
 function buildAggregations(
   filters,
-  vehicleFitmentQuery
+  vehicleFitmentQuery,
+  priceRange
 ) {
 
   const aggs = {};
@@ -903,7 +912,9 @@ function buildAggregations(
 
         filters,
 
-        filterName
+        filterName,
+
+        priceRange
 
       );
 
@@ -1213,6 +1224,74 @@ export async function GET(request) {
       );
 
 
+
+      const minPriceParam =
+        searchParams.get("min_price");
+
+      const maxPriceParam =
+        searchParams.get("max_price");
+
+      const priceRange = {};
+
+      const minPrice =
+        Number(minPriceParam);
+
+      const maxPrice =
+        Number(maxPriceParam);
+
+        
+      // Valid minimum price
+      if (
+        minPriceParam !== null &&
+        Number.isFinite(minPrice) &&
+        minPrice >= 0
+      ) {
+
+        priceRange.gte =
+          minPrice;
+
+      }
+
+
+      // Valid maximum price
+      if (
+        maxPriceParam !== null &&
+        Number.isFinite(maxPrice) &&
+        maxPrice >= 0
+      ) {
+
+        priceRange.lte =
+          maxPrice;
+
+      }
+
+
+      // If min > max, ignore the entire price filter
+      if (
+        priceRange.gte !== undefined &&
+        priceRange.lte !== undefined &&
+        priceRange.gte > priceRange.lte
+      ) {
+
+        // Reset price filter
+        Object.keys(priceRange).forEach(
+          key => delete priceRange[key]
+        );
+
+      }
+
+
+
+
+
+    const appliedFilters = {
+      ...filters,
+    };
+
+    if (Object.keys(priceRange).length > 0) {
+      appliedFilters.price = priceRange;
+    }
+
     // ==================================================
     // GET VEHICLE
     // ==================================================
@@ -1326,7 +1405,7 @@ export async function GET(request) {
         totalPages: 0,
 
         appliedFilters:
-          filters,
+          appliedFilters,
 
         filters: {},
 
@@ -1342,7 +1421,9 @@ export async function GET(request) {
     const filterQueries =
 
       buildFilterQueries(
-        filters
+        filters,
+        null,
+        priceRange
       );
 
 
@@ -1362,25 +1443,25 @@ export async function GET(request) {
     //
     // ==================================================
 
+
     const must = [
-
-      // Global filters
-
       ...GLOBAL_TIRE_FILTERS,
-
-
-      // Vehicle compatibility
 
       vehicleFitmentQuery,
 
-
-      // User filters
-
       ...filterQueries,
 
-    ]
+      // Price range
+      // Object.keys(priceRange).length > 0
+      //   ? {
+      //       range: {
+      //         price: priceRange,
+      //       },
+      //     }
+      //   : null,
 
-      .filter(Boolean);
+    ].filter(Boolean);
+
 
 
     // ==================================================
@@ -1393,7 +1474,9 @@ export async function GET(request) {
 
         filters,
 
-        vehicleFitmentQuery
+        vehicleFitmentQuery,
+
+        priceRange
 
       );
 
@@ -1686,7 +1769,7 @@ export async function GET(request) {
       // Applied filters
 
       appliedFilters:
-        filters,
+        appliedFilters,
 
 
       // Available filters

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -66,24 +65,58 @@ const FILTER_ORDER = [
 
 export default function ProductsAndFilters() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [sort, setSort] = useState("");
-  const [page, setPage] = useState(1);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [selectedFilters, setSelectedFilters] =
+    useState({});
+
+  const [sort, setSort] =
+    useState("");
+
+  const [page, setPage] =
+    useState(1);
+
+  const [mobileFiltersOpen, setMobileFiltersOpen] =
+    useState(false);
+
+  // =====================================================
+  // PRICE FILTER STATE
+  // =====================================================
+
+  const [minPrice, setMinPrice] =
+    useState("");
+
+  const [maxPrice, setMaxPrice] =
+    useState("");
+
+  // =====================================================
+  // PRICE ERROR
+  // =====================================================
+
+  const [priceError, setPriceError] =
+    useState("");
 
   // =====================================================
   // VEHICLE ID FROM URL
   // =====================================================
 
   const vehicleId = useMemo(() => {
-    if (typeof window === "undefined") {
+    if (
+      typeof window === "undefined"
+    ) {
       return null;
     }
 
-    const params = new URLSearchParams(window.location.search);
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
 
-    return params.get("vehicleId");
+    return params.get(
+      "vehicleId"
+    );
   }, []);
 
   // =====================================================
@@ -91,34 +124,83 @@ export default function ProductsAndFilters() {
   // =====================================================
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (
+      typeof window === "undefined"
+    ) {
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
 
     const filters = {};
 
-    for (const key of FILTER_ORDER) {
-      const value = params.get(key);
+    // ---------------------------------------------
+    // NORMAL FILTERS
+    // ---------------------------------------------
+
+    for (
+      const key of FILTER_ORDER
+    ) {
+      const value =
+        params.get(key);
 
       if (!value) {
         continue;
       }
 
-      filters[key] = value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean);
+      filters[key] =
+        value
+          .split(",")
+          .map(
+            (item) =>
+              item.trim()
+          )
+          .filter(Boolean);
     }
 
-    setSelectedFilters(filters);
+    setSelectedFilters(
+      filters
+    );
 
-    setSort(params.get("sort") || "");
+    // ---------------------------------------------
+    // SORT
+    // ---------------------------------------------
 
-    const urlPage = Number(params.get("page")) || 1;
+    setSort(
+      params.get("sort") || ""
+    );
 
-    setPage(urlPage);
+    // ---------------------------------------------
+    // PAGE
+    // ---------------------------------------------
+
+    const urlPage =
+      Number(
+        params.get("page")
+      ) || 1;
+
+    setPage(
+      urlPage
+    );
+
+    // ---------------------------------------------
+    // PRICE
+    // ---------------------------------------------
+
+    setMinPrice(
+      params.get(
+        "min_price"
+      ) || ""
+    );
+
+    setMaxPrice(
+      params.get(
+        "max_price"
+      ) || ""
+    );
   }, []);
 
   // =====================================================
@@ -129,57 +211,146 @@ export default function ProductsAndFilters() {
     nextFilters = selectedFilters,
     nextSort = sort,
     nextPage = page,
+
+    nextMinPrice = minPrice,
+    nextMaxPrice = maxPrice,
   } = {}) {
     if (!vehicleId) {
       return;
     }
 
-    setLoading(true);
+    setLoading(
+      true
+    );
 
     try {
-      const params = new URLSearchParams();
+      const params =
+        new URLSearchParams();
 
+      // =================================================
       // VEHICLE ID
-      params.set("vehicleId", vehicleId);
+      // =================================================
 
-      // FILTERS
-      for (const [filterName, values] of Object.entries(
-        nextFilters
-      )) {
-        if (!values || values.length === 0) {
+      params.set(
+        "vehicleId",
+        vehicleId
+      );
+
+      // =================================================
+      // NORMAL FILTERS
+      // =================================================
+
+      for (
+        const [
+          filterName,
+          values,
+        ] of Object.entries(
+          nextFilters
+        )
+      ) {
+        if (
+          !values ||
+          values.length === 0
+        ) {
           continue;
         }
 
-        params.set(filterName, values.join(","));
+        params.set(
+          filterName,
+          values.join(",")
+        );
       }
 
+      // =================================================
+      // PRICE FILTER
+      // =================================================
+
+      if (
+        nextMinPrice !== "" &&
+        nextMinPrice !== null &&
+        nextMinPrice !== undefined
+      ) {
+        params.set(
+          "min_price",
+          String(
+            nextMinPrice
+          )
+        );
+      }
+
+      if (
+        nextMaxPrice !== "" &&
+        nextMaxPrice !== null &&
+        nextMaxPrice !== undefined
+      ) {
+        params.set(
+          "max_price",
+          String(
+            nextMaxPrice
+          )
+        );
+      }
+
+      // =================================================
       // SORT
-      if (nextSort) {
-        params.set("sort", nextSort);
+      // =================================================
+
+      if (
+        nextSort
+      ) {
+        params.set(
+          "sort",
+          nextSort
+        );
       }
 
+      // =================================================
       // PAGINATION
-      params.set("page", String(nextPage));
-      params.set("limit", "24");
+      // =================================================
 
+      params.set(
+        "page",
+        String(
+          nextPage
+        )
+      );
+
+      params.set(
+        "limit",
+        "24"
+      );
+
+      // =================================================
       // UPDATE URL
+      // =================================================
+
       window.history.replaceState(
         {},
         "",
-        `${window.location.pathname}?${params.toString()}`
+        `${
+          window.location.pathname
+        }?${params.toString()}`
       );
 
-      // API
-      const response = await fetch(
-        `${API_URL}?${params.toString()}`,
-        {
-          cache: "no-store",
-        }
-      );
+      // =================================================
+      // API REQUEST
+      // =================================================
 
-      const result = await response.json();
+      const response =
+        await fetch(
+          `${API_URL}?${params.toString()}`,
+          {
+            cache:
+              "no-store",
+          }
+        );
 
-      if (!response.ok) {
+      const result =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
         throw new Error(
           result.message ||
             result.error ||
@@ -187,11 +358,20 @@ export default function ProductsAndFilters() {
         );
       }
 
-      setData(result);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
+      setData(
+        result
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        "Failed to fetch products:",
+        error
+      );
     } finally {
-      setLoading(false);
+      setLoading(
+        false
+      );
     }
   }
 
@@ -213,20 +393,36 @@ export default function ProductsAndFilters() {
   // TOGGLE FILTER
   // =====================================================
 
-  function toggleFilter(filterName, value) {
-    const stringValue = String(value);
+  function toggleFilter(
+    filterName,
+    value
+  ) {
+    const stringValue =
+      String(
+        value
+      );
 
     const currentValues =
-      selectedFilters[filterName] || [];
+      selectedFilters[
+        filterName
+      ] || [];
 
-    const exists = currentValues.includes(stringValue);
+    const exists =
+      currentValues.includes(
+        stringValue
+      );
 
     let newValues;
 
-    if (exists) {
-      newValues = currentValues.filter(
-        (item) => item !== stringValue
-      );
+    if (
+      exists
+    ) {
+      newValues =
+        currentValues.filter(
+          (item) =>
+            item !==
+            stringValue
+        );
     } else {
       newValues = [
         ...currentValues,
@@ -238,15 +434,26 @@ export default function ProductsAndFilters() {
       ...selectedFilters,
     };
 
-    if (newValues.length > 0) {
-      nextFilters[filterName] = newValues;
+    if (
+      newValues.length > 0
+    ) {
+      nextFilters[
+        filterName
+      ] =
+        newValues;
     } else {
-      delete nextFilters[filterName];
+      delete nextFilters[
+        filterName
+      ];
     }
 
-    setSelectedFilters(nextFilters);
+    setSelectedFilters(
+      nextFilters
+    );
 
-    setPage(1);
+    setPage(
+      1
+    );
 
     window.scrollTo({
       top: 0,
@@ -257,6 +464,14 @@ export default function ProductsAndFilters() {
       nextFilters,
       nextSort: sort,
       nextPage: 1,
+
+      // IMPORTANT:
+      // Preserve price filter
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
     });
   }
 
@@ -264,37 +479,207 @@ export default function ProductsAndFilters() {
   // CLEAR ONE FILTER
   // =====================================================
 
-  function clearFilter(filterName) {
+  function clearFilter(
+    filterName
+  ) {
     const nextFilters = {
       ...selectedFilters,
     };
 
-    delete nextFilters[filterName];
+    delete nextFilters[
+      filterName
+    ];
 
-    setSelectedFilters(nextFilters);
+    setSelectedFilters(
+      nextFilters
+    );
 
-    setPage(1);
+    setPage(
+      1
+    );
 
     fetchProducts({
       nextFilters,
       nextSort: sort,
       nextPage: 1,
+
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
     });
   }
 
   // =====================================================
-  // CLEAR ALL FILTERS
+  // CLEAR ALL NORMAL FILTERS
   // =====================================================
 
   function clearAllFilters() {
-    setSelectedFilters({});
+    setSelectedFilters(
+      {}
+    );
 
-    setPage(1);
+    setPage(
+      1
+    );
 
     fetchProducts({
       nextFilters: {},
       nextSort: sort,
       nextPage: 1,
+
+      // Keep price
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
+    });
+  }
+
+  // =====================================================
+  // APPLY PRICE FILTER
+  // =====================================================
+
+  function applyPriceFilter() {
+    setPriceError(
+      ""
+    );
+
+    const min =
+      minPrice === ""
+        ? null
+        : Number(
+            minPrice
+          );
+
+    const max =
+      maxPrice === ""
+        ? null
+        : Number(
+            maxPrice
+          );
+
+    // ---------------------------------------------
+    // MIN VALIDATION
+    // ---------------------------------------------
+
+    if (
+      min !== null &&
+      (!Number.isFinite(
+        min
+      ) ||
+        min < 0)
+    ) {
+      setPriceError(
+        "Minimum price must be 0 or greater."
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------
+    // MAX VALIDATION
+    // ---------------------------------------------
+
+    if (
+      max !== null &&
+      (!Number.isFinite(
+        max
+      ) ||
+        max < 0)
+    ) {
+      setPriceError(
+        "Maximum price must be 0 or greater."
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------
+    // MIN > MAX
+    // ---------------------------------------------
+
+    if (
+      min !== null &&
+      max !== null &&
+      min > max
+    ) {
+      setPriceError(
+        "Minimum price cannot be greater than maximum price."
+      );
+
+      return;
+    }
+
+    // ---------------------------------------------
+    // RESET PAGE
+    // ---------------------------------------------
+
+    setPage(
+      1
+    );
+
+    // ---------------------------------------------
+    // FETCH
+    // ---------------------------------------------
+
+    fetchProducts({
+      nextFilters:
+        selectedFilters,
+
+      nextSort:
+        sort,
+
+      nextPage:
+        1,
+
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
+    });
+  }
+
+  // =====================================================
+  // CLEAR PRICE FILTER
+  // =====================================================
+
+  function clearPriceFilter() {
+    setMinPrice(
+      ""
+    );
+
+    setMaxPrice(
+      ""
+    );
+
+    setPriceError(
+      ""
+    );
+
+    setPage(
+      1
+    );
+
+    fetchProducts({
+      nextFilters:
+        selectedFilters,
+
+      nextSort:
+        sort,
+
+      nextPage:
+        1,
+
+      // Explicitly remove price
+      nextMinPrice:
+        "",
+
+      nextMaxPrice:
+        "",
     });
   }
 
@@ -302,17 +687,34 @@ export default function ProductsAndFilters() {
   // SORT
   // =====================================================
 
-  function handleSort(event) {
-    const nextSort = event.target.value;
+  function handleSort(
+    event
+  ) {
+    const nextSort =
+      event.target.value;
 
-    setSort(nextSort);
+    setSort(
+      nextSort
+    );
 
-    setPage(1);
+    setPage(
+      1
+    );
 
     fetchProducts({
-      nextFilters: selectedFilters,
+      nextFilters:
+        selectedFilters,
+
       nextSort,
+
       nextPage: 1,
+
+      // Preserve price
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
     });
   }
 
@@ -320,24 +722,42 @@ export default function ProductsAndFilters() {
   // PAGINATION
   // =====================================================
 
-  function goToPage(nextPage) {
-    if (nextPage < 1) {
+  function goToPage(
+    nextPage
+  ) {
+    if (
+      nextPage < 1
+    ) {
       return;
     }
 
     if (
       data?.totalPages &&
-      nextPage > data.totalPages
+      nextPage >
+        data.totalPages
     ) {
       return;
     }
 
-    setPage(nextPage);
+    setPage(
+      nextPage
+    );
 
     fetchProducts({
-      nextFilters: selectedFilters,
-      nextSort: sort,
+      nextFilters:
+        selectedFilters,
+
+      nextSort:
+        sort,
+
       nextPage,
+
+      // Preserve price
+      nextMinPrice:
+        minPrice,
+
+      nextMaxPrice:
+        maxPrice,
     });
 
     window.scrollTo({
@@ -353,13 +773,19 @@ export default function ProductsAndFilters() {
   if (!vehicleId) {
     return (
       <div className="products-page">
+
         <div className="empty-state">
-          <h2>Vehicle ID is required</h2>
+
+          <h2>
+            Vehicle ID is required
+          </h2>
 
           <p>
             Please select a vehicle first.
           </p>
+
         </div>
+
       </div>
     );
   }
@@ -368,16 +794,23 @@ export default function ProductsAndFilters() {
   // INITIAL LOADING
   // =====================================================
 
-  if (!data && loading) {
+  if (
+    !data &&
+    loading
+  ) {
     return (
       <div className="products-page">
+
         <div className="initial-loading">
+
           <div className="loading-spinner" />
 
           <p>
             Loading tires...
           </p>
+
         </div>
+
       </div>
     );
   }
@@ -410,43 +843,65 @@ export default function ProductsAndFilters() {
 
   // =====================================================
   // UNIQUE OEM TIRE SIZE PAIRS
-  //
-  // Examples:
-  //
-  // 245/50R18
-  //
-  // 245/45R19 / 275/40R19
-  //
-  // 245/40R20 / 275/35R20
   // =====================================================
 
-  const fitmentSizePairs = Array.from(
-    new Set(
-      vehicleFitments
-        .map((fitment) => {
-          if (
-            fitment.tire_size &&
-            fitment.tire_size_rear
-          ) {
-            return `${fitment.tire_size} / ${fitment.tire_size_rear}`;
-          }
+  const fitmentSizePairs =
+    Array.from(
+      new Set(
+        vehicleFitments
+          .map(
+            (fitment) => {
+              if (
+                fitment.tire_size &&
+                fitment.tire_size_rear
+              ) {
+                return `${fitment.tire_size} / ${fitment.tire_size_rear}`;
+              }
 
-          return fitment.tire_size || null;
-        })
-        .filter(Boolean)
-    )
-  );
+              return (
+                fitment.tire_size ||
+                null
+              );
+            }
+          )
+          .filter(Boolean)
+      )
+    );
 
   // =====================================================
-  // ACTIVE FILTER COUNT
+  // ACTIVE NORMAL FILTER COUNT
+  // =====================================================
+
+  const activeNormalFilterCount =
+    Object.values(
+      selectedFilters
+    ).reduce(
+      (
+        total,
+        values
+      ) =>
+        total +
+        values.length,
+      0
+    );
+
+  // =====================================================
+  // PRICE FILTER ACTIVE
+  // =====================================================
+
+  const priceFilterActive =
+    minPrice !== "" ||
+    maxPrice !== "";
+
+  // =====================================================
+  // TOTAL ACTIVE FILTER COUNT
   // =====================================================
 
   const activeFilterCount =
-    Object.values(selectedFilters).reduce(
-      (total, values) =>
-        total + values.length,
-      0
-    );
+    activeNormalFilterCount +
+    (priceFilterActive
+      ? 1
+      : 0);
 
   return (
     <div className="products-page">
@@ -456,6 +911,7 @@ export default function ProductsAndFilters() {
       ================================================= */}
 
       <section className="selected-vehicle-section">
+
         <div className="products-container">
 
           <div className="selected-vehicle-card">
@@ -485,14 +941,20 @@ export default function ProductsAndFilters() {
                 )}
               </h2>
 
-              {(vehicle?.body ||
-                vehicle?.doors) && (
+              {(
+                vehicle?.body ||
+                vehicle?.doors
+              ) && (
                 <p>
+
                   {vehicle.body}
 
                   {vehicle.body &&
                     vehicle.doors && (
-                      <> • </>
+                      <>
+                        {" "}
+                        •{" "}
+                      </>
                     )}
 
                   {vehicle.doors && (
@@ -500,6 +962,7 @@ export default function ProductsAndFilters() {
                       {vehicle.doors} Doors
                     </>
                   )}
+
                 </p>
               )}
 
@@ -519,17 +982,18 @@ export default function ProductsAndFilters() {
 
           </div>
 
-
           {/* =================================================
               OEM TIRE SIZES
           ================================================= */}
 
-          {fitmentSizePairs.length > 0 && (
+          {fitmentSizePairs.length >
+            0 && (
             <div className="oem-tire-sizes">
 
               <div className="oem-tire-sizes-header">
 
                 <div>
+
                   <h3>
                     OEM Tire Sizes
                   </h3>
@@ -537,10 +1001,14 @@ export default function ProductsAndFilters() {
                   <p>
                     Available tire sizes for this vehicle
                   </p>
+
                 </div>
 
                 <span className="oem-size-count">
-                  {fitmentSizePairs.length} fitments
+
+                  {fitmentSizePairs.length}{" "}
+                  fitments
+
                 </span>
 
               </div>
@@ -564,8 +1032,8 @@ export default function ProductsAndFilters() {
           )}
 
         </div>
-      </section>
 
+      </section>
 
       {/* =================================================
           HEADER
@@ -593,18 +1061,23 @@ export default function ProductsAndFilters() {
               type="button"
               className="mobile-filter-button"
               onClick={() =>
-                setMobileFiltersOpen(true)
+                setMobileFiltersOpen(
+                  true
+                )
               }
             >
+
               <span>
                 Filters
               </span>
 
-              {activeFilterCount > 0 && (
+              {activeFilterCount >
+                0 && (
                 <span className="filter-count">
                   {activeFilterCount}
                 </span>
               )}
+
             </button>
 
             <div className="sort-wrapper">
@@ -615,9 +1088,12 @@ export default function ProductsAndFilters() {
 
               <select
                 value={sort}
-                onChange={handleSort}
+                onChange={
+                  handleSort
+                }
                 className="sort-select"
               >
+
                 <option value="">
                   Relevance
                 </option>
@@ -633,6 +1109,7 @@ export default function ProductsAndFilters() {
                 <option value="brand_asc">
                   Brand: A-Z
                 </option>
+
               </select>
 
             </div>
@@ -642,7 +1119,6 @@ export default function ProductsAndFilters() {
         </div>
 
       </header>
-
 
       {/* =================================================
           MAIN
@@ -658,11 +1134,12 @@ export default function ProductsAndFilters() {
           <div
             className="filter-overlay"
             onClick={() =>
-              setMobileFiltersOpen(false)
+              setMobileFiltersOpen(
+                false
+              )
             }
           />
         )}
-
 
         {/* =================================================
             SIDEBAR
@@ -676,6 +1153,10 @@ export default function ProductsAndFilters() {
           }`}
         >
 
+          {/* =================================================
+              SIDEBAR HEADER
+          ================================================= */}
+
           <div className="sidebar-header">
 
             <div>
@@ -684,7 +1165,8 @@ export default function ProductsAndFilters() {
                 Filters
               </h2>
 
-              {activeFilterCount > 0 && (
+              {activeFilterCount >
+                0 && (
                 <p>
                   {activeFilterCount} selected
                 </p>
@@ -696,7 +1178,9 @@ export default function ProductsAndFilters() {
               type="button"
               className="mobile-close-button"
               onClick={() =>
-                setMobileFiltersOpen(false)
+                setMobileFiltersOpen(
+                  false
+                )
               }
             >
               ×
@@ -704,29 +1188,205 @@ export default function ProductsAndFilters() {
 
           </div>
 
+          {/* =================================================
+              CLEAR ALL NORMAL FILTERS
+          ================================================= */}
 
-          {/* CLEAR ALL */}
-
-          {activeFilterCount > 0 && (
+          {activeNormalFilterCount >
+            0 && (
             <button
               type="button"
               className="clear-all-button"
-              onClick={clearAllFilters}
+              onClick={
+                clearAllFilters
+              }
             >
               Clear all filters
             </button>
           )}
 
+          {/* =================================================
+              PRICE FILTER
+              
+              THIS ALWAYS SHOWS
+              
+              IT DOES NOT DEPEND ON
+              availableFilters
+          ================================================= */}
 
-          {/* ACTIVE FILTERS */}
+          <div className="filter-group price-filter-group">
 
-          {activeFilterCount > 0 && (
+            <div className="filter-group-header">
+
+              <h3>
+                Price
+              </h3>
+
+              {priceFilterActive && (
+                <button
+                  type="button"
+                  onClick={
+                    clearPriceFilter
+                  }
+                  className="filter-clear-button"
+                >
+                  Clear
+                </button>
+              )}
+
+            </div>
+
+            <div className="price-inputs">
+
+              {/* MIN PRICE */}
+
+              <div className="price-input-wrapper">
+
+                <label htmlFor="min-price">
+                  Min Price
+                </label>
+
+                <div className="price-input-container">
+
+                  <span className="price-symbol">
+                    $
+                  </span>
+
+                  <input
+                    id="min-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                    value={
+                      minPrice
+                    }
+                    onChange={(
+                      event
+                    ) => {
+                      setMinPrice(
+                        event.target.value
+                      );
+
+                      setPriceError(
+                        ""
+                      );
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+              {/* MAX PRICE */}
+
+              <div className="price-input-wrapper">
+
+                <label htmlFor="max-price">
+                  Max Price
+                </label>
+
+                <div className="price-input-container">
+
+                  <span className="price-symbol">
+                    $
+                  </span>
+
+                  <input
+                    id="max-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="1000"
+                    value={
+                      maxPrice
+                    }
+                    onChange={(
+                      event
+                    ) => {
+                      setMaxPrice(
+                        event.target.value
+                      );
+
+                      setPriceError(
+                        ""
+                      );
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+              {/* PRICE ERROR */}
+
+              {priceError && (
+                <div className="price-error">
+                  {priceError}
+                </div>
+              )}
+
+              {/* APPLY */}
+
+              <button
+                type="button"
+                className="apply-price-button"
+                onClick={
+                  applyPriceFilter
+                }
+              >
+                Apply Price
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              ACTIVE FILTERS
+          ================================================= */}
+
+          {activeFilterCount >
+            0 && (
             <div className="active-filters">
+
+              {/* PRICE ACTIVE CHIP */}
+
+              {priceFilterActive && (
+                <button
+                  type="button"
+                  className="active-filter-chip"
+                  onClick={
+                    clearPriceFilter
+                  }
+                >
+
+                  {minPrice !== "" &&
+                    `$${minPrice}`}
+
+                  {minPrice !== "" &&
+                    maxPrice !== "" &&
+                    " - "}
+
+                  {maxPrice !== "" &&
+                    `$${maxPrice}`}
+
+                  <span>
+                    ×
+                  </span>
+
+                </button>
+              )}
+
+              {/* NORMAL ACTIVE FILTERS */}
 
               {Object.entries(
                 selectedFilters
               ).flatMap(
-                ([filterName, values]) =>
+                ([
+                  filterName,
+                  values,
+                ]) =>
                   values.map(
                     (value) => (
                       <button
@@ -740,11 +1400,13 @@ export default function ProductsAndFilters() {
                           )
                         }
                       >
+
                         {value}
 
                         <span>
                           ×
                         </span>
+
                       </button>
                     )
                   )
@@ -753,13 +1415,16 @@ export default function ProductsAndFilters() {
             </div>
           )}
 
-
-          {/* FILTER GROUPS */}
+          {/* =================================================
+              FILTER GROUPS
+          ================================================= */}
 
           <div className="filter-groups">
 
             {FILTER_ORDER.map(
-              (filterName) => {
+              (
+                filterName
+              ) => {
 
                 const options =
                   availableFilters[
@@ -768,7 +1433,8 @@ export default function ProductsAndFilters() {
 
                 if (
                   !options ||
-                  options.length === 0
+                  options.length ===
+                    0
                 ) {
                   return null;
                 }
@@ -780,7 +1446,9 @@ export default function ProductsAndFilters() {
 
                 return (
                   <div
-                    key={filterName}
+                    key={
+                      filterName
+                    }
                     className="filter-group"
                   >
 
@@ -790,11 +1458,13 @@ export default function ProductsAndFilters() {
                         {
                           FILTER_LABELS[
                             filterName
-                          ] || filterName
+                          ] ||
+                          filterName
                         }
                       </h3>
 
-                      {selected.length > 0 && (
+                      {selected.length >
+                        0 && (
                         <button
                           type="button"
                           onClick={() =>
@@ -810,11 +1480,12 @@ export default function ProductsAndFilters() {
 
                     </div>
 
-
                     <div className="filter-options">
 
                       {options.map(
-                        (option) => {
+                        (
+                          option
+                        ) => {
 
                           const value =
                             String(
@@ -828,7 +1499,9 @@ export default function ProductsAndFilters() {
 
                           return (
                             <label
-                              key={value}
+                              key={
+                                value
+                              }
                               className={`filter-option ${
                                 checked
                                   ? "filter-option-selected"
@@ -840,7 +1513,9 @@ export default function ProductsAndFilters() {
 
                                 <input
                                   type="checkbox"
-                                  checked={checked}
+                                  checked={
+                                    checked
+                                  }
                                   onChange={() =>
                                     toggleFilter(
                                       filterName,
@@ -856,7 +1531,9 @@ export default function ProductsAndFilters() {
                               </div>
 
                               <span className="option-count">
-                                {option.count}
+                                {
+                                  option.count
+                                }
                               </span>
 
                             </label>
@@ -875,16 +1552,18 @@ export default function ProductsAndFilters() {
 
         </aside>
 
-
         {/* =================================================
             PRODUCT AREA
         ================================================= */}
 
         <main className="product-area">
 
-          {/* ACTIVE FILTER SUMMARY */}
+          {/* =================================================
+              ACTIVE FILTER SUMMARY
+          ================================================= */}
 
-          {activeFilterCount > 0 && (
+          {activeFilterCount >
+            0 && (
             <div className="active-summary">
 
               <div className="active-summary-title">
@@ -893,10 +1572,43 @@ export default function ProductsAndFilters() {
 
               <div className="active-summary-list">
 
+                {/* PRICE SUMMARY */}
+
+                {priceFilterActive && (
+                  <button
+                    type="button"
+                    className="summary-chip"
+                    onClick={
+                      clearPriceFilter
+                    }
+                  >
+
+                    {minPrice !== "" &&
+                      `$${minPrice}`}
+
+                    {minPrice !== "" &&
+                      maxPrice !== "" &&
+                      " - "}
+
+                    {maxPrice !== "" &&
+                      `$${maxPrice}`}
+
+                    <span>
+                      ×
+                    </span>
+
+                  </button>
+                )}
+
+                {/* NORMAL FILTER SUMMARY */}
+
                 {Object.entries(
                   selectedFilters
                 ).flatMap(
-                  ([filterName, values]) =>
+                  ([
+                    filterName,
+                    values,
+                  ]) =>
                     values.map(
                       (value) => (
                         <button
@@ -910,11 +1622,13 @@ export default function ProductsAndFilters() {
                             )
                           }
                         >
+
                           {value}
 
                           <span>
                             ×
                           </span>
+
                         </button>
                       )
                     )
@@ -922,19 +1636,27 @@ export default function ProductsAndFilters() {
 
               </div>
 
-              <button
-                type="button"
-                className="summary-clear"
-                onClick={clearAllFilters}
-              >
-                Clear all
-              </button>
+              {/* CLEAR NORMAL FILTERS */}
+
+              {activeNormalFilterCount >
+                0 && (
+                <button
+                  type="button"
+                  className="summary-clear"
+                  onClick={
+                    clearAllFilters
+                  }
+                >
+                  Clear all
+                </button>
+              )}
 
             </div>
           )}
 
-
-          {/* LOADING */}
+          {/* =================================================
+              LOADING
+          ================================================= */}
 
           {loading && (
             <div className="updating-bar">
@@ -946,17 +1668,25 @@ export default function ProductsAndFilters() {
             </div>
           )}
 
+          {/* =================================================
+              PRODUCTS
+          ================================================= */}
 
-          {/* PRODUCTS */}
-
-          {products.length > 0 ? (
+          {products.length >
+          0 ? (
             <div className="product-grid">
 
               {products.map(
-                (product) => (
+                (
+                  product
+                ) => (
                   <ProductCard
-                    key={product.id}
-                    product={product}
+                    key={
+                      product.id
+                    }
+                    product={
+                      product
+                    }
                   />
                 )
               )}
@@ -978,10 +1708,17 @@ export default function ProductsAndFilters() {
                 to see more products.
               </p>
 
-              {activeFilterCount > 0 && (
+              {activeFilterCount >
+                0 && (
                 <button
                   type="button"
-                  onClick={clearAllFilters}
+                  onClick={() => {
+
+                    clearAllFilters();
+
+                    clearPriceFilter();
+
+                  }}
                   className="empty-clear-button"
                 >
                   Clear all filters
@@ -991,10 +1728,12 @@ export default function ProductsAndFilters() {
             </div>
           )}
 
+          {/* =================================================
+              PAGINATION
+          ================================================= */}
 
-          {/* PAGINATION */}
-
-          {data?.totalPages > 1 && (
+          {data?.totalPages >
+            1 && (
             <div className="pagination">
 
               <button
@@ -1004,7 +1743,9 @@ export default function ProductsAndFilters() {
                   loading
                 }
                 onClick={() =>
-                  goToPage(page - 1)
+                  goToPage(
+                    page - 1
+                  )
                 }
                 className="pagination-button"
               >
@@ -1022,7 +1763,9 @@ export default function ProductsAndFilters() {
                 {" "}of{" "}
 
                 <strong>
-                  {data.totalPages}
+                  {
+                    data.totalPages
+                  }
                 </strong>
 
               </div>
@@ -1035,11 +1778,14 @@ export default function ProductsAndFilters() {
                   loading
                 }
                 onClick={() =>
-                  goToPage(page + 1)
+                  goToPage(
+                    page + 1
+                  )
                 }
                 className="pagination-button"
               >
                 Next →
+
               </button>
 
             </div>
@@ -1058,7 +1804,9 @@ export default function ProductsAndFilters() {
 // PRODUCT CARD
 // =======================================================
 
-function ProductCard({ product }) {
+function ProductCard({
+  product,
+}) {
   const image =
     product.image ||
     product.images?.[0] ||
@@ -1090,25 +1838,30 @@ function ProductCard({ product }) {
 
       </div>
 
-
       {/* CONTENT */}
 
       <div className="product-content">
 
         <div className="product-brand">
+
           {product.brand ||
             "Unknown Brand"}
+
         </div>
 
         <h3 className="product-title">
+
           {product.model ||
             product.title ||
             "Tire"}
+
         </h3>
 
         {product.size && (
           <div className="product-size">
+
             {product.size}
+
           </div>
         )}
 
@@ -1116,8 +1869,10 @@ function ProductCard({ product }) {
 
           <div className="product-price">
 
-            {product.price !== undefined &&
-            product.price !== null ? (
+            {product.price !==
+              undefined &&
+            product.price !==
+              null ? (
               <>
                 $
                 {Number(
