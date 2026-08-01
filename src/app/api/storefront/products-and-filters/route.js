@@ -447,8 +447,9 @@ async function getVehicle(vehicleId) {
 
 
   return result._source;
-
+ // 
 }
+
 
 
 // ======================================================
