@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import "./ProductsAndFilters.css";
+import Link from "next/link";
 
 const API_URL = "/api/storefront/products-and-filters";
 
@@ -1687,6 +1688,7 @@ export default function ProductsAndFilters() {
                     product={
                       product
                     }
+                    vehicleId={vehicleId}
                   />
                 )
               )}
@@ -1806,6 +1808,7 @@ export default function ProductsAndFilters() {
 
 function ProductCard({
   product,
+  vehicleId
 }) {
   const image =
     product.image ||
@@ -1885,12 +1888,18 @@ function ProductCard({
 
           </div>
 
-          <button
-            type="button"
-            className="view-product-button"
-          >
-            View
-          </button>
+
+           <Link
+            href={'/frontend/product/'+product.handle+'/?vehicleId='+vehicleId || ''}
+           >
+              <button
+                type="button"
+                className="view-product-button"
+              >
+                View
+              </button>
+           </Link>
+
 
         </div>
 
