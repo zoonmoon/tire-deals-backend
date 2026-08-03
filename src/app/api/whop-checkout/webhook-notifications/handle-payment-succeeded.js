@@ -14,7 +14,7 @@ export async function handlePaymentSucceeded(
         const orderNumber =
             webhookData.metadata?.order_number;
 
-        
+
         if (!orderNumber) {
 
             throw new Error(
@@ -205,14 +205,13 @@ export async function handlePaymentSucceeded(
                     quantity = quantity - ?
 
                 WHERE id = ?
-
+                
                 `,
                 [
 
                     item.quantity,
 
                     item.tire_inventory_id
-
 
                 ]
             );

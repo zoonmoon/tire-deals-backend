@@ -10,12 +10,13 @@ export async function logPaymentEvent(
             provider,
             provider_event_id,
             provider_payment_id,
+            order_number,
             event_type,
             event_data
 
         )
 
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
 
         ON DUPLICATE KEY UPDATE
 
@@ -28,6 +29,8 @@ export async function logPaymentEvent(
             webhookData.id,
 
             webhookData.data.id,
+
+            webhookData.data.metadata?.order_number || null,
 
             webhookData.type,
 

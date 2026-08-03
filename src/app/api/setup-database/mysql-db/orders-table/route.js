@@ -528,9 +528,8 @@ export async function GET() {
             );
 
         `);
-
+            
         await connection.execute(`
-        
             CREATE TABLE payment_events (
 
                 id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -541,29 +540,38 @@ export async function GET() {
 
                 provider_payment_id VARCHAR(255) NOT NULL,
 
+                order_number VARCHAR(255) NULL,
+
                 event_type VARCHAR(100) NOT NULL,
 
                 event_data JSON NOT NULL,
 
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+
                 UNIQUE KEY unique_provider_event (
                     provider,
                     provider_event_id
                 ),
+
 
                 INDEX idx_provider_payment_id (
                     provider,
                     provider_payment_id
                 ),
 
+
+                INDEX idx_order_number (
+                    order_number
+                ),
+
+
                 INDEX idx_event_type (
                     event_type
                 )
 
             )
-
-        `)
+        `);
 
         // ============================================================
         // REFUNDS
