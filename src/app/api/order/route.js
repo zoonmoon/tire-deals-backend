@@ -73,7 +73,7 @@ export async function GET(){
 
                 },
 
-                
+
                 {
 
                     type: "shipping",
@@ -146,7 +146,7 @@ export async function GET(){
 //         tax_total: 32,
 //         grand_total: 927
 //     },
-
+// 
 //     items: [...]
 // }
 
