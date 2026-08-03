@@ -11,8 +11,9 @@ export async function POST(request) {
   const requestBodyText = await request.text();
   const headers = Object.fromEntries(request.headers);
   const webhookData = whopsdk.webhooks.unwrap(requestBodyText, { headers });
-  
 
+  
+  console.log("new event arrived")
   console.log(webhookData)
 
   // Handle the webhook event
@@ -24,6 +25,7 @@ export async function POST(request) {
   // Otherwise the webhook will be retried.
   return new Response("OK", { status: 200 });
 
+
 }
 
 
@@ -33,9 +35,9 @@ async function handlePaymentSucceeded(webhookData) {
   // In a real scenario, you might fetch user data, update a database, etc.
   console.log("[PAYMENT SUCCEEDED]", webhookData);
 
-  //  metadata: { order_id: 'order_4444' },
+  //  metadata: { order_number: 'ORD-1785723825551-18159' },
 
-  // webhookData.metadata.order_id 
+  // webhookData.metadata.order_number 
   
   // mark this order as paid :) okay
 

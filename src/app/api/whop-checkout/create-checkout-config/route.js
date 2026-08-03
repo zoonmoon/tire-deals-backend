@@ -18,7 +18,7 @@ export async function GET(){
                     plan_type: "one_time",
                 },
                 metadata: {
-                    order_number: "order_4444",
+                    order_number: "ORD-1785723825551-18159",
                 },
             }
         );
