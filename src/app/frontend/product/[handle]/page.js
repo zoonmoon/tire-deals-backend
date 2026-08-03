@@ -17,8 +17,8 @@ export default function ProductPage() {
 
   const [fitmentStatus,  setFitmentStatus] = useState(null);
 
-  // arjun 
-  
+  // arjun  
+    
   const [productLoading, setProductLoading] = useState(true);
   const [fitmentLoading, setFitmentLoading] = useState(false);
 
