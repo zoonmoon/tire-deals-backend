@@ -5,8 +5,6 @@ const client = new Whop({
 });
 
 
-
-
 export async function GET(){
 
     try{
@@ -20,7 +18,7 @@ export async function GET(){
                     plan_type: "one_time",
                 },
                 metadata: {
-                    order_id: "order_4444",
+                    order_number: "order_4444",
                 },
             }
         );
