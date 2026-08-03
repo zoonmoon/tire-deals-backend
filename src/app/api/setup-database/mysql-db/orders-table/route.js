@@ -3,6 +3,8 @@ import { MYSQL_CONFIG } from '../utils';
 
 export async function GET() {
 
+    return 
+    
     const connection = await mysql.createConnection(MYSQL_CONFIG);
 
     try {
@@ -36,7 +38,7 @@ export async function GET() {
         await connection.execute(`
             DROP TABLE IF EXISTS payment_events
         `);
-            
+
         // Old table from previous schema
 
         await connection.execute(`
