@@ -30,7 +30,7 @@ export async function handleWhopWebhook(
             );
 
         }
-
+        // 
    
         // Log every Whop event
         await logPaymentEvent(
