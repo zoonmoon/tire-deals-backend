@@ -33,6 +33,10 @@ export async function GET() {
             DROP TABLE IF EXISTS payments
         `);
 
+        await connection.execute(`
+            DROP TABLE IF EXISTS payment_events
+        `);
+            
         // Old table from previous schema
 
         await connection.execute(`
@@ -407,7 +411,7 @@ export async function GET() {
         //
         // ============================================================
         
-            
+
         await connection.execute(`
 
             CREATE TABLE payments (

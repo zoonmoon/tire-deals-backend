@@ -28,6 +28,7 @@ export async function createOrder(data) {
     );
 
     try {
+        // 
 
         // ============================================================
         // START TRANSACTION
@@ -222,7 +223,7 @@ export async function createOrder(data) {
                 }
                 
                 
-                
+
                 // ----------------------------------------------------
                 // Get current inventory
                 //
