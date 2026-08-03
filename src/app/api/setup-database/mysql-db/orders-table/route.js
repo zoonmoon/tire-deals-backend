@@ -382,7 +382,13 @@ export async function GET() {
 
                     REFERENCES orders(id)
 
-                    ON DELETE CASCADE
+                    ON DELETE CASCADE,
+
+
+                FOREIGN KEY (tire_inventory_id)
+                    REFERENCES tire_inventory(id)
+                    ON DELETE SET NULL
+
 
             );
 

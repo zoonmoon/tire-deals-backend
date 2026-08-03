@@ -51,7 +51,7 @@ export async function GET(){
 
                     type: "product",
 
-                    tire_inventory_id: 12345,
+                    tire_inventory_id: 5,
 
                     quantity: 2,
 
@@ -65,15 +65,15 @@ export async function GET(){
 
                     type: "product",
 
-                    tire_inventory_id: 67890,
+                    tire_inventory_id: 9,
 
-                    quantity: 2,
+                    quantity: 1,
 
                     selected_vehicle: null
 
                 },
 
-
+                
                 {
 
                     type: "shipping",
@@ -113,6 +113,14 @@ export async function GET(){
         return new Response(JSON.stringify(order))
 
     }catch(error){
+
+
+        return new Response(
+            JSON.stringify({
+                success: false, 
+                message: error.message
+            })
+        )
 
     }
 

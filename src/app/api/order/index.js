@@ -1,6 +1,6 @@
 
 import mysql from "mysql2/promise";
-import { MYSQL_CONFIG } from "../utils";
+import { MYSQL_CONFIG } from "../setup-database/mysql-db/utils";
 
 
 /**
@@ -203,13 +203,11 @@ export async function createOrder(data) {
 
             }
 
-
             // ========================================================
             // PRODUCT LINE ITEM
             // ========================================================
 
             if (type === "product") {
-
 
                 // ----------------------------------------------------
                 // Product must have inventory ID
@@ -222,8 +220,9 @@ export async function createOrder(data) {
                     );
 
                 }
-
-
+                
+                
+                
                 // ----------------------------------------------------
                 // Get current inventory
                 //
@@ -264,7 +263,6 @@ export async function createOrder(data) {
                     ]
 
                 );
-
 
                 // ----------------------------------------------------
                 // Product not found
