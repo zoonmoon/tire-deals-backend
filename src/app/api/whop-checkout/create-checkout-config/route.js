@@ -4,10 +4,17 @@ const client = new Whop({
   apiKey: process.env.WHOP_API_KEY,
 });
 
+import { createOrderForWhopSession } from "./create_order";
 
 export async function GET(){
 
     try{
+        
+        let order  = await createOrderForWhopSession() 
+
+        if(!order.orderNumber){
+            throw new Error("failed to create order") 
+        }
         
         const checkoutConfig = await client.checkoutConfigurations.create(
             {
@@ -18,7 +25,7 @@ export async function GET(){
                     plan_type: "one_time",
                 },
                 metadata: {
-                    order_number: "ORD-1785723825551-18159",
+                    order_number: order.orderNumber,
                 },
             }
         );
@@ -29,9 +36,9 @@ export async function GET(){
         );
 
     }catch(error){
-    
+        
         console.log(error)
-    
+        
         return new Response("Internal Server Error", {status: 500});
     
     }

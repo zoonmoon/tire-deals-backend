@@ -406,8 +406,8 @@ export async function GET() {
         // Payment attempt 2 -> paid
         //
         // ============================================================
-
-
+        
+            
         await connection.execute(`
 
             CREATE TABLE payments (
@@ -528,7 +528,7 @@ export async function GET() {
             );
 
         `);
-            
+         
         await connection.execute(`
             CREATE TABLE payment_events (
 
