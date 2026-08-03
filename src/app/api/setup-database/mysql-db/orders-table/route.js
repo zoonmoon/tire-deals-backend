@@ -407,6 +407,7 @@ export async function GET() {
         //
         // ============================================================
 
+
         await connection.execute(`
 
             CREATE TABLE payments (
@@ -416,9 +417,9 @@ export async function GET() {
                 order_id BIGINT UNSIGNED NOT NULL,
 
 
-                -- ====================================================
+                -- ============================================================
                 -- PAYMENT PROVIDER
-                -- ====================================================
+                -- ============================================================
 
                 -- Example:
                 --
@@ -429,16 +430,24 @@ export async function GET() {
                 provider VARCHAR(50) NOT NULL,
 
 
-                -- ====================================================
-                -- PAYMENT PROVIDER TRANSACTION ID
-                -- ====================================================
+                -- ============================================================
+                -- PROVIDER PAYMENT ID
+                --
+                -- The payment ID returned by the payment provider.
+                --
+                -- Whop example:
+                -- pay_hx1HIt2ZjDEN2i
+                --
+                -- This is NOT our internal MySQL payment ID.
+                -- Our internal ID is the "id" column above.
+                -- ============================================================
 
-                transaction_id VARCHAR(255) NULL,
+                payment_id VARCHAR(255) NOT NULL,
 
 
-                -- ====================================================
+                -- ============================================================
                 -- PAYMENT AMOUNT
-                -- ====================================================
+                -- ============================================================
 
                 amount DECIMAL(12, 2)
                     NOT NULL DEFAULT 0.00,
@@ -448,9 +457,9 @@ export async function GET() {
                     NOT NULL DEFAULT 'USD',
 
 
-                -- ====================================================
+                -- ============================================================
                 -- PAYMENT STATUS
-                -- ====================================================
+                -- ============================================================
 
                 status VARCHAR(50)
                     NOT NULL DEFAULT 'pending',
@@ -465,9 +474,9 @@ export async function GET() {
                 */
 
 
-                -- ====================================================
+                -- ============================================================
                 -- TIMESTAMPS
-                -- ====================================================
+                -- ============================================================
 
                 created_at TIMESTAMP
                     DEFAULT CURRENT_TIMESTAMP,
@@ -477,20 +486,38 @@ export async function GET() {
                     ON UPDATE CURRENT_TIMESTAMP,
 
 
-                -- ====================================================
+                -- ============================================================
                 -- INDEXES
-                -- ====================================================
+                -- ============================================================
 
                 INDEX idx_order_id (order_id),
-
-                INDEX idx_transaction_id (transaction_id),
 
                 INDEX idx_status (status),
 
 
-                -- ====================================================
+                -- ============================================================
+                -- IDEMPOTENCY
+                --
+                -- The same provider payment can only exist once.
+                --
+                -- Example:
+                --
+                -- provider = whop
+                -- payment_id = pay_hx1HIt2ZjDEN2i
+                --
+                -- If Whop sends the same payment event multiple times,
+                -- the same payment cannot be inserted twice.
+                -- ============================================================
+
+                UNIQUE KEY unique_provider_payment (
+                    provider,
+                    payment_id
+                ),
+
+
+                -- ============================================================
                 -- FOREIGN KEY
-                -- ====================================================
+                -- ============================================================
 
                 FOREIGN KEY (order_id)
 
@@ -502,6 +529,41 @@ export async function GET() {
 
         `);
 
+        await connection.execute(`
+        
+            CREATE TABLE payment_events (
+
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+                provider VARCHAR(50) NOT NULL,
+
+                provider_event_id VARCHAR(255) NOT NULL,
+
+                provider_payment_id VARCHAR(255) NOT NULL,
+
+                event_type VARCHAR(100) NOT NULL,
+
+                event_data JSON NOT NULL,
+
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                UNIQUE KEY unique_provider_event (
+                    provider,
+                    provider_event_id
+                ),
+
+                INDEX idx_provider_payment_id (
+                    provider,
+                    provider_payment_id
+                ),
+
+                INDEX idx_event_type (
+                    event_type
+                )
+
+            )
+
+        `)
 
         // ============================================================
         // REFUNDS

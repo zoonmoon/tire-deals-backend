@@ -1,6 +1,4 @@
 import { Whop } from "@whop/sdk";
-import { handleWhopWebhook } from ".";
-
 
 export const whopsdk = new Whop({
     apiKey: process.env.WHOP_API_KEY,
@@ -18,8 +16,10 @@ export async function POST(request) {
   console.log("new event arrived")
   console.log(webhookData)
 
-  await handleWhopWebhook(webhookData) 
-
+  // Handle the webhook event
+  if (webhookData.type === "payment.succeeded") {
+    await handlePaymentSucceeded(webhookData.data);
+  }
 
   // Make sure to return a 2xx status code quickly.
   // Otherwise the webhook will be retried.
@@ -29,3 +29,16 @@ export async function POST(request) {
 }
 
 
+async function handlePaymentSucceeded(webhookData) {
+
+  // This is a placeholder for a potentially long-running operation.
+  // In a real scenario, you might fetch user data, update a database, etc.
+  console.log("[PAYMENT SUCCEEDED]", webhookData);
+
+  //  metadata: { order_number: 'ORD-1785723825551-18159' },
+
+  // webhookData.metadata.order_number 
+  
+  // mark this order as paid :) okay
+
+}
