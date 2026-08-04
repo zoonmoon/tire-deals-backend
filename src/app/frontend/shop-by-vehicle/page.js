@@ -508,7 +508,7 @@ export default function ShopByVehicleTest() {
     }
 
     window.location.href =
-      `/frontend/product-grid-and-filters?vehicleId=${encodeURIComponent(
+      `/frontend/product-grid-and-filters?submodel=${encodeURIComponent(
         selectedSubmodel
       )}`;
 
