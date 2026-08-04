@@ -182,7 +182,7 @@ export async function POST(
             FROM refunds
 
             WHERE payment_id = ?
-            
+
             AND status IN (
                 'pending',
                 'processing',
@@ -315,7 +315,7 @@ export async function POST(
                 payment.order_id,
 
                 payment.id,
-
+                
                 refundAmount,
 
                 payment.currency,
@@ -331,7 +331,7 @@ export async function POST(
 
 
         // ============================================================
-        // RESPONSE
+        // RESPONSE --
         // ============================================================
 
         return new Response(
