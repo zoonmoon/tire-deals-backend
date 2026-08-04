@@ -2,13 +2,11 @@
 import mysql from "mysql2/promise";
 import Whop from "@whop/sdk";
 
-import { MYSQL_CONFIG } from "../../../setup-database/mysql-db/utils";
-
+import { MYSQL_CONFIG } from "@/app/api/setup-database/mysql-db/utils";
 
 const whopClient = new Whop({
     apiKey: process.env.WHOP_API_KEY,
 });
-
 
 export async function POST(
     request,
