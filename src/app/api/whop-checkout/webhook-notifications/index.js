@@ -31,14 +31,48 @@ export async function handleWhopWebhook(
 
         }
         
+
+        // ============================================================
+        // REFUND CREATED
+        // ============================================================
+
+        if (
+            webhookData.type ===
+            "refund.created"
+        ) {
+
+            await handleRefundCreated(
+                connection,
+                webhookData.data
+            );
+
+        }
+
+
         // 
         
-        // Log every Whop event
-        await logPaymentEvent(
-            connection,
-            webhookData
-        );
+        if (
+            webhookData.type?.startsWith("payment.")
+        ) {
 
+            await logPaymentEvent(
+                connection,
+                webhookData
+            );
+
+        }
+
+
+        if (
+            webhookData.type?.startsWith("refund.")
+        ) {
+
+            await logAllRefundEvents(
+                connection,
+                webhookData
+            );
+
+        }
 
 
     } finally {
