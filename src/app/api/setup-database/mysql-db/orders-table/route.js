@@ -715,7 +715,11 @@ export async function GET() {
                     REFERENCES orders(id)
 
                     ON DELETE CASCADE,
-
+                
+                UNIQUE KEY unique_provider_refund (
+                    provider,
+                    provider_refund_id
+                ),
 
                 FOREIGN KEY (payment_id)
 

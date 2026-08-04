@@ -233,7 +233,7 @@ export default function ProductsAndFilters() {
       // =================================================
 
       params.set(
-        "vehicleId",
+        "submodel",
         vehicleId
       );
 

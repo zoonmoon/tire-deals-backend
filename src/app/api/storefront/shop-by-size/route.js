@@ -19,7 +19,7 @@ const GLOBAL_INVENTORY_FILTERS=  [
       status: "active"
     }
   },
-
+  
 ]
 
 function getNumber(value) {

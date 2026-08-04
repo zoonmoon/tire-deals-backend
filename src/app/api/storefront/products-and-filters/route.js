@@ -1132,9 +1132,9 @@ export async function GET(request) {
     const vehicleId =
 
       searchParams.get(
-        "vehicleId"
+        "submodel"
       );
-
+      
 
     if (!vehicleId) {
 
