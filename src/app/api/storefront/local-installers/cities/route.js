@@ -57,7 +57,7 @@ const getInstallerLocations = unstable_cache(
   ["all-installers-locations"],
 
   {
-    revalidate: 60 * 60 * 24 * 5,
+    revalidate: 60 * 60 * 24 * 115,
   }
 );
 
