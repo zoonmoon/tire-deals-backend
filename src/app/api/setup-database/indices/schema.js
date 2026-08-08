@@ -771,86 +771,145 @@ export const allVehiclesSchema = {
 
 
 
-      
-export const categoriesSchema = {
-        mappings: {
-          properties: {
-            bigcommerce_id: { type: "keyword" },
-            bigcommerce_parent_id: { type: "keyword" },
-            is_visible: { type: "boolean" },
-            name: {type: "keyword"},
-            image_url: {type: "keyword"},
-            sort_order: {type: "integer"},
-            url: {type: "text"}
-          },
-        },
+export const localInstallersSchema = {
+  mappings: {
+    properties: {
+      // =========================
+      // IDENTITY
+      // =========================
+
+      id: {
+        type: "keyword"
+      },
+
+      // =========================
+      // SHOP SEARCH
+      // =========================
+
+      company_name: {
+        type: "text"
+      },
+
+      // =========================
+      // ADDRESS / ZIP SEARCH
+      // =========================
+
+      address_line1: {
+        type: "text"
+      },
+
+      address_line2: {
+        type: "text"
+      },
+
+      city: {
+        type: "keyword"
+      },
+
+      state: {
+        type: "keyword"
+      },
+
+      zip: {
+        type: "keyword"
+      },
+
+      // =========================
+      // GEO / DISTANCE SEARCH
+      // =========================
+
+      location: {
+        type: "geo_point"
+      },
+
+      // =========================
+      // RATING
+      // =========================
+
+      rating: {
+        type: "float"
+      },
+
+      review_count: {
+        type: "integer"
+      },
+
+      // =========================
+      // INSTALLER TYPE / FILTERS
+      // =========================
+
+      is_mobile_install: {
+        type: "boolean"
+      },
+
+      is_certified: {
+        type: "boolean"
+      },
+
+      is_top_shop: {
+        type: "boolean"
+      },
+
+      is_sponsored: {
+        type: "boolean"
+      },
+
+      authorised_installer: {
+        type: "boolean"
+      },
+
+      // =========================
+      // RIM COMPATIBILITY
+      // =========================
+
+      min_rim_size: {
+        type: "integer"
+      },
+
+      max_rim_size: {
+        type: "integer"
+      },
+
+      // =========================
+      // PRODUCT / VEHICLE TYPE
+      // =========================
+
+      installer_product_sub_types: {
+        type: "keyword"
+      },
+
+      // =========================
+      // INSTALLATION PRICE
+      // =========================
+
+      installation_price: {
+        type: "integer"
+      },
+
+      installation_sale_price: {
+        type: "integer"
+      },
+
+      installation_4_tires_sale_price: {
+        type: "integer"
+      },
+
+      installation_cost_for_4_tires_in_cents: {
+        type: "integer"
+      },
+
+      saving_cost: {
+        type: "integer"
+      },
+
+      // =========================
+      // EVERYTHING ELSE
+      // =========================
+
+      raw: {
+        type: "object",
+        enabled: false
       }
-
-export const fitmentDataSchema = {
-  mappings: {
-    properties: {
-      id: { type: "keyword" },
-      
-      product_id: {type: "keyword"},
-
-      year: { type: "integer" },
-
-      make: { type: "keyword" },
-      model: { type: "keyword" },
-      vehicle_type: { type: "keyword" },
-      
-      notes: { type: "text" }
     }
   }
 };
-
-export const turn14FitmentDataSchema = {
-  mappings: {
-    properties: {
-      item_id: { type: "keyword" },
-      t14_part_number: {type: "keyword"},
-      mfr_part_number: { type: "keyword" },
-      brand: { type: "keyword" },
-      fitment_info: { type: "text" }
-    }
-  }
-};
-
-export const makeModelVehicleTypeSchema = {
-  mappings: {
-    properties: {
-      make: { type: "keyword" },
-      model: {type: "keyword"},
-      vehicle_type: { type: "keyword" },
-    }
-  }
-};
-
-export const sparkShippingProductsSchema = {
-  mappings: {
-    properties: {
-      id: { type: "keyword" },
-      wps_item_id: { "type": "keyword" },
-      last_updated_at: { "type": "date" },
-      vendor_skus_count: { "type": "integer" },
-      vendor_skus: {
-        "type": "nested",
-        "properties": {
-          "brand": { "type": "keyword" },
-          "vendor_name": { "type": "keyword" },
-          "vendor_sku": { "type": "keyword" },
-          "vendor_sku": { "type": "keyword" },
-          "vendor_part_number": { "type": "keyword" },
-        }
-      }, 
-    }
-  }
-}
-export const wpsBrandsSchema = {
-  mappings: {
-    properties: {
-      brand_id: { type: "keyword" },
-      brand_name: { "type": "keyword" }
-    }
-  }
-}
