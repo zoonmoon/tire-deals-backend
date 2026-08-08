@@ -60,7 +60,7 @@ const getInstallerLocations = unstable_cache(
     revalidate: 60 * 60 * 24 * 115,
   }
 );
-// 
+// //
 export async function GET() {
   try {
     const cities =
