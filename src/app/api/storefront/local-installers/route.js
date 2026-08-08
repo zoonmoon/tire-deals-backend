@@ -20,6 +20,9 @@ export async function GET(request) {
     const zip =
       searchParams.get("zip")?.trim();
 
+    const shopName =
+    searchParams.get("shop_name")?.trim();
+
 
     const isMobileInstallParam =
     searchParams.get("is_mobile_install");
@@ -118,6 +121,14 @@ export async function GET(request) {
     });
     }
 
+
+    if (shopName) {
+    filters.push({
+        match_phrase: {
+        company_name: shopName,
+        },
+    });
+    }
 
 
 
