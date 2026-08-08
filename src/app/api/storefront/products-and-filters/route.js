@@ -1138,28 +1138,31 @@ export async function GET(request) {
 
     if (!vehicleId) {
 
-      return NextResponse.json(
+      // return NextResponse.json(
 
-        {
+      //   {
 
-          success:
-            false,
+      //     success:
+      //       false,
 
-          error:
-            "vehicleId is required",
+      //     error:
+      //       "vehicleId is required",
 
-        },
+      //   },
 
-        {
+      //   {
 
-          status:
-            400,
+      //     status:
+      //       400,
 
-        }
+      //   }
 
-      );
+      // );
 
     }
+
+
+
 
 
     // ==================================================
@@ -1297,122 +1300,130 @@ export async function GET(request) {
     // GET VEHICLE
     // ==================================================
 
-    const vehicle =
+    let vehicle = null;
+
+    let vehicleFitments = [];
+
+    let vehicleFitmentQuery = null;
+
+
+    if (vehicleId) {
+
+      vehicle =
 
       await getVehicle(
         vehicleId
       );
 
+      if (!vehicle) {
 
-    if (!vehicle) {
+        return NextResponse.json(
 
-      return NextResponse.json(
+          {
 
-        {
+            success:
+              false,
 
-          success:
-            false,
+            error:
+              "Vehicle not found",
 
-          error:
-            "Vehicle not found",
+          },
 
-        },
+          {
 
-        {
+            status:
+              404,
 
-          status:
-            404,
+          }
 
-        }
+        );
 
-      );
+      }
 
-    }
+      // ==================================================
+      // VEHICLE FITMENTS
+      // ==================================================
+      //
+      // Only:
+      //
+      // fitments
+      // optional_fitments
+      //
+      // NOT plus_sizes
+      //
+      // ==================================================
 
-
-    // ==================================================
-    // VEHICLE FITMENTS
-    // ==================================================
-    //
-    // Only:
-    //
-    // fitments
-    // optional_fitments
-    //
-    // NOT plus_sizes
-    //
-    // ==================================================
-
-    const vehicleFitments =
+      vehicleFitments =
 
       extractVehicleFitments(
         vehicle
       );
 
 
-    // ==================================================
-    // VEHICLE COMPATIBILITY QUERY
-    // ==================================================
+      // ==================================================
+      // VEHICLE COMPATIBILITY QUERY
+      // ==================================================
 
-    const vehicleFitmentQuery =
+      vehicleFitmentQuery =
 
       buildVehicleFitmentQuery(
         vehicleFitments
       );
 
-
-    if (!vehicleFitmentQuery) {
-
-      return NextResponse.json({
-
-        success:
-          true,
-
-        vehicle: {
-
-          id:
-            vehicle.id,
-
-          year:
-            vehicle.year,
-
-          make:
-            vehicle.make,
-
-          model:
-            vehicle.model,
-
-          submodel:
-            vehicle.submodel,
-
-          body:
-            vehicle.body,
-
-          doors:
-            vehicle.doors,
-
-        },
-
-        vehicleFitments,
-
-        tires: [],
-
-        total: 0,
-
-        page,
-
-        limit,
-
-        totalPages: 0,
-
-        appliedFilters:
-          appliedFilters,
-
-        filters: {},
-
-      });
-
     }
+
+    // if (!vehicleFitmentQuery) {
+
+    //   return NextResponse.json({
+
+    //     success:
+    //       true,
+
+    //     vehicle: {
+
+    //       id:
+    //         vehicle.id,
+
+    //       year:
+    //         vehicle.year,
+
+    //       make:
+    //         vehicle.make,
+
+    //       model:
+    //         vehicle.model,
+
+    //       submodel:
+    //         vehicle.submodel,
+
+    //       body:
+    //         vehicle.body,
+
+    //       doors:
+    //         vehicle.doors,
+
+    //     },
+
+    //     vehicleFitments,
+
+    //     tires: [],
+
+    //     total: 0,
+
+    //     page,
+
+    //     limit,
+
+    //     totalPages: 0,
+
+    //     appliedFilters:
+    //       appliedFilters,
+
+    //     filters: {},
+
+    //   });
+
+    // }
 
 
     // ==================================================
@@ -1715,30 +1726,20 @@ export async function GET(request) {
 
       // Vehicle
 
-      vehicle: {
 
-        id:
-          vehicle.id,
 
-        year:
-          vehicle.year,
+      vehicle: vehicle
+        ? {
+            id: vehicle.id,
+            year: vehicle.year,
+            make: vehicle.make,
+            model: vehicle.model,
+            submodel: vehicle.submodel,
+            body: vehicle.body,
+            doors: vehicle.doors,
+          }
+        : null,
 
-        make:
-          vehicle.make,
-
-        model:
-          vehicle.model,
-
-        submodel:
-          vehicle.submodel,
-
-        body:
-          vehicle.body,
-
-        doors:
-          vehicle.doors,
-
-      },
 
       // Vehicle fitments
 
