@@ -5,7 +5,7 @@ import { ZIP_COORDINATES_VS_LAT_LON } from "../../synchronize/local-installers/z
 
 const INDEX_NAME = "all_installers";
 
-const DEFAULT_RADIUS = "25mi";
+const DEFAULT_RADIUS = "10mi";
 const DEFAULT_SIZE = 500;
 
 export async function GET(request) {
