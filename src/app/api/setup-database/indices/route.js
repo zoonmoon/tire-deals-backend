@@ -18,6 +18,8 @@ export async function GET() {
         body: rebatesSchema,
       });
 
+      // 
+
       console.log("rebatesSchema index created ✅");
 
     } else {
