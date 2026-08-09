@@ -475,7 +475,7 @@ export async function GET(
 
     const vehicleId =
       searchParams.get(
-        "vehicleId"
+        "submodel"
       );
 
 
@@ -485,7 +485,7 @@ export async function GET(
         {
           success: false,
           error:
-            "vehicleId is required",
+            "submodel is required",
         },
         {
           status: 400,
