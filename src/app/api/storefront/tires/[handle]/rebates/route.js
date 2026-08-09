@@ -358,8 +358,8 @@ export async function GET(request, { params }) {
 
       rebates,
     });
-    
-    // 
+
+    //  // 
 
   } catch (error) {
     console.error(
