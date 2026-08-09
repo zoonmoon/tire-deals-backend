@@ -1,12 +1,31 @@
 // app/api/setup/route.js
 
-import { allTiresSchema , allVehiclesSchema, localInstallersSchema } from "./schema";
+import { allTiresSchema , allVehiclesSchema, localInstallersSchema, rebatesSchema } from "./schema";
 import openSearchClient from "../_lib/route";
 
 export async function GET() {
    
   try {
 
+
+    const rebates = await openSearchClient.indices.exists({ index: "rebates" });
+
+    if (!rebates.body) {
+
+      await openSearchClient.indices.create({
+        index: "rebates",
+        body: rebatesSchema,
+      });
+
+      console.log("rebatesSchema index created ✅");
+
+    } else {
+
+      console.log("rebatesSchema index already exists");
+
+    }
+
+    return
 
     const allInstallers = await openSearchClient.indices.exists({ index: "all_installers" });
 

@@ -913,3 +913,111 @@ export const localInstallersSchema = {
     }
   }
 };
+
+export const rebatesSchema = {
+  mappings: {
+    properties: {
+      // =========================
+      // IDENTITY
+      // =========================
+
+      id: {
+        type: "keyword"
+      },
+
+      product_code: {
+        type: "keyword"
+      },
+
+      brand: {
+        type: "keyword"
+      },
+
+      pattern: {
+        type: "keyword"
+      },
+
+      display_name: {
+        type: "keyword"
+      },
+
+      // =========================
+      // NORMALIZED MATCHING
+      // =========================
+
+      normalized_product_code: {
+        type: "keyword"
+      },
+
+      normalized_brand: {
+        type: "keyword"
+      },
+
+      // =========================
+      // REBATE
+      // =========================
+
+      amount: {
+        type: "scaled_float",
+        scaling_factor: 100
+      },
+
+      amount_two: {
+        type: "scaled_float",
+        scaling_factor: 100
+      },
+
+      amount_reason: {
+        type: "text"
+      },
+
+      amount_two_reason: {
+        type: "text"
+      },
+
+      qty_required: {
+        type: "integer"
+      },
+
+      description_preview: {
+        type: "text"
+      },
+
+      // =========================
+      // DATES
+      // =========================
+
+      start_date: {
+        type: "date"
+      },
+
+      end_date: {
+        type: "date"
+      },
+
+      // =========================
+      // ASSETS
+      // =========================
+
+      form_url: {
+        type: "keyword",
+        index: false
+      },
+
+      preview_image_url: {
+        type: "keyword",
+        index: false
+      },
+
+      banner_image_url: {
+        type: "keyword",
+        index: false
+      },
+
+      horizontal_image_url: {
+        type: "keyword",
+        index: false
+      }
+    }
+  }
+};
