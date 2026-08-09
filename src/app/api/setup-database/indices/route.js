@@ -7,6 +7,7 @@ export async function GET() {
    
   try {
 
+    // 
 
     const rebates = await openSearchClient.indices.exists({ index: "rebates" });
 

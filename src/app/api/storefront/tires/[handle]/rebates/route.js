@@ -342,7 +342,7 @@ export async function GET(request, { params }) {
         normalized_part_number:
           normalizedPartNumber,
       },
-
+      
       matching: {
         normalized_brand:
           normalizedBrand,
