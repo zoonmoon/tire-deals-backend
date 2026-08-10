@@ -152,6 +152,7 @@ export async function POST(request) {
             return Response.json(
                 {
                     success: false,
+                    is_logged_in: false, 
                     message: 'Invalid email or password.'
                 },
                 {
@@ -200,6 +201,7 @@ export async function POST(request) {
 
         return Response.json({
             success: true,
+            is_logged_in: true, 
             message: 'Login successful.'
         });
 
