@@ -18,12 +18,14 @@
     "@whop/checkout": "^0.3.0",
     "@whop/sdk": "^0.0.40",
     "basic-ftp": "^6.0.2",
+    "bcryptjs": "^3.0.3",
     "csv-parse": "^7.0.1",
     "mysql2": "^3.23.1",
     "next": "16.2.10",
     "pdf-lib": "^1.17.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^6.18.1"
   },
   "devDependencies": {
     "babel-plugin-react-compiler": "1.0.0"
