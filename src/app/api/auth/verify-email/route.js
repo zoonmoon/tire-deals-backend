@@ -3,6 +3,8 @@ import crypto from 'crypto';
 
 import { MYSQL_CONFIG } from '../../setup-database/mysql-db/utils';
 
+import { createAuthCookie } from '../utils/manage-cookie';
+
 export async function POST(request) {
 
     let connection;
@@ -264,6 +266,13 @@ export async function POST(request) {
             // --------------------------------------------------------
 
             await connection.commit();
+
+
+            await createAuthCookie({
+                id: customer.id,
+                email: customer.email
+            });
+
 
         } catch (transactionError) {
 

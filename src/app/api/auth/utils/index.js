@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { sendEmail } from '@/app/utils/email';
+import { sendEmail } from '@/app/api/utils/email';
 
 export function generateVerificationCode() {
 
