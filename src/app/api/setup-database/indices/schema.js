@@ -1021,3 +1021,66 @@ export const rebatesSchema = {
     }
   }
 };
+
+
+export const contactInquiriesSchema = {
+  mappings: {
+    properties: {
+      // =========================
+      // IDENTITY
+      // =========================
+
+      id: {
+        type: "keyword"
+      },
+
+      // =========================
+      // CONTACT
+      // =========================
+
+      name: {
+        type: "keyword"
+      },
+
+      email: {
+        type: "keyword"
+      },
+
+      phone: {
+        type: "keyword"
+      },
+
+      // =========================
+      // INQUIRY
+      // =========================
+
+      subject: {
+        type: "keyword"
+      },
+
+      message: {
+        type: "text"
+      },
+
+      // =========================
+      // STATUS
+      // =========================
+
+      status: {
+        type: "keyword"
+      },
+
+      // =========================
+      // DATES
+      // =========================
+
+      created_at: {
+        type: "date"
+      },
+
+      updated_at: {
+        type: "date"
+      }
+    }
+  }
+};

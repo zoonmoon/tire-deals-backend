@@ -4,6 +4,8 @@ import { MYSQL_CONFIG } from '../utils';
 
 export async function GET() {
 
+    return 
+
     const connection = await mysql.createConnection(MYSQL_CONFIG);
 
     try {
@@ -15,7 +17,7 @@ export async function GET() {
         await connection.execute(`
             DROP TABLE IF EXISTS customer_auth_tokens
         `);
-
+            
         await connection.execute(`
             DROP TABLE IF EXISTS customer_addresses
         `); 

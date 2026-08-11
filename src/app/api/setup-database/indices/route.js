@@ -1,6 +1,13 @@
 // app/api/setup/route.js
 
-import { allTiresSchema , allVehiclesSchema, localInstallersSchema, rebatesSchema } from "./schema";
+import { 
+  allTiresSchema , 
+  allVehiclesSchema, 
+  localInstallersSchema, 
+  rebatesSchema, 
+  contactInquiriesSchema
+
+} from "./schema";
 import openSearchClient from "../_lib/route";
 
 export async function GET() {
@@ -8,6 +15,31 @@ export async function GET() {
   try {
 
     // 
+
+
+
+    const contactUS = await openSearchClient.indices.exists({ index: "contact_us_inquiries" });
+
+    if (!contactUS.body) {
+
+      await openSearchClient.indices.create({
+        index: "contact_us_inquiries",
+        body: contactInquiriesSchema,
+      });
+
+      // 
+
+      console.log("contactInquiriesSchema index created ✅");
+
+    } else {
+
+      console.log("contactInquiriesSchema index already exists");
+
+    }
+
+    return 
+
+
 
     const rebates = await openSearchClient.indices.exists({ index: "rebates" });
 
