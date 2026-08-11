@@ -69,7 +69,7 @@ export async function POST(request) {
       message: message.trim(),
 
       status: "new",
-        
+
       created_at: now,
       updated_at: now
     };
@@ -111,7 +111,7 @@ export async function POST(request) {
       "Contact inquiry submission failed:",
       error
     );
-
+    
     return NextResponse.json(
       {
         success: false,

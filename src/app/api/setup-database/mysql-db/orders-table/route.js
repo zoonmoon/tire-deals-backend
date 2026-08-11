@@ -73,6 +73,19 @@ export async function GET() {
                 customer_email VARCHAR(255) NOT NULL,
 
 
+                -- ship_to_customer   
+                -- local_installer    
+                -- mobile_installer   
+                -- fedex_pickup       
+                -- delivery method can take above values
+                delivery_method VARCHAR(50) NOT NULL DEFAULT 'ship_to_customer',
+
+
+
+                -- it can be installer id if customer chooses local_installer
+                delivery_location_id VARCHAR(255) NULL,
+
+
                 -- ====================================================
                 -- ORDER STATUS
                 -- ====================================================
@@ -145,7 +158,7 @@ export async function GET() {
 
                 grand_total DECIMAL(12, 2)
                     NOT NULL DEFAULT 0.00,
-
+                
 
                 -- ====================================================
                 -- BILLING ADDRESS

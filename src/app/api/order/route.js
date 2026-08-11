@@ -44,7 +44,10 @@ export async function GET(){
 
             shipping_country: "US",
 
-
+            delivery_method: "ship_to_local_installer", 
+            
+            delivery_location_id: "74216",
+            
             items: [
 
                 {

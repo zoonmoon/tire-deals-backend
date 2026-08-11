@@ -1,7 +1,7 @@
 
 import mysql from "mysql2/promise";
 import { MYSQL_CONFIG } from "../setup-database/mysql-db/utils";
-
+import { DELIVERY_METHODS } from "./delivery_methods";
 
 /**
  * Create Order
@@ -95,6 +95,9 @@ export async function createOrder(data) {
 
             shipping_country = null,
 
+            delivery_method = 'ship_to_customer',
+
+            delivery_location_id = null , 
 
             // --------------------------------------------------------
             // ORDER ITEMS
@@ -105,6 +108,13 @@ export async function createOrder(data) {
         } = data;
 
 
+        if(!DELIVERY_METHODS.includes(delivery_method.trim())){
+            throw new Error(
+                `Delivery method is invalid. Supported values are ${DELIVERY_METHODS.join(' , ')}  `                   
+            )
+        }
+        
+        
         // ============================================================
         // BASIC VALIDATION
         // ============================================================
@@ -621,6 +631,8 @@ export async function createOrder(data) {
 
             INSERT INTO orders (
 
+               
+
                 order_number,
 
                 customer_id,
@@ -682,7 +694,11 @@ export async function createOrder(data) {
 
                 shipping_postcode,
 
-                shipping_country
+                shipping_country,
+
+                delivery_method, 
+                
+                delivery_location_id
 
             )
 
@@ -695,7 +711,10 @@ export async function createOrder(data) {
                 ?, ?, ?, ?, ?, ?, ?, ?, ?,
 
 
-                ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+
+                ?, ?
+
 
             )
 
@@ -764,7 +783,11 @@ export async function createOrder(data) {
 
                 shipping_postcode,
 
-                shipping_country
+                shipping_country,
+
+                delivery_method, 
+
+                delivery_location_id
 
             ]
 
