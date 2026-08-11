@@ -36,7 +36,7 @@ export async function createOrder(data) {
 
         await connection.beginTransaction();
 
-
+        
         // ============================================================
         // GET ORDER DATA
         // ============================================================
