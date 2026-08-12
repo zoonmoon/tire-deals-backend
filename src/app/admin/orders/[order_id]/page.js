@@ -46,8 +46,6 @@ export default function AdminOrderDetailsPage() {
 
     const [error, setError] = useState(null);
 
-
-
     const [
         fulfillDialogOpen,
         setFulfillDialogOpen
@@ -89,8 +87,35 @@ export default function AdminOrderDetailsPage() {
     ] = useState(false);
 
 
-const [cancellingFulfillmentId, setCancellingFulfillmentId] =
-    useState(null);
+
+    const [cancellingFulfillmentId, setCancellingFulfillmentId] =
+        useState(null);
+
+    const [deliveringFulfillmentId, setDeliveringFulfillmentId] =
+        useState(null);
+
+
+    const [trackingDialogOpen, setTrackingDialogOpen] =
+        useState(false);
+
+    const [trackingFulfillment, setTrackingFulfillment] =
+        useState(null);
+
+    const [trackingCarrier, setTrackingCarrier] =
+        useState('');
+
+    const [trackingService, setTrackingService] =
+        useState('');
+
+    const [trackingNumber, setTrackingNumber] =
+        useState('');
+
+    const [trackingUrl, setTrackingUrl] =
+        useState('');
+
+    const [updatingTracking, setUpdatingTracking] =
+        useState(false);
+
 
     // ============================================================
     // FETCH ORDER
@@ -569,121 +594,271 @@ const [cancellingFulfillmentId, setCancellingFulfillmentId] =
     // ============================================================
 
 
-// ============================================================
-// CANCEL FULFILLMENT
-// ============================================================
+    // ============================================================
+    // CANCEL FULFILLMENT
+    // ============================================================
 
-const handleCancelFulfillment = async (fulfillmentId) => {
+    const handleCancelFulfillment = async (fulfillmentId) => {
 
-    try {
+        try {
 
-        setError(null);
+            setError(null);
 
-        setCancellingFulfillmentId(
-            fulfillmentId
-        );
-
-
-        // ========================================================
-        // CANCEL FULFILLMENT
-        // ========================================================
-
-        const response =
-            await fetch(
-                `/api/admin/orders/${orderId}/fulfillments/${fulfillmentId}`,
-                {
-                    method: 'DELETE',
-
-                    credentials: 'include',
-
-                    cache: 'no-store',
-                }
+            setCancellingFulfillmentId(
+                fulfillmentId
             );
 
 
-        const data =
-            await response.json();
+            // ========================================================
+            // CANCEL FULFILLMENT
+            // ========================================================
+
+            const response =
+                await fetch(
+                    `/api/admin/orders/${orderId}/fulfillments/${fulfillmentId}`,
+                    {
+                        method: 'DELETE',
+
+                        credentials: 'include',
+
+                        cache: 'no-store',
+                    }
+                );
 
 
-        // ========================================================
-        // HANDLE ERROR
-        // ========================================================
+            const data =
+                await response.json();
 
-        if (
-            !response.ok ||
-            !data.success
-        ) {
 
-            throw new Error(
-                data?.message ||
+            // ========================================================
+            // HANDLE ERROR
+            // ========================================================
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data?.message ||
+                    'Unable to cancel fulfillment.'
+                );
+
+            }
+
+
+            // ========================================================
+            // REFRESH ORDER
+            // ========================================================
+
+            const refreshResponse =
+                await fetch(
+                    `/api/admin/orders/${orderId}`,
+                    {
+                        method: 'GET',
+
+                        credentials: 'include',
+
+                        cache: 'no-store',
+                    }
+                );
+
+
+            const refreshData =
+                await refreshResponse.json();
+
+
+            if (
+                !refreshResponse.ok ||
+                !refreshData.success
+            ) {
+
+                throw new Error(
+                    refreshData?.message ||
+                    'Fulfillment was cancelled, but the order could not be refreshed.'
+                );
+
+            }
+
+
+            setOrder(
+                refreshData.order
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'Cancel fulfillment error:',
+                error
+            );
+
+
+            setError(
+                error.message ||
                 'Unable to cancel fulfillment.'
             );
 
+
+        } finally {
+
+            setCancellingFulfillmentId(
+                null
+            );
+
+        }
+
+    };
+
+
+
+    // ============================================================
+    // MARK FULFILLMENT AS DELIVERED
+    // ============================================================
+
+
+    const handleMarkDelivered = async (fulfillmentId) => {
+
+        const confirmed = window.confirm(
+            'Are you sure you want to mark this fulfillment as delivered?'
+        );
+
+        // User clicked Cancel
+        if (!confirmed) {
+            return;
         }
 
 
-        // ========================================================
-        // REFRESH ORDER
-        // ========================================================
+        try {
 
-        const refreshResponse =
-            await fetch(
-                `/api/admin/orders/${orderId}`,
+            setDeliveringFulfillmentId(
+                fulfillmentId
+            );
+
+
+            const response = await fetch(
+                `/api/admin/orders/${orderId}/fulfillments/${fulfillmentId}`,
                 {
-                    method: 'GET',
+                    method: 'PATCH',
 
                     credentials: 'include',
 
-                    cache: 'no-store',
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        status: 'delivered',
+                    }),
                 }
             );
 
 
-        const refreshData =
-            await refreshResponse.json();
+            const data =
+                await response.json();
 
 
-        if (
-            !refreshResponse.ok ||
-            !refreshData.success
-        ) {
+            if (
+                !response.ok ||
+                !data.success
+            ) {
 
-            throw new Error(
-                refreshData?.message ||
-                'Fulfillment was cancelled, but the order could not be refreshed.'
+                throw new Error(
+                    data?.message ||
+                    'Unable to mark fulfillment as delivered.'
+                );
+
+            }
+
+
+            // ====================================================
+            // REFRESH ORDER
+            // ====================================================
+
+            const refreshResponse =
+                await fetch(
+                    `/api/admin/orders/${orderId}`,
+                    {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-store',
+                    }
+                );
+
+
+            const refreshData =
+                await refreshResponse.json();
+
+
+            if (
+                refreshResponse.ok &&
+                refreshData.success
+            ) {
+
+                setOrder(
+                    refreshData.order
+                );
+
+            }
+
+
+            toast.success(
+                'Fulfillment marked as delivered.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'Mark delivered error:',
+                error
+            );
+
+
+            toast.error(
+                error.message ||
+                'Unable to mark fulfillment as delivered.'
+            );
+
+
+        } finally {
+
+            setDeliveringFulfillmentId(
+                null
             );
 
         }
 
+    };
 
-        setOrder(
-            refreshData.order
+
+
+    const handleAddTracking = (fulfillment) => {
+
+        setTrackingFulfillment(
+            fulfillment
         );
 
-
-    } catch (error) {
-
-        console.error(
-            'Cancel fulfillment error:',
-            error
+        setTrackingCarrier(
+            fulfillment.carrier || ''
         );
 
-
-        setError(
-            error.message ||
-            'Unable to cancel fulfillment.'
+        setTrackingService(
+            fulfillment.service || ''
         );
 
-
-    } finally {
-
-        setCancellingFulfillmentId(
-            null
+        setTrackingNumber(
+            fulfillment.tracking_number || ''
         );
 
-    }
+        setTrackingUrl(
+            fulfillment.tracking_url || ''
+        );
 
-};
+        setTrackingDialogOpen(true);
+
+    };
 
 
 
@@ -1120,7 +1295,7 @@ const handleCancelFulfillment = async (fulfillmentId) => {
                                                     }
                                                 >
 
-                                                    Add Tracking
+                                                     Tracking Info
 
                                                 </Button>
 
@@ -1137,20 +1312,25 @@ const handleCancelFulfillment = async (fulfillmentId) => {
 
 
 
+
+
                                                         <Button
                                                             size="small"
                                                             variant="outlined"
                                                             color="success"
                                                             onClick={() =>
-                                                                handleMarkDelivered(
-                                                                    fulfillment.id
-                                                                )
+                                                                handleMarkDelivered(fulfillment.id)
+                                                            }
+                                                            disabled={
+                                                                deliveringFulfillmentId === fulfillment.id
                                                             }
                                                         >
-
-                                                            Mark Delivered
-
+                                                            {deliveringFulfillmentId === fulfillment.id
+                                                                ? 'Marking...'
+                                                                : 'Mark Delivered'}
                                                         </Button>
+
+                                         
 
                                         
 

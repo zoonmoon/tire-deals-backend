@@ -511,3 +511,479 @@ export async function DELETE(request, { params }) {
     }
 
 }
+
+
+// ============================================================
+// MARK FULFILLMENT AS DELIVERED
+// ============================================================
+
+export async function PATCH(request, { params }) {
+
+    let connection;
+
+    try {
+
+        // ========================================================
+        // ADMIN AUTHENTICATION
+        // ========================================================
+
+        const admin =
+            await getAuthenticatedAdmin();
+
+
+        if (!admin) {
+
+            return Response.json(
+                {
+                    success: false,
+                    message: 'Authentication required.',
+                },
+                {
+                    status: 401,
+                }
+            );
+
+        }
+
+
+        // ========================================================
+        // URL PARAMETERS
+        // ========================================================
+
+        const {
+            order_id,
+            fulfillment_id,
+        } = await params;
+
+
+        const orderId =
+            Number(order_id);
+
+        const fulfillmentId =
+            Number(fulfillment_id);
+
+
+        if (
+            !Number.isInteger(orderId) ||
+            orderId <= 0
+        ) {
+
+            return Response.json(
+                {
+                    success: false,
+                    message: 'Invalid order ID.',
+                },
+                {
+                    status: 400,
+                }
+            );
+
+        }
+
+
+        if (
+            !Number.isInteger(fulfillmentId) ||
+            fulfillmentId <= 0
+        ) {
+
+            return Response.json(
+                {
+                    success: false,
+                    message: 'Invalid fulfillment ID.',
+                },
+                {
+                    status: 400,
+                }
+            );
+
+        }
+
+
+        // ========================================================
+        // DATABASE CONNECTION
+        // ========================================================
+
+        connection =
+            await mysql.createConnection(
+                MYSQL_CONFIG
+            );
+
+
+        // ========================================================
+        // START TRANSACTION
+        // ========================================================
+
+        await connection.beginTransaction();
+
+
+        // ========================================================
+        // GET FULFILLMENT
+        // ========================================================
+
+        const [fulfillmentRows] =
+            await connection.execute(
+
+                `
+                    SELECT
+
+                        id,
+
+                        order_id,
+
+                        status,
+
+                        tracking_number
+
+                    FROM fulfillments
+
+                    WHERE id = ?
+
+                    AND order_id = ?
+
+                    FOR UPDATE
+                `,
+
+                [
+                    fulfillmentId,
+                    orderId,
+                ]
+
+            );
+
+
+        if (
+            fulfillmentRows.length === 0
+        ) {
+
+            await connection.rollback();
+
+            return Response.json(
+                {
+                    success: false,
+                    message: 'Fulfillment not found.',
+                },
+                {
+                    status: 404,
+                }
+            );
+
+        }
+
+
+        const fulfillment =
+            fulfillmentRows[0];
+
+
+        // ========================================================
+        // VALIDATE STATUS
+        // ========================================================
+
+        if (
+            fulfillment.status ===
+            'delivered'
+        ) {
+
+            await connection.rollback();
+
+            return Response.json(
+                {
+                    success: false,
+                    message:
+                        'Fulfillment is already delivered.',
+                },
+                {
+                    status: 400,
+                }
+            );
+
+        }
+
+
+        if (
+            fulfillment.status ===
+            'cancelled'
+        ) {
+
+            await connection.rollback();
+
+            return Response.json(
+                {
+                    success: false,
+                    message:
+                        'Cancelled fulfillments cannot be marked as delivered.',
+                },
+                {
+                    status: 400,
+                }
+            );
+
+        }
+
+
+        // ========================================================
+        // MARK AS DELIVERED
+        // ========================================================
+
+        await connection.execute(
+
+            `
+                UPDATE fulfillments
+
+                SET
+
+                    status = 'delivered',
+
+                    delivered_at =
+                        CURRENT_TIMESTAMP
+
+                WHERE id = ?
+
+                AND order_id = ?
+            `,
+
+            [
+                fulfillmentId,
+                orderId,
+            ]
+
+        );
+
+
+        // ========================================================
+        // CHECK ORDER FULFILLMENT STATUS
+        //
+        // If every product quantity has been fulfilled,
+        // mark the order as fulfilled.
+        // Otherwise keep it partially fulfilled.
+        // ========================================================
+
+        const [summaryRows] =
+            await connection.execute(
+
+                `
+                    SELECT
+
+                        oi.id,
+
+                        oi.quantity AS ordered_quantity,
+
+                        COALESCE(
+                            SUM(fi.quantity),
+                            0
+                        ) AS fulfilled_quantity
+
+                    FROM order_items oi
+
+                    LEFT JOIN fulfillment_items fi
+
+                        ON fi.order_item_id = oi.id
+
+                    LEFT JOIN fulfillments f
+
+                        ON f.id = fi.fulfillment_id
+
+                        AND f.order_id = ?
+
+                    WHERE oi.order_id = ?
+
+                    AND oi.type = 'product'
+
+                    GROUP BY
+
+                        oi.id,
+
+                        oi.quantity
+                `,
+
+                [
+                    orderId,
+                    orderId,
+                ]
+
+            );
+
+
+        let allFulfilled = true;
+
+        let anyFulfilled = false;
+
+
+        for (const row of summaryRows) {
+
+            const orderedQuantity =
+                Number(
+                    row.ordered_quantity
+                );
+
+            const fulfilledQuantity =
+                Number(
+                    row.fulfilled_quantity
+                );
+
+
+            if (
+                fulfilledQuantity > 0
+            ) {
+
+                anyFulfilled = true;
+
+            }
+
+
+            if (
+                fulfilledQuantity <
+                orderedQuantity
+            ) {
+
+                allFulfilled = false;
+
+            }
+
+        }
+
+
+        let fulfillmentStatus;
+
+
+        if (
+            allFulfilled &&
+            summaryRows.length > 0
+        ) {
+
+            fulfillmentStatus =
+                'fulfilled';
+
+        }
+        else if (anyFulfilled) {
+
+            fulfillmentStatus =
+                'partially_fulfilled';
+
+        }
+        else {
+
+            fulfillmentStatus =
+                'unfulfilled';
+
+        }
+
+
+        // ========================================================
+        // UPDATE ORDER
+        // ========================================================
+
+        await connection.execute(
+
+            `
+                UPDATE orders
+
+                SET fulfillment_status = ?
+
+                WHERE id = ?
+            `,
+
+            [
+                fulfillmentStatus,
+                orderId,
+            ]
+
+        );
+
+
+        // ========================================================
+        // COMMIT
+        // ========================================================
+
+        await connection.commit();
+
+
+        // ========================================================
+        // SUCCESS
+        // ========================================================
+
+        return Response.json(
+            {
+                success: true,
+
+                message:
+                    'Fulfillment marked as delivered.',
+
+                fulfillment: {
+
+                    id:
+                        fulfillmentId,
+
+                    status:
+                        'delivered',
+
+                    delivered_at:
+                        new Date(),
+
+                },
+
+                order: {
+
+                    id:
+                        orderId,
+
+                    fulfillment_status:
+                        fulfillmentStatus,
+
+                },
+
+            },
+            {
+                status: 200,
+            }
+        );
+
+
+    } catch (error) {
+
+        if (connection) {
+
+            try {
+
+                await connection.rollback();
+
+            } catch (rollbackError) {
+
+                console.error(
+                    'Mark delivered rollback failed:',
+                    rollbackError
+                );
+
+            }
+
+        }
+
+
+        console.error(
+            'Mark fulfillment delivered error:',
+            error
+        );
+
+
+        return Response.json(
+            {
+                success: false,
+                message:
+                    'Unable to mark fulfillment as delivered.',
+            },
+            {
+                status: 500,
+            }
+        );
+
+
+    } finally {
+
+        if (connection) {
+
+            await connection.end();
+
+        }
+
+    }
+
+}
