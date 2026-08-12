@@ -1,9 +1,9 @@
-
 import mysql from 'mysql2/promise';
 
 import { MYSQL_CONFIG } from '@/app/api/setup-database/mysql-db/utils';
 
 import { getAuthenticatedAdmin } from '../../auth/utils/manage-cookie';
+
 
 export async function GET(request, { params }) {
 
@@ -354,10 +354,25 @@ export async function GET(request, { params }) {
 
 
         // ============================================================
-        // SHIPMENTS
+        // FULFILLMENTS
+        //
+        // One fulfillment can contain multiple order items.
+        //
+        // Example:
+        //
+        // Fulfillment #1
+        //     Product A x2
+        //     Product B x3
+        //
+        // Fulfillment #2
+        //     Product A x1
+        //     Product C x1
+        //
+        // Each fulfillment has its own carrier, service,
+        // tracking number, etc.
         // ============================================================
 
-        const [shipments] = await connection.execute(
+        const [fulfillments] = await connection.execute(
             `
                 SELECT
 
@@ -365,15 +380,11 @@ export async function GET(request, { params }) {
 
                     order_id,
 
-                    order_item_id,
-
-                    quantity,
-
                     status,
 
                     provider,
 
-                    provider_shipment_id,
+                    provider_fulfillment_id,
 
                     carrier,
 
@@ -393,7 +404,7 @@ export async function GET(request, { params }) {
 
                     updated_at
 
-                FROM shipments
+                FROM fulfillments
 
                 WHERE order_id = ?
 
@@ -403,6 +414,104 @@ export async function GET(request, { params }) {
                 orderId
             ]
         );
+
+
+        // ============================================================
+        // FULFILLMENT ITEMS
+        //
+        // Fetch only fulfillment items belonging to this order.
+        // ============================================================
+
+        const [fulfillmentItems] = await connection.execute(
+            `
+                SELECT
+
+                    fi.id,
+
+                    fi.fulfillment_id,
+
+                    fi.order_item_id,
+
+                    fi.quantity,
+
+                    fi.created_at,
+
+                    fi.updated_at
+
+                FROM fulfillment_items fi
+
+                INNER JOIN fulfillments f
+
+                    ON f.id = fi.fulfillment_id
+
+                WHERE f.order_id = ?
+
+                ORDER BY fi.id ASC
+            `,
+            [
+                orderId
+            ]
+        );
+
+
+        // ============================================================
+        // ATTACH FULFILLMENT ITEMS
+        //
+        // Convert:
+        //
+        // fulfillments
+        // fulfillment_items
+        //
+        // into:
+        //
+        // fulfillments: [
+        //     {
+        //         ...,
+        //         items: [...]
+        //     }
+        // ]
+        // ============================================================
+
+        const fulfillmentMap = new Map();
+
+
+        for (const fulfillment of fulfillments) {
+
+            fulfillmentMap.set(
+                fulfillment.id,
+                {
+                    ...fulfillment,
+
+                    items: []
+                }
+            );
+
+        }
+
+
+        for (const fulfillmentItem of fulfillmentItems) {
+
+            const fulfillment =
+                fulfillmentMap.get(
+                    fulfillmentItem.fulfillment_id
+                );
+
+
+            if (fulfillment) {
+
+                fulfillment.items.push(
+                    fulfillmentItem
+                );
+
+            }
+
+        }
+
+
+        const fulfillmentList =
+            Array.from(
+                fulfillmentMap.values()
+            );
 
 
         // ============================================================
@@ -462,9 +571,11 @@ export async function GET(request, { params }) {
 
                 refunds,
 
-                shipments,
+                fulfillments:
+                    fulfillmentList,
 
-                payment_events: paymentEvents,
+                payment_events:
+                    paymentEvents,
 
             },
 
@@ -501,4 +612,3 @@ export async function GET(request, { params }) {
     }
 
 }
-

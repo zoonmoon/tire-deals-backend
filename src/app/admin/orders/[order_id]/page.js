@@ -1,17 +1,23 @@
 
 'use client';
-
+import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
     ArrowBackOutlined,
 } from '@mui/icons-material';
+
+
 import {
     Alert,
     Box,
     Button,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Divider,
     Grid,
     Paper,
@@ -22,6 +28,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TextField,
     Typography,
 } from '@mui/material';
 
@@ -38,6 +45,47 @@ export default function AdminOrderDetailsPage() {
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState(null);
+
+
+    const [
+        fulfillDialogOpen,
+        setFulfillDialogOpen
+    ] = useState(false);
+
+    const [
+        fulfillmentQuantities,
+        setFulfillmentQuantities
+    ] = useState({});
+
+    const [
+        fulfillmentCarrier,
+        setFulfillmentCarrier
+    ] = useState('');
+
+    const [
+        fulfillmentService,
+        setFulfillmentService
+    ] = useState('');
+
+    const [
+        fulfillmentTrackingNumber,
+        setFulfillmentTrackingNumber
+    ] = useState('');
+
+    const [
+        fulfillmentTrackingUrl,
+        setFulfillmentTrackingUrl
+    ] = useState('');
+
+    const [
+        fulfillmentShippingCost,
+        setFulfillmentShippingCost
+    ] = useState('');
+
+    const [
+        creatingFulfillment,
+        setCreatingFulfillment
+    ] = useState(false);
 
 
     // ============================================================
@@ -160,15 +208,15 @@ export default function AdminOrderDetailsPage() {
 
     if (error) {
 
-        return (
+        // return (
 
-            <Alert severity="error">
+        //     <Alert severity="error">
 
-                {error}
+        //         {error}
 
-            </Alert>
+        //     </Alert>
 
-        );
+        // );
 
     }
 
@@ -262,6 +310,254 @@ export default function AdminOrderDetailsPage() {
     };
 
 
+    const getFulfilledQuantity = (orderItemId) => {
+
+        return (
+            order.fulfillments || []
+        ).reduce(
+            (total, fulfillment) => {
+
+                const fulfillmentItem =
+                    fulfillment.items?.find(
+                        item =>
+                            Number(item.order_item_id) ===
+                            Number(orderItemId)
+                    );
+
+                return total +
+                    Number(
+                        fulfillmentItem?.quantity || 0
+                    );
+
+            },
+            0
+        );
+
+    };
+
+
+    const getRemainingQuantity = (orderItem) => {
+
+        const orderedQuantity =
+            Number(orderItem.quantity || 0);
+
+        const fulfilledQuantity =
+            getFulfilledQuantity(orderItem.id);
+
+        return Math.max(
+            0,
+            orderedQuantity - fulfilledQuantity
+        );
+
+    };
+
+
+    // ============================================================
+    // CREATE FULFILLMENT
+    // ============================================================
+
+    const handleCreateFulfillment = async () => {
+
+        try {
+
+            setCreatingFulfillment(true);
+
+            // ========================================================
+            // BUILD FULFILLMENT ITEMS
+            // ========================================================
+
+            const items = Object.entries(
+                fulfillmentQuantities
+            )
+                .map(
+
+                    ([orderItemId, quantity]) => ({
+
+                        order_item_id:
+                            Number(orderItemId),
+
+                        quantity:
+                            Number(quantity || 0),
+
+                    })
+                )
+                .filter(
+                    item =>
+                        item.quantity > 0
+                );
+
+
+            // ========================================================
+            // VALIDATE
+            // ========================================================
+
+            if (items.length === 0) {
+
+                throw new Error(
+                    'Please select at least one item to fulfill.'
+                );
+
+            }
+
+
+            // ========================================================
+            // CREATE FULFILLMENT
+            // ========================================================
+
+            const response =
+                await fetch(
+                    `/api/admin/orders/${orderId}/fulfill`,
+                    {
+                        method: 'POST',
+
+                        credentials: 'include',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json',
+                        },
+
+                        body: JSON.stringify({
+
+                            items,
+
+                            carrier:
+                                fulfillmentCarrier ||
+                                null,
+
+                            service:
+                                fulfillmentService ||
+                                null,
+
+                            tracking_number:
+                                fulfillmentTrackingNumber ||
+                                null,
+
+                            tracking_url:
+                                fulfillmentTrackingUrl ||
+                                null,
+
+                            shipping_cost:
+                                Number(
+                                    fulfillmentShippingCost ||
+                                    0
+                                ),
+
+                        }),
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            // ========================================================
+            // HANDLE ERROR
+            // ========================================================
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data?.message ||
+                    'Unable to create fulfillment.'
+                );
+
+            }
+
+
+            // ========================================================
+            // CLOSE DIALOG
+            // ========================================================
+
+            setFulfillDialogOpen(false);
+
+
+            // ========================================================
+            // RESET FORM
+            // ========================================================
+
+            setFulfillmentQuantities({});
+
+            setFulfillmentCarrier('');
+
+            setFulfillmentService('');
+
+            setFulfillmentTrackingNumber('');
+
+            setFulfillmentTrackingUrl('');
+
+            setFulfillmentShippingCost('');
+
+
+            // ========================================================
+            // REFRESH ORDER
+            // ========================================================
+
+            const refreshResponse =
+                await fetch(
+                    `/api/admin/orders/${orderId}`,
+                    {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-store',
+                    }
+                );
+
+
+            const refreshData =
+                await refreshResponse.json();
+
+
+            if (
+                refreshResponse.ok &&
+                refreshData.success
+            ) {
+
+                setOrder(
+                    refreshData.order
+                );
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                'Create fulfillment error:',
+                error
+            );
+
+
+            setError(
+                error.message ||
+                'Unable to create fulfillment.'
+            );
+
+
+
+            toast.error(
+                error.message ||
+                'Unable to create fulfillment.'
+            );
+
+
+
+        } finally {
+
+            setCreatingFulfillment(false);
+
+        }
+
+    };
+
+
+
+
     // ============================================================
     // PAGE
     // ============================================================
@@ -284,22 +580,22 @@ export default function AdminOrderDetailsPage() {
                     xs: 'flex-start',
                     sm: 'center',
                 }}
-                spacing={2}
+                spacing={3}
                 sx={{
                     mb: 3,
                 }}
             >
 
 
-                    <Button
-                        startIcon={<ArrowBackOutlined />}
-                        onClick={() => window.history.back()}
-                        sx={{
-                            mb: 2,
-                        }}
-                    >
-                        
-                    </Button>
+                <Button
+                    startIcon={<ArrowBackOutlined />}
+                    onClick={() => window.history.back()}
+                    sx={{
+                        mb: 2,
+                    }}
+                >
+                    
+                </Button>
 
 
 
@@ -334,36 +630,68 @@ export default function AdminOrderDetailsPage() {
                 </Box>
 
 
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    flexWrap="wrap"
+
+                <div
+                    style={{
+                        display:'flex',
+                        justifyContent:'space-between',
+                        flexGrow:'1',
+                        alignItems:'center'
+                    }}
+
                 >
 
-                    <Chip
-                        label={order.status}
-                        color={getStatusColor(
-                            order.status
-                        )}
-                    />
+
+                    <Stack
+                        direction={'row'}
+                        spacing={1}
+                    >
+
+                        <Chip
+                            label={order.status}
+                            size={'small'}
+                            color={getStatusColor(
+                                order.status
+                            )}
+                        />
 
 
-                    <Chip
-                        label={order.payment_status}
-                        color={getStatusColor(
-                            order.payment_status
-                        )}
-                    />
+                        <Chip
+                            label={order.payment_status}
+                            size={'small'}
+                            color={getStatusColor(
+                                order.payment_status
+                            )}
+                        />
 
 
-                    <Chip
-                        label={order.fulfillment_status}
-                        color={getStatusColor(
-                            order.fulfillment_status
-                        )}
-                    />
+                        <Chip
+                            label={order.fulfillment_status}
+                            size={'small'}
+                            color={getStatusColor(
+                                order.fulfillment_status
+                            )}
+                        />
 
-                </Stack>
+
+                    </Stack>
+
+
+
+                    <Button
+                        variant="contained"
+                        sx={{maxHeight:'40px'}}
+                        onClick={() =>
+                            setFulfillDialogOpen(true)
+                        }
+                    >
+                        Fulfill Order
+                    </Button>
+
+                </div>
+
+
+
 
             </Stack>
 
@@ -534,6 +862,339 @@ export default function AdminOrderDetailsPage() {
                     </Paper>
 
                 </Grid>
+
+
+
+                {/* ================================================== */}
+                {/* FULFILLMENTS */}
+                {/* ================================================== */}
+
+                {order.fulfillments?.length > 0 && (
+
+                    <Grid
+                        size={12}
+                    >
+
+                        <Paper
+                            variant="outlined"
+                        >
+
+                            <Box sx={{ p: 3 }}>
+
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                    }}
+                                >
+
+                                    Fulfillments
+
+                                </Typography>
+
+                            </Box>
+
+
+                            <Divider />
+
+
+                            {order.fulfillments.map(
+                                (fulfillment) => (
+
+                                    <Box
+                                        key={fulfillment.id}
+                                        sx={{
+                                            p: 3,
+                                        }}
+                                    >
+
+                                        <Stack
+                                            direction={{
+                                                xs: 'column',
+                                                sm: 'row',
+                                            }}
+                                            justifyContent="space-between"
+                                            spacing={2}
+                                            sx={{
+                                                mb: 2,
+                                            }}
+                                        >
+
+                                            <Box>
+
+                                                <Typography
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                    }}
+                                                >
+
+                                                    Fulfillment #
+                                                    {fulfillment.id}
+
+                                                </Typography>
+
+
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                >
+
+                                                    Created{' '}
+
+                                                    {formatDate(
+                                                        fulfillment.created_at
+                                                    )}
+
+                                                </Typography>
+
+                                            </Box>
+
+
+                                            <Chip
+                                                size="small"
+                                                label={fulfillment.status}
+                                                color={getStatusColor(
+                                                    fulfillment.status
+                                                )}
+                                            />
+
+                                        </Stack>
+
+
+                                        <Grid
+                                            container
+                                            spacing={2}
+                                            sx={{
+                                                mb: 2,
+                                            }}
+                                        >
+
+                                            <Grid
+                                                size={{
+                                                    xs: 12,
+                                                    sm: 4,
+                                                }}
+                                            >
+
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+
+                                                    Carrier
+
+                                                </Typography>
+
+
+                                                <Typography>
+
+                                                    {fulfillment.carrier ||
+                                                        '—'}
+
+                                                </Typography>
+
+                                            </Grid>
+
+
+                                            <Grid
+                                                size={{
+                                                    xs: 12,
+                                                    sm: 4,
+                                                }}
+                                            >
+
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+
+                                                    Service
+
+                                                </Typography>
+
+
+                                                <Typography>
+
+                                                    {fulfillment.service ||
+                                                        '—'}
+
+                                                </Typography>
+
+                                            </Grid>
+
+
+                                            <Grid
+                                                size={{
+                                                    xs: 12,
+                                                    sm: 4,
+                                                }}
+                                            >
+
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+
+                                                    Tracking
+
+                                                </Typography>
+
+
+                                                {fulfillment.tracking_url ? (
+
+                                                    <Typography
+                                                        component="a"
+                                                        href={
+                                                            fulfillment.tracking_url
+                                                        }
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        sx={{
+                                                            textDecoration:
+                                                                'none',
+                                                        }}
+                                                    >
+
+                                                        {
+                                                            fulfillment.tracking_number ||
+                                                            'Track'
+                                                        }
+
+                                                    </Typography>
+
+                                                ) : (
+
+                                                    <Typography>
+
+                                                        {
+                                                            fulfillment.tracking_number ||
+                                                            '—'
+                                                        }
+
+                                                    </Typography>
+
+                                                )}
+
+                                            </Grid>
+
+                                        </Grid>
+
+
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                mb: 1,
+                                            }}
+                                        >
+
+                                            Items
+
+                                        </Typography>
+
+
+                                        <TableContainer>
+
+                                            <Table
+                                                size="small"
+                                            >
+
+                                                <TableHead>
+
+                                                    <TableRow>
+
+                                                        <TableCell>
+                                                            Product
+                                                        </TableCell>
+
+                                                        <TableCell>
+                                                            Order Item ID
+                                                        </TableCell>
+
+                                                        <TableCell align="right">
+                                                            Quantity
+                                                        </TableCell>
+
+                                                    </TableRow>
+
+                                                </TableHead>
+
+
+                                                <TableBody>
+
+                                                    {fulfillment.items?.map(
+                                                        (fulfillmentItem) => {
+
+                                                            const orderItem =
+                                                                order.items?.find(
+                                                                    item =>
+                                                                        Number(
+                                                                            item.id
+                                                                        ) ===
+                                                                        Number(
+                                                                            fulfillmentItem.order_item_id
+                                                                        )
+                                                                );
+
+
+                                                            return (
+
+                                                                <TableRow
+                                                                    key={
+                                                                        fulfillmentItem.id
+                                                                    }
+                                                                >
+
+                                                                    <TableCell>
+
+                                                                        {
+                                                                            orderItem?.name ||
+                                                                            '—'
+                                                                        }
+
+                                                                    </TableCell>
+
+
+                                                                    <TableCell>
+
+                                                                        {
+                                                                            fulfillmentItem.order_item_id
+                                                                        }
+
+                                                                    </TableCell>
+
+
+                                                                    <TableCell align="right">
+
+                                                                        {
+                                                                            fulfillmentItem.quantity
+                                                                        }
+
+                                                                    </TableCell>
+
+                                                                </TableRow>
+
+                                                            );
+
+                                                        }
+                                                    )}
+
+                                                </TableBody>
+
+                                            </Table>
+
+                                        </TableContainer>
+
+                                    </Box>
+
+                                )
+                            )}
+
+                        </Paper>
+
+                    </Grid>
+
+                )}
+
 
 
                 {/* ================================================== */}
@@ -1091,179 +1752,7 @@ export default function AdminOrderDetailsPage() {
                 )}
 
 
-                {/* ================================================== */}
-                {/* SHIPMENTS */}
-                {/* ================================================== */}
 
-                {order.shipments?.length > 0 && (
-
-                    <Grid
-                        size={12}
-                    >
-
-                        <Paper
-                            variant="outlined"
-                        >
-
-                            <Box sx={{ p: 3 }}>
-
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                    }}
-                                >
-
-                                    Shipments
-
-                                </Typography>
-
-                            </Box>
-
-
-                            <Divider />
-
-
-                            <TableContainer>
-
-                                <Table>
-
-                                    <TableHead>
-
-                                        <TableRow>
-
-                                            <TableCell>
-                                                Item ID
-                                            </TableCell>
-
-                                            <TableCell>
-                                                Status
-                                            </TableCell>
-
-                                            <TableCell>
-                                                Carrier
-                                            </TableCell>
-
-                                            <TableCell>
-                                                Service
-                                            </TableCell>
-
-                                            <TableCell>
-                                                Tracking
-                                            </TableCell>
-
-                                            <TableCell>
-                                                Quantity
-                                            </TableCell>
-
-                                        </TableRow>
-
-                                    </TableHead>
-
-
-                                    <TableBody>
-
-                                        {order.shipments.map(
-                                            (shipment) => (
-
-                                                <TableRow
-                                                    key={shipment.id}
-                                                >
-
-                                                    <TableCell>
-
-                                                        {
-                                                            shipment.order_item_id
-                                                        }
-
-                                                    </TableCell>
-
-
-                                                    <TableCell>
-
-                                                        <Chip
-                                                            size="small"
-                                                            label={shipment.status}
-                                                            color={getStatusColor(
-                                                                shipment.status
-                                                            )}
-                                                        />
-
-                                                    </TableCell>
-
-
-                                                    <TableCell>
-
-                                                        {shipment.carrier ||
-                                                            '—'}
-
-                                                    </TableCell>
-
-
-                                                    <TableCell>
-
-                                                        {shipment.service ||
-                                                            '—'}
-
-                                                    </TableCell>
-
-
-                                                    <TableCell>
-
-                                                        {shipment.tracking_url ? (
-
-                                                            <Typography
-                                                                component="a"
-                                                                href={
-                                                                    shipment.tracking_url
-                                                                }
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                sx={{
-                                                                    textDecoration:
-                                                                        'none',
-                                                                }}
-                                                            >
-
-                                                                {
-                                                                    shipment.tracking_number ||
-                                                                    'Track'
-                                                                }
-
-                                                            </Typography>
-
-                                                        ) : (
-
-                                                            shipment.tracking_number ||
-                                                            '—'
-
-                                                        )}
-
-                                                    </TableCell>
-
-
-                                                    <TableCell>
-
-                                                        {shipment.quantity}
-
-                                                    </TableCell>
-
-                                                </TableRow>
-
-                                            )
-                                        )}
-
-                                    </TableBody>
-
-                                </Table>
-
-                            </TableContainer>
-
-                        </Paper>
-
-                    </Grid>
-
-                )}
 
 
                 {/* ================================================== */}
@@ -1347,6 +1836,491 @@ export default function AdminOrderDetailsPage() {
                 </Grid>
 
             </Grid>
+
+
+            {/* ================================================== */}
+            {/* FULFILL ORDER DIALOG */}
+            {/* ================================================== */}
+
+            <Dialog
+                open={fulfillDialogOpen}
+                onClose={() => {
+
+                    if (reason === 'backdropClick') {
+                        return;
+                    }
+
+                    if (!creatingFulfillment) {
+
+                        setFulfillDialogOpen(false);
+
+                    }
+
+                }}
+                fullWidth
+                maxWidth="md"
+            >
+
+                <DialogTitle>
+
+                    Fulfill Order #{order.order_number}
+
+                </DialogTitle>
+
+
+                <DialogContent dividers>
+
+                    <Stack spacing={3}>
+
+                        {/* ================================================== */}
+                        {/* ITEMS */}
+                        {/* ================================================== */}
+
+                        <Box>
+
+                            <Typography
+                                variant="subtitle1"
+                                sx={{
+                                    fontWeight: 600,
+                                    mb: 2,
+                                }}
+                            >
+
+                                Items to Fulfill
+
+                            </Typography>
+
+
+                            <Stack spacing={2}>
+
+                                {order.items?.filter(i => i.type === 'product' && getRemainingQuantity(i) > 0 )?.map(
+                                    (item) => {
+
+                                        const fulfilledQuantity =
+                                            getFulfilledQuantity(
+                                                item.id
+                                            );
+
+
+                                        const remainingQuantity =
+                                            Math.max(
+                                                0,
+                                                Number(
+                                                    item.quantity || 0
+                                                ) -
+                                                fulfilledQuantity
+                                            );
+
+
+                                        return (
+
+                                            <Paper
+                                                key={item.id}
+                                                variant="outlined"
+                                                sx={{
+                                                    p: 2,
+                                                }}
+                                            >
+
+                                                <Grid
+                                                    container
+                                                    spacing={2}
+                                                    alignItems="center"
+                                                    sx={{alignItems:'center'}}
+                                                >
+
+                                                    {/* PRODUCT */}
+
+                                                    <Grid
+                                                        size={{
+                                                            xs: 12,
+                                                            sm: 5,
+                                                        }}
+                                                    >
+
+                                                        <Typography
+                                                            sx={{
+                                                                fontWeight: 600,
+                                                            }}
+                                                        >
+
+                                                            {item.name}
+
+                                                        </Typography>
+
+
+                                                        <Typography
+                                                            variant="body2"
+                                                            color="text.secondary"
+                                                        >
+
+                                                            Ordered:{' '}
+
+                                                            {item.quantity}
+
+                                                            {' · '}
+
+                                                            Fulfilled:{' '}
+
+                                                            {fulfilledQuantity}
+
+                                                            {' · '}
+
+                                                            Remaining:{' '}
+
+                                                            {remainingQuantity}
+
+                                                        </Typography>
+
+                                                    </Grid>
+
+
+                                                    {/* QUANTITY */}
+
+                                                    <Grid
+                                                        size={{
+                                                            xs: 12,
+                                                            sm: 4,
+                                                        }}
+                                                    >
+
+                                                        <TextField
+                                                            fullWidth
+                                                            size="small"
+                                                            type="number"
+                                                            label="Quantity"
+                                                            value={
+                                                                fulfillmentQuantities[
+                                                                    item.id
+                                                                ] ?? ''
+                                                            }
+                                                            disabled={
+                                                                remainingQuantity === 0 ||
+                                                                creatingFulfillment
+                                                            }
+                                                            onChange={(event) => {
+
+                                                                const value =
+                                                                    event.target.value;
+
+
+                                                                if (
+                                                                    value === ''
+                                                                ) {
+
+                                                                    setFulfillmentQuantities(
+                                                                        previous => ({
+                                                                            ...previous,
+                                                                            [item.id]: ''
+                                                                        })
+                                                                    );
+
+                                                                    return;
+
+                                                                }
+
+
+                                                                const quantity =
+                                                                    Number(value);
+
+
+                                                                if (
+                                                                    !Number.isInteger(
+                                                                        quantity
+                                                                    ) ||
+                                                                    quantity < 0
+                                                                ) {
+
+                                                                    return;
+
+                                                                }
+
+
+                                                                if (
+                                                                    quantity >
+                                                                    remainingQuantity
+                                                                ) {
+
+                                                                    return;
+
+                                                                }
+
+
+                                                                setFulfillmentQuantities(
+                                                                    previous => ({
+                                                                        ...previous,
+                                                                        [item.id]:
+                                                                            quantity
+                                                                    })
+                                                                );
+
+                                                            }}
+                                                            inputProps={{
+                                                                min: 0,
+                                                                max: remainingQuantity,
+                                                                step: 1,
+                                                            }}
+                                                        />
+
+                                                    </Grid>
+
+
+                                                    {/* REMAINING */}
+
+                                                    <Grid
+                                                        size={{
+                                                            xs: 12,
+                                                            sm: 3,
+                                                        }}
+                                                    >
+
+                                                        <Chip
+                                                            size="small"
+                                                            label={
+                                                                remainingQuantity === 0
+                                                                    ? 'Fully fulfilled'
+                                                                    : `${remainingQuantity} remaining`
+                                                            }
+                                                            color={
+                                                                remainingQuantity === 0
+                                                                    ? 'success'
+                                                                    : 'default'
+                                                            }
+                                                        />
+
+                                                    </Grid>
+
+                                                </Grid>
+
+                                            </Paper>
+
+                                        );
+
+                                    }
+                                )}
+
+                            </Stack>
+
+                        </Box>
+
+
+                        <Divider />
+
+
+                        {/* ================================================== */}
+                        {/* SHIPPING */}
+                        {/* ================================================== */}
+
+                        <Box>
+
+                            <Typography
+                                variant="subtitle1"
+                                sx={{
+                                    fontWeight: 600,
+                                    mb: 2,
+                                }}
+                            >
+
+                                Shipping
+
+                            </Typography>
+
+
+                            <Grid
+                                container
+                                spacing={2}
+                            >
+
+                                <Grid
+                                    size={{
+                                        xs: 12,
+                                        sm: 6,
+                                    }}
+                                >
+
+                                    <TextField
+                                        fullWidth
+                                        label="Carrier"
+                                        value={
+                                            fulfillmentCarrier
+                                        }
+                                        disabled={
+                                            creatingFulfillment
+                                        }
+                                        onChange={(event) =>
+                                            setFulfillmentCarrier(
+                                                event.target.value
+                                            )
+                                        }
+                                    />
+
+                                </Grid>
+
+
+                                <Grid
+                                    size={{
+                                        xs: 12,
+                                        sm: 6,
+                                    }}
+                                >
+
+                                    <TextField
+                                        fullWidth
+                                        label="Service"
+                                        value={
+                                            fulfillmentService
+                                        }
+                                        disabled={
+                                            creatingFulfillment
+                                        }
+                                        onChange={(event) =>
+                                            setFulfillmentService(
+                                                event.target.value
+                                            )
+                                        }
+                                    />
+
+                                </Grid>
+
+
+                                <Grid
+                                    size={12}
+                                >
+
+                                    <TextField
+                                        fullWidth
+                                        label="Tracking Number"
+                                        value={
+                                            fulfillmentTrackingNumber
+                                        }
+                                        disabled={
+                                            creatingFulfillment
+                                        }
+                                        onChange={(event) =>
+                                            setFulfillmentTrackingNumber(
+                                                event.target.value
+                                            )
+                                        }
+                                    />
+
+                                </Grid>
+
+
+                                <Grid
+                                    size={12}
+                                >
+
+                                    <TextField
+                                        fullWidth
+                                        label="Tracking URL"
+                                        value={
+                                            fulfillmentTrackingUrl
+                                        }
+                                        disabled={
+                                            creatingFulfillment
+                                        }
+                                        onChange={(event) =>
+                                            setFulfillmentTrackingUrl(
+                                                event.target.value
+                                            )
+                                        }
+                                    />
+
+                                </Grid>
+
+
+                                <Grid
+                                    size={{
+                                        xs: 12,
+                                        sm: 6,
+                                    }}
+                                >
+
+                                    <TextField
+                                        fullWidth
+                                        label="Shipping Cost"
+                                        type="number"
+                                        value={
+                                            fulfillmentShippingCost
+                                        }
+                                        disabled={
+                                            creatingFulfillment
+                                        }
+                                        onChange={(event) =>
+                                            setFulfillmentShippingCost(
+                                                event.target.value
+                                            )
+                                        }
+                                        inputProps={{
+                                            min: 0,
+                                            step: '0.01',
+                                        }}
+                                    />
+
+                                </Grid>
+
+                            </Grid>
+
+                        </Box>
+
+                    </Stack>
+
+                </DialogContent>
+
+
+                <DialogActions
+                    sx={{
+                        minHeight:'70px',
+                        display:'flex',
+                        justifyContent:'space-between'
+
+                    }}
+
+                >
+
+                    <Button
+                        variant={'contained'}
+                        color={'error'}
+                        onClick={() =>
+                            setFulfillDialogOpen(false)
+                        }
+                        disabled={
+                            creatingFulfillment
+                        }
+                    >
+
+                        Cancel
+
+                    </Button>
+
+
+                    <Button
+                        variant="contained"
+                        disabled={
+                            creatingFulfillment
+                        }
+                        onClick={handleCreateFulfillment}
+                    >
+
+                        {creatingFulfillment ? (
+
+                            <CircularProgress
+                                size={20}
+                            />
+
+                        ) : (
+
+                            'Create Fulfillment'
+
+                        )}
+
+                    </Button>
+
+                </DialogActions>
+
+            </Dialog>
+
+
 
         </Box>
 
