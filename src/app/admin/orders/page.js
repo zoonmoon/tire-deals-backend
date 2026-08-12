@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
     Alert,
     Box,
@@ -1427,15 +1428,19 @@ export default function OrdersPage() {
                                 orders.map(
                                     order => (
 
+
                                         <TableRow
-                                            key={
-                                                order.id
-                                            }
+                                            key={order.id}
                                             hover
+                                            component={Link}
+                                            href={`/admin/orders/${order.id}`}
                                             sx={{
                                                 cursor: 'pointer',
+                                                textDecoration: 'none',
                                             }}
                                         >
+
+
 
                                             {/* ====================== */}
                                             {/* ORDER */}

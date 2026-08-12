@@ -3,11 +3,251 @@ import { MYSQL_CONFIG } from '../utils';
 
 export async function GET() {
 
-    return 
+     
     
     const connection = await mysql.createConnection(MYSQL_CONFIG);
 
     try {
+
+
+
+
+
+        // ============================================================
+        // DROP FULFILLMENT TABLES
+        // ============================================================
+
+        // Child table must be dropped first because of foreign key.
+        await connection.execute(`
+            DROP TABLE IF EXISTS fulfillment_items
+        `);
+
+        await connection.execute(`
+            DROP TABLE IF EXISTS fulfillments
+        `);
+
+
+        // ============================================================
+        // FULFILLMENTS
+        // ============================================================
+
+        await connection.execute(`
+
+            CREATE TABLE fulfillments (
+
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+
+                -- ====================================================
+                -- ORDER
+                -- ====================================================
+
+                order_id BIGINT UNSIGNED NOT NULL,
+
+
+                -- ====================================================
+                -- FULFILLMENT STATUS
+                -- ====================================================
+
+                status VARCHAR(50)
+                    NOT NULL DEFAULT 'pending',
+
+                /*
+                    pending
+                    processing
+                    shipped
+                    in_transit
+                    out_for_delivery
+                    delivered
+                    cancelled
+                    returned
+                */
+
+
+                -- ====================================================
+                -- SHIPPING PROVIDER
+                -- ====================================================
+
+                provider VARCHAR(50) NULL,
+
+
+                -- ====================================================
+                -- PROVIDER FULFILLMENT / SHIPMENT ID
+                -- ====================================================
+
+                provider_fulfillment_id VARCHAR(255) NULL,
+
+
+                -- ====================================================
+                -- CARRIER
+                -- ====================================================
+
+                carrier VARCHAR(100) NULL,
+
+
+                -- ====================================================
+                -- SHIPPING SERVICE
+                -- ====================================================
+
+                service VARCHAR(255) NULL,
+
+
+                -- ====================================================
+                -- TRACKING
+                -- ====================================================
+
+                tracking_number VARCHAR(255) NULL,
+
+                tracking_url VARCHAR(1000) NULL,
+
+
+                -- ====================================================
+                -- INTERNAL SHIPPING COST
+                -- ====================================================
+
+                shipping_cost DECIMAL(12, 2)
+                    NOT NULL DEFAULT 0.00,
+
+
+                -- ====================================================
+                -- DATES
+                -- ====================================================
+
+                shipped_at DATETIME NULL,
+
+                delivered_at DATETIME NULL,
+
+
+                -- ====================================================
+                -- TIMESTAMPS
+                -- ====================================================
+
+                created_at TIMESTAMP
+                    DEFAULT CURRENT_TIMESTAMP,
+
+                updated_at TIMESTAMP
+                    DEFAULT CURRENT_TIMESTAMP
+                    ON UPDATE CURRENT_TIMESTAMP,
+
+
+                -- ====================================================
+                -- INDEXES
+                -- ====================================================
+
+                INDEX idx_order_id (order_id),
+
+                INDEX idx_tracking_number (tracking_number),
+
+                INDEX idx_status (status),
+
+
+                -- ====================================================
+                -- FOREIGN KEY
+                -- ====================================================
+
+                FOREIGN KEY (order_id)
+
+                    REFERENCES orders(id)
+
+                    ON DELETE CASCADE
+
+            );
+
+        `);
+
+
+        // ============================================================
+        // FULFILLMENT ITEMS
+        // ============================================================
+
+        await connection.execute(`
+
+            CREATE TABLE fulfillment_items (
+
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+
+                -- ====================================================
+                -- FULFILLMENT
+                -- ====================================================
+
+                fulfillment_id BIGINT UNSIGNED NOT NULL,
+
+
+                -- ====================================================
+                -- ORDER ITEM
+                --
+                -- Product order item being fulfilled.
+                -- ====================================================
+
+                order_item_id BIGINT UNSIGNED NOT NULL,
+
+
+                -- ====================================================
+                -- QUANTITY
+                --
+                -- Quantity of this order item included in this
+                -- fulfillment.
+                -- ====================================================
+
+                quantity INT UNSIGNED NOT NULL DEFAULT 1,
+
+
+                -- ====================================================
+                -- TIMESTAMPS
+                -- ====================================================
+
+                created_at TIMESTAMP
+                    DEFAULT CURRENT_TIMESTAMP,
+
+                updated_at TIMESTAMP
+                    DEFAULT CURRENT_TIMESTAMP
+                    ON UPDATE CURRENT_TIMESTAMP,
+
+
+                -- ====================================================
+                -- INDEXES
+                -- ====================================================
+
+                INDEX idx_fulfillment_id (fulfillment_id),
+
+                INDEX idx_order_item_id (order_item_id),
+
+
+                -- ====================================================
+                -- PREVENT DUPLICATE ORDER ITEM
+                -- IN THE SAME FULFILLMENT
+                -- ====================================================
+
+                UNIQUE KEY unique_fulfillment_order_item (
+                    fulfillment_id,
+                    order_item_id
+                ),
+
+
+                -- ====================================================
+                -- FOREIGN KEYS
+                -- ====================================================
+
+                FOREIGN KEY (fulfillment_id)
+
+                    REFERENCES fulfillments(id)
+
+                    ON DELETE CASCADE,
+
+
+                FOREIGN KEY (order_item_id)
+
+                    REFERENCES order_items(id)
+
+                    ON DELETE CASCADE
+
+            );
+
+        `);
+
+        return 
+
 
         // ============================================================
         // DROP EXISTING TABLES
@@ -91,7 +331,6 @@ export async function GET() {
                 -- ====================================================
 
                 status VARCHAR(50) NOT NULL DEFAULT 'pending',
-
                 /*
                     pending
                     processing
@@ -158,7 +397,7 @@ export async function GET() {
 
                 grand_total DECIMAL(12, 2)
                     NOT NULL DEFAULT 0.00,
-                
+
 
                 -- ====================================================
                 -- BILLING ADDRESS
@@ -206,7 +445,7 @@ export async function GET() {
                 shipping_state VARCHAR(100) NULL,
 
                 shipping_postcode VARCHAR(30) NULL,
-
+                
                 shipping_country VARCHAR(100) NULL,
 
 
@@ -220,12 +459,14 @@ export async function GET() {
                     ON UPDATE CURRENT_TIMESTAMP,
 
 
+                admin_viewed_at TIMESTAMP NULL,
+
                 -- ====================================================
                 -- INDEXES
                 -- ====================================================
 
                 UNIQUE KEY unique_order_number (order_number),
-
+                
                 INDEX idx_customer_id (customer_id),
 
                 INDEX idx_customer_email (customer_email),
@@ -236,8 +477,10 @@ export async function GET() {
 
                 INDEX idx_fulfillment_status (fulfillment_status),
 
-                INDEX idx_created_at (created_at)
+                INDEX idx_created_at (created_at),
 
+                INDEX idx_admin_viewed_at (admin_viewed_at)
+                
             );
 
         `);

@@ -337,6 +337,8 @@ export async function GET(request) {
                 order_number,
 
                 customer_id,
+                
+                admin_viewed_at,
 
                 customer_email,
 
