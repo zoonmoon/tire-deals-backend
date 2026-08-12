@@ -531,7 +531,9 @@ export default function AdminOrderDetailsPage() {
             // REFRESH ORDER
             // ========================================================
 
+            toast.success('Fulfillment created successfully')
 
+            setLoading(true) 
             
 
             const refreshResponse =
@@ -560,8 +562,11 @@ export default function AdminOrderDetailsPage() {
 
             }
 
+            setLoading(false)
 
         } catch (error) {
+
+            setLoading(false)
 
             console.error(
                 'Create fulfillment error:',
@@ -651,9 +656,14 @@ export default function AdminOrderDetailsPage() {
             }
 
 
+            toast.success('Fulfillment cancelled successfully')
+
             // ========================================================
             // REFRESH ORDER
             // ========================================================
+
+
+            setLoading(true)
 
             const refreshResponse =
                 await fetch(
@@ -677,6 +687,10 @@ export default function AdminOrderDetailsPage() {
                 !refreshData.success
             ) {
 
+
+                setLoading(false)
+
+
                 throw new Error(
                     refreshData?.message ||
                     'Fulfillment was cancelled, but the order could not be refreshed.'
@@ -684,6 +698,7 @@ export default function AdminOrderDetailsPage() {
 
             }
 
+            setLoading(false)
 
             setOrder(
                 refreshData.order
@@ -696,6 +711,8 @@ export default function AdminOrderDetailsPage() {
                 'Cancel fulfillment error:',
                 error
             );
+
+            setLoading(false)
 
 
             setError(
@@ -1100,16 +1117,16 @@ export default function AdminOrderDetailsPage() {
 
                     <Stack
                         direction={'row'}
-                        spacing={1}
+                        spacing={2}
                     >
 
-                        <Chip
+                        {/* <Chip
                             label={order.status}
                             size={'small'}
                             color={getStatusColor(
                                 order.status
                             )}
-                        />
+                        /> */}
 
 
                         <Chip
