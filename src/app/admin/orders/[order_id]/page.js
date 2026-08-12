@@ -19,8 +19,12 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControl,
     Grid,
+    InputLabel,
+    MenuItem,
     Paper,
+    Select,
     Stack,
     Table,
     TableBody,
@@ -862,6 +866,153 @@ export default function AdminOrderDetailsPage() {
 
 
 
+    const handlePatchTracking = async () => {
+
+        if (!trackingFulfillment) {
+            return;
+        }
+
+
+        try {
+
+            setUpdatingTracking(true);
+
+
+            const response =
+                await fetch(
+                    `/api/admin/orders/${orderId}/fulfillments/${trackingFulfillment.id}/tracking`,
+                    {
+                        method: 'PATCH',
+
+                        credentials: 'include',
+
+                        headers: {
+                            'Content-Type':
+                                'application/json',
+                        },
+
+                        body: JSON.stringify({
+
+                            carrier:
+                                trackingCarrier.trim() ||
+                                null,
+
+                            service:
+                                trackingService.trim() ||
+                                null,
+
+                            tracking_number:
+                                trackingNumber.trim() ||
+                                null,
+
+                            tracking_url:
+                                trackingUrl.trim() ||
+                                null,
+
+                        }),
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data?.message ||
+                    'Unable to update tracking information.'
+                );
+
+            }
+
+
+            // ====================================================
+            // CLOSE DIALOG
+            // ====================================================
+
+            setTrackingDialogOpen(false);
+
+
+            // ====================================================
+            // RESET
+            // ====================================================
+
+            setTrackingFulfillment(null);
+
+            setTrackingCarrier('');
+
+            setTrackingService('');
+
+            setTrackingNumber('');
+
+            setTrackingUrl('');
+
+
+            // ====================================================
+            // REFRESH ORDER
+            // ====================================================
+
+            const refreshResponse =
+                await fetch(
+                    `/api/admin/orders/${orderId}`,
+                    {
+                        method: 'GET',
+                        credentials: 'include',
+                        cache: 'no-store',
+                    }
+                );
+
+
+            const refreshData =
+                await refreshResponse.json();
+
+
+            if (
+                refreshResponse.ok &&
+                refreshData.success
+            ) {
+
+                setOrder(
+                    refreshData.order
+                );
+
+            }
+
+
+            toast.success(
+                'Tracking information updated.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'Update tracking error:',
+                error
+            );
+
+
+            toast.error(
+                error.message ||
+                'Unable to update tracking information.'
+            );
+
+
+        } finally {
+
+            setUpdatingTracking(false);
+
+        }
+
+    };
+
+
 
     // ============================================================
     // PAGE
@@ -1223,27 +1374,39 @@ export default function AdminOrderDetailsPage() {
                                                 xs: 'column',
                                                 sm: 'row',
                                             }}
-                                            justifyContent="space-between"
-                                            alignItems={{
-                                                xs: 'flex-start',
-                                                sm: 'center',
-                                            }}
                                             spacing={2}
                                             sx={{
                                                 mb: 2,
+                                                alignItems:'center',
+                                                justifyContent:'space-between'
                                             }}
                                         >
 
                                             <Box>
 
+
+
                                                 <Typography
                                                     sx={{
                                                         fontWeight: 600,
+                                                        alignItems:'center',
+                                                        display:'flex',
+                                                        gap: '10px',
+                                                        mb: 0.5
                                                     }}
                                                 >
 
                                                     Fulfillment #
                                                     {fulfillment.id}
+
+
+                                                    <Chip
+                                                        size="small"
+                                                        label={fulfillment.status}
+                                                        color={getStatusColor(
+                                                            fulfillment.status
+                                                        )}
+                                                    />
 
                                                 </Typography>
 
@@ -1270,20 +1433,11 @@ export default function AdminOrderDetailsPage() {
 
                                             <Stack
                                                 direction="row"
-                                                spacing={1}
+                                                spacing={3}
                                                 alignItems="center"
                                                 flexWrap="wrap"
                                                 useFlexGap
                                             >
-
-                                                <Chip
-                                                    size="small"
-                                                    label={fulfillment.status}
-                                                    color={getStatusColor(
-                                                        fulfillment.status
-                                                    )}
-                                                />
-
 
                                                 <Button
                                                     size="small"
@@ -1475,25 +1629,30 @@ export default function AdminOrderDetailsPage() {
 
                                                 {fulfillment.tracking_url ? (
 
-                                                    <Typography
-                                                        component="a"
-                                                        href={
-                                                            fulfillment.tracking_url
-                                                        }
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        sx={{
-                                                            textDecoration:
-                                                                'none',
-                                                        }}
-                                                    >
+                                                    <div>
 
-                                                        {
-                                                            fulfillment.tracking_number ||
-                                                            'Track'
-                                                        }
+                                                        <Typography
+                                                            component="a"
+                                                            href={
+                                                                fulfillment.tracking_url
+                                                            }
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            sx={{
+                                                                textDecoration:
+                                                                    'none',
+                                                            }}
+                                                        >
 
-                                                    </Typography>
+                                                            {
+                                                                fulfillment.tracking_number ||
+                                                                'Track'
+                                                            }
+
+                                                        </Typography>
+
+                                                    </div>
+
 
                                                 ) : (
 
@@ -1533,6 +1692,7 @@ export default function AdminOrderDetailsPage() {
 
                                             <Table
                                                 size="small"
+                                                sx={{maxWidth: '500px'}}
                                             >
 
                                                 <TableHead>
@@ -1543,13 +1703,15 @@ export default function AdminOrderDetailsPage() {
                                                             Product
                                                         </TableCell>
 
-                                                        <TableCell>
-                                                            Order Item ID
+                                                        <TableCell >
+                                                            Quantity
                                                         </TableCell>
 
                                                         <TableCell align="right">
-                                                            Quantity
+                                                            Order Item ID
                                                         </TableCell>
+
+
 
                                                     </TableRow>
 
@@ -1591,7 +1753,19 @@ export default function AdminOrderDetailsPage() {
                                                                     </TableCell>
 
 
-                                                                    <TableCell>
+                                                                    <TableCell
+                                                                        
+                                                                    >
+
+                                                                        {
+                                                                            fulfillmentItem.quantity
+                                                                        }
+
+                                                                    </TableCell>
+
+                                                                    <TableCell
+                                                                        align="right"
+                                                                    >
 
                                                                         {
                                                                             fulfillmentItem.order_item_id
@@ -1600,15 +1774,7 @@ export default function AdminOrderDetailsPage() {
                                                                     </TableCell>
 
 
-                                                                    <TableCell
-                                                                        align="right"
-                                                                    >
 
-                                                                        {
-                                                                            fulfillmentItem.quantity
-                                                                        }
-
-                                                                    </TableCell>
 
                                                                 </TableRow>
 
@@ -2606,6 +2772,158 @@ export default function AdminOrderDetailsPage() {
                 </DialogActions>
 
             </Dialog>
+
+
+
+
+
+
+
+            <Dialog
+                open={trackingDialogOpen}
+                onClose={(event, reason) => {
+
+                    if (reason === 'backdropClick') {
+                        return;
+                    }
+
+                    if (!updatingTracking) {
+                        setTrackingDialogOpen(false);
+                    }
+
+                }}
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>
+
+                    {trackingFulfillment?.tracking_number
+                        ? 'Edit Tracking Information'
+                        : 'Add Tracking Information'}
+
+                </DialogTitle>
+
+
+                <DialogContent dividers>
+
+                    <Stack spacing={2}>
+
+                        <FormControl
+                            fullWidth
+                            disabled={updatingTracking}
+                        >
+                            <InputLabel>
+                                Carrier
+                            </InputLabel>
+
+                            <Select
+                                value={trackingCarrier}
+                                label="Carrier"
+                                onChange={(event) =>
+                                    setTrackingCarrier(
+                                        event.target.value
+                                    )
+                                }
+                            >
+
+                                <MenuItem value="UPS">
+                                    UPS
+                                </MenuItem>
+
+                                <MenuItem value="FedEx">
+                                    FedEx
+                                </MenuItem>
+
+                                <MenuItem value="Roadie">
+                                    Roadie
+                                </MenuItem>
+
+                            </Select>
+
+                        </FormControl>
+
+
+                        <TextField
+                            fullWidth
+                            label="Service"
+                            value={trackingService}
+                            disabled={updatingTracking}
+                            onChange={(event) =>
+                                setTrackingService(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+
+                        <TextField
+                            fullWidth
+                            label="Tracking Number"
+                            value={trackingNumber}
+                            disabled={updatingTracking}
+                            onChange={(event) =>
+                                setTrackingNumber(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+
+                        <TextField
+                            fullWidth
+                            label="Tracking URL"
+                            value={trackingUrl}
+                            disabled={updatingTracking}
+                            onChange={(event) =>
+                                setTrackingUrl(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+                    </Stack>
+
+                </DialogContent>
+
+
+                <DialogActions
+                    sx={{
+                        display: 'flex',
+                        minHeight: '60px',
+                        justifyContent: 'space-between',
+                    }}
+                >
+
+                    <Button
+                        color="error"
+                        variant="contained"
+                        onClick={() =>
+                            setTrackingDialogOpen(false)
+                        }
+                        disabled={updatingTracking}
+                    >
+                        Cancel
+                    </Button>
+
+
+                    <Button
+                        variant="contained"
+                        onClick={handlePatchTracking}
+                        disabled={updatingTracking}
+                    >
+
+                        {updatingTracking
+                            ? 'Saving...'
+                            : 'Save Tracking'}
+
+                    </Button>
+
+                </DialogActions>
+
+            </Dialog>
+
+
+
 
 
 
