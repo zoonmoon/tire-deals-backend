@@ -3,23 +3,19 @@ import { NextResponse } from 'next/server';
 import { getAuthenticatedAdmin } from '@/app/api/admin/auth/utils/manage-cookie';
 
 export async function middleware(request) {
-
-    const { pathname } =
-        request.nextUrl;
-
+    const { pathname } = request.nextUrl;
 
     // ============================================================
     // ADMIN API
     // ============================================================
 
-    if (pathname.startsWith('/api/admin')) {
-
-        const admin =
-            await getAuthenticatedAdmin();
-
+    if (
+        pathname.startsWith('/api/admin') &&
+        !pathname.startsWith('/api/admin/auth')
+    ) {
+        const admin = await getAuthenticatedAdmin();
 
         if (!admin) {
-
             return NextResponse.json(
                 {
                     success: false,
@@ -29,21 +25,12 @@ export async function middleware(request) {
                     status: 401,
                 }
             );
-
         }
-
     }
 
-
     return NextResponse.next();
-
 }
 
-
 export const config = {
-
-    matcher: [
-        '/api/admin/:path*',
-    ],
-
+    matcher: ['/api/admin/:path*'],
 };
