@@ -155,6 +155,8 @@ export async function DELETE(request, { params }) {
         // FULFILLMENT NOT FOUND
         // ========================================================
 
+        //
+
         if (
             fulfillmentRows.length === 0
         ) {
@@ -193,7 +195,7 @@ export async function DELETE(request, { params }) {
             'in_progress'
         ];
 
-        
+
         if (
             !cancellableStatuses.includes(
                 fulfillment.status
