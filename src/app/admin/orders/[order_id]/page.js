@@ -47,6 +47,7 @@ export default function AdminOrderDetailsPage() {
     const [error, setError] = useState(null);
 
 
+
     const [
         fulfillDialogOpen,
         setFulfillDialogOpen
@@ -87,6 +88,9 @@ export default function AdminOrderDetailsPage() {
         setCreatingFulfillment
     ] = useState(false);
 
+
+const [cancellingFulfillmentId, setCancellingFulfillmentId] =
+    useState(null);
 
     // ============================================================
     // FETCH ORDER
@@ -406,7 +410,7 @@ export default function AdminOrderDetailsPage() {
 
             const response =
                 await fetch(
-                    `/api/admin/orders/${orderId}/fulfill`,
+                    `/api/admin/orders/${orderId}/fulfillments`,
                     {
                         method: 'POST',
 
@@ -498,6 +502,9 @@ export default function AdminOrderDetailsPage() {
             // REFRESH ORDER
             // ========================================================
 
+
+            
+
             const refreshResponse =
                 await fetch(
                     `/api/admin/orders/${orderId}`,
@@ -554,6 +561,129 @@ export default function AdminOrderDetailsPage() {
         }
 
     };
+
+
+
+    // ============================================================
+    // CANCEL FULFILLMENT
+    // ============================================================
+
+
+// ============================================================
+// CANCEL FULFILLMENT
+// ============================================================
+
+const handleCancelFulfillment = async (fulfillmentId) => {
+
+    try {
+
+        setError(null);
+
+        setCancellingFulfillmentId(
+            fulfillmentId
+        );
+
+
+        // ========================================================
+        // CANCEL FULFILLMENT
+        // ========================================================
+
+        const response =
+            await fetch(
+                `/api/admin/orders/${orderId}/fulfillments/${fulfillmentId}`,
+                {
+                    method: 'DELETE',
+
+                    credentials: 'include',
+
+                    cache: 'no-store',
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        // ========================================================
+        // HANDLE ERROR
+        // ========================================================
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
+
+            throw new Error(
+                data?.message ||
+                'Unable to cancel fulfillment.'
+            );
+
+        }
+
+
+        // ========================================================
+        // REFRESH ORDER
+        // ========================================================
+
+        const refreshResponse =
+            await fetch(
+                `/api/admin/orders/${orderId}`,
+                {
+                    method: 'GET',
+
+                    credentials: 'include',
+
+                    cache: 'no-store',
+                }
+            );
+
+
+        const refreshData =
+            await refreshResponse.json();
+
+
+        if (
+            !refreshResponse.ok ||
+            !refreshData.success
+        ) {
+
+            throw new Error(
+                refreshData?.message ||
+                'Fulfillment was cancelled, but the order could not be refreshed.'
+            );
+
+        }
+
+
+        setOrder(
+            refreshData.order
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'Cancel fulfillment error:',
+            error
+        );
+
+
+        setError(
+            error.message ||
+            'Unable to cancel fulfillment.'
+        );
+
+
+    } finally {
+
+        setCancellingFulfillmentId(
+            null
+        );
+
+    }
+
+};
 
 
 
@@ -865,6 +995,7 @@ export default function AdminOrderDetailsPage() {
 
 
 
+
                 {/* ================================================== */}
                 {/* FULFILLMENTS */}
                 {/* ================================================== */}
@@ -908,12 +1039,20 @@ export default function AdminOrderDetailsPage() {
                                         }}
                                     >
 
+                                        {/* ====================================== */}
+                                        {/* FULFILLMENT HEADER */}
+                                        {/* ====================================== */}
+
                                         <Stack
                                             direction={{
                                                 xs: 'column',
                                                 sm: 'row',
                                             }}
                                             justifyContent="space-between"
+                                            alignItems={{
+                                                xs: 'flex-start',
+                                                sm: 'center',
+                                            }}
                                             spacing={2}
                                             sx={{
                                                 mb: 2,
@@ -950,16 +1089,130 @@ export default function AdminOrderDetailsPage() {
                                             </Box>
 
 
-                                            <Chip
-                                                size="small"
-                                                label={fulfillment.status}
-                                                color={getStatusColor(
-                                                    fulfillment.status
+                                            {/* ================================== */}
+                                            {/* STATUS + ACTIONS */}
+                                            {/* ================================== */}
+
+                                            <Stack
+                                                direction="row"
+                                                spacing={1}
+                                                alignItems="center"
+                                                flexWrap="wrap"
+                                                useFlexGap
+                                            >
+
+                                                <Chip
+                                                    size="small"
+                                                    label={fulfillment.status}
+                                                    color={getStatusColor(
+                                                        fulfillment.status
+                                                    )}
+                                                />
+
+
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    onClick={() =>
+                                                        handleAddTracking(
+                                                            fulfillment
+                                                        )
+                                                    }
+                                                >
+
+                                                    Add Tracking
+
+                                                </Button>
+
+
+                                                {/* ================================== */}
+                                                {/* IN PROGRESS ACTIONS */}
+                                                {/* ================================== */}
+
+                                                {fulfillment.status ===
+                                                    'in_progress' && (
+
+                                                    <>
+
+
+
+
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="success"
+                                                            onClick={() =>
+                                                                handleMarkDelivered(
+                                                                    fulfillment.id
+                                                                )
+                                                            }
+                                                        >
+
+                                                            Mark Delivered
+
+                                                        </Button>
+
+                                        
+
+
+                                                        <Button
+                                                            color="error"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            disabled={
+                                                                cancellingFulfillmentId === fulfillment.id
+                                                            }
+                                                            onClick={() => {
+
+                                                                const confirmed =
+                                                                    window.confirm(
+                                                                        `Are you sure you want to delete Fulfillment #${fulfillment.id}?`
+                                                                    );
+
+
+                                                                if (!confirmed) {
+
+                                                                    return;
+
+                                                                }
+
+
+                                                                handleCancelFulfillment(
+                                                                    fulfillment.id
+                                                                );
+
+                                                            }}
+                                                        >
+                                                            {cancellingFulfillmentId === fulfillment.id ? (
+
+                                                                <CircularProgress
+                                                                    size={18}
+                                                                    color="inherit"
+                                                                />
+
+                                                            ) : (
+
+                                                                'Delete Fulfillment'
+
+                                                            )}
+                                                        </Button>
+
+
+
+
+
+                                                    </>
+
                                                 )}
-                                            />
+
+                                            </Stack>
 
                                         </Stack>
 
+
+                                        {/* ====================================== */}
+                                        {/* SHIPPING INFORMATION */}
+                                        {/* ====================================== */}
 
                                         <Grid
                                             container
@@ -1080,6 +1333,10 @@ export default function AdminOrderDetailsPage() {
                                         </Grid>
 
 
+                                        {/* ====================================== */}
+                                        {/* ITEMS */}
+                                        {/* ====================================== */}
+
                                         <Typography
                                             variant="subtitle2"
                                             sx={{
@@ -1163,7 +1420,9 @@ export default function AdminOrderDetailsPage() {
                                                                     </TableCell>
 
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell
+                                                                        align="right"
+                                                                    >
 
                                                                         {
                                                                             fulfillmentItem.quantity
@@ -1194,6 +1453,8 @@ export default function AdminOrderDetailsPage() {
                     </Grid>
 
                 )}
+
+
 
 
 
@@ -2107,161 +2368,7 @@ export default function AdminOrderDetailsPage() {
                         <Divider />
 
 
-                        {/* ================================================== */}
-                        {/* SHIPPING */}
-                        {/* ================================================== */}
 
-                        <Box>
-
-                            <Typography
-                                variant="subtitle1"
-                                sx={{
-                                    fontWeight: 600,
-                                    mb: 2,
-                                }}
-                            >
-
-                                Shipping
-
-                            </Typography>
-
-
-                            <Grid
-                                container
-                                spacing={2}
-                            >
-
-                                <Grid
-                                    size={{
-                                        xs: 12,
-                                        sm: 6,
-                                    }}
-                                >
-
-                                    <TextField
-                                        fullWidth
-                                        label="Carrier"
-                                        value={
-                                            fulfillmentCarrier
-                                        }
-                                        disabled={
-                                            creatingFulfillment
-                                        }
-                                        onChange={(event) =>
-                                            setFulfillmentCarrier(
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-
-                                </Grid>
-
-
-                                <Grid
-                                    size={{
-                                        xs: 12,
-                                        sm: 6,
-                                    }}
-                                >
-
-                                    <TextField
-                                        fullWidth
-                                        label="Service"
-                                        value={
-                                            fulfillmentService
-                                        }
-                                        disabled={
-                                            creatingFulfillment
-                                        }
-                                        onChange={(event) =>
-                                            setFulfillmentService(
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-
-                                </Grid>
-
-
-                                <Grid
-                                    size={12}
-                                >
-
-                                    <TextField
-                                        fullWidth
-                                        label="Tracking Number"
-                                        value={
-                                            fulfillmentTrackingNumber
-                                        }
-                                        disabled={
-                                            creatingFulfillment
-                                        }
-                                        onChange={(event) =>
-                                            setFulfillmentTrackingNumber(
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-
-                                </Grid>
-
-
-                                <Grid
-                                    size={12}
-                                >
-
-                                    <TextField
-                                        fullWidth
-                                        label="Tracking URL"
-                                        value={
-                                            fulfillmentTrackingUrl
-                                        }
-                                        disabled={
-                                            creatingFulfillment
-                                        }
-                                        onChange={(event) =>
-                                            setFulfillmentTrackingUrl(
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-
-                                </Grid>
-
-
-                                <Grid
-                                    size={{
-                                        xs: 12,
-                                        sm: 6,
-                                    }}
-                                >
-
-                                    <TextField
-                                        fullWidth
-                                        label="Shipping Cost"
-                                        type="number"
-                                        value={
-                                            fulfillmentShippingCost
-                                        }
-                                        disabled={
-                                            creatingFulfillment
-                                        }
-                                        onChange={(event) =>
-                                            setFulfillmentShippingCost(
-                                                event.target.value
-                                            )
-                                        }
-                                        inputProps={{
-                                            min: 0,
-                                            step: '0.01',
-                                        }}
-                                    />
-
-                                </Grid>
-
-                            </Grid>
-
-                        </Box>
 
                     </Stack>
 

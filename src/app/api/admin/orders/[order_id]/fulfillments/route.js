@@ -79,7 +79,7 @@ export async function POST(request, { params }) {
         const {
             items = [],
 
-            status = 'pending',
+            status = 'in_progress',
 
             provider = null,
 
@@ -130,6 +130,7 @@ export async function POST(request, { params }) {
 
         const allowedStatuses = [
             'pending',
+            'in_progress',
             'processing',
             'shipped',
             'in_transit',
@@ -921,3 +922,6 @@ export async function POST(request, { params }) {
     }
 
 }
+
+
+

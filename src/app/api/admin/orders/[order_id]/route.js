@@ -608,7 +608,7 @@ export async function GET(request, { params }) {
             await connection.end();
 
         }
-
+        
     }
 
 }

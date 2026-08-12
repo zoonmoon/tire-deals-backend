@@ -107,7 +107,7 @@ export async function GET() {
 
                 shipping_cost DECIMAL(12, 2)
                     NOT NULL DEFAULT 0.00,
-
+                
 
                 -- ====================================================
                 -- DATES
