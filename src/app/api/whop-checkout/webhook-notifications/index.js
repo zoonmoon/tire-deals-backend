@@ -5,6 +5,8 @@ import { logPaymentEvent } from "./log_payment_event";
 
 import { handlePaymentSucceeded } from "./handle-payment-succeeded";
 
+import { handleRefundCreated } from "./handle-refund";
+
 export async function handleWhopWebhook(
     webhookData
 ) {

@@ -8,6 +8,7 @@ import {
 } from '@mui/icons-material';
 
 
+
 import {
     Alert,
     Box,
@@ -42,7 +43,6 @@ export default function AdminOrderDetailsPage() {
     const params = useParams();
 
     const orderId = params?.order_id;
-
 
     const [order, setOrder] = useState(null);
 
@@ -119,6 +119,18 @@ export default function AdminOrderDetailsPage() {
 
     const [updatingTracking, setUpdatingTracking] =
         useState(false);
+
+
+
+    const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+
+    const [refundAmount, setRefundAmount] = useState('');
+
+    const [refundReason, setRefundReason] = useState('');
+
+    const [creatingRefund, setCreatingRefund] = useState(false);
+
+
 
 
     // ============================================================
@@ -1032,6 +1044,98 @@ export default function AdminOrderDetailsPage() {
 
 
 
+    const handleCreateRefund = async () => {
+
+        try {
+
+            setCreatingRefund(true);
+
+            const amount = Number(refundAmount);
+
+            if (!Number.isFinite(amount) || amount <= 0) {
+                throw new Error('Please enter a valid refund amount.');
+            }
+
+            const response = await fetch(
+                `/api/admin/orders/${orderId}/refund`,
+                {
+                    method: 'POST',
+
+                    credentials: 'include',
+
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        partial_amount: amount,
+                        reason: refundReason.trim() || null,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data?.error ||
+                    data?.message ||
+                    'Unable to initiate refund.'
+                );
+            }
+
+            toast.success(
+                'Refund initiated successfully.'
+            );
+
+            setRefundDialogOpen(false);
+
+            setRefundAmount('');
+
+            setRefundReason('');
+
+            // Refresh order
+            const refreshResponse = await fetch(
+                `/api/admin/orders/${orderId}`,
+                {
+                    method: 'GET',
+                    credentials: 'include',
+                    cache: 'no-store',
+                }
+            );
+
+            const refreshData =
+                await refreshResponse.json();
+
+            if (
+                refreshResponse.ok &&
+                refreshData.success
+            ) {
+                setOrder(refreshData.order);
+            }
+
+        } catch (error) {
+
+            console.error(
+                'Create refund error:',
+                error
+            );
+
+            toast.error(
+                error.message ||
+                'Unable to initiate refund.'
+            );
+
+        } finally {
+
+            setCreatingRefund(false);
+
+        }
+
+    };
+
+
+
     // ============================================================
     // PAGE
     // ============================================================
@@ -1152,15 +1256,41 @@ export default function AdminOrderDetailsPage() {
 
 
 
-                    <Button
-                        variant="contained"
-                        sx={{maxHeight:'40px'}}
-                        onClick={() =>
-                            setFulfillDialogOpen(true)
-                        }
+
+                    <Stack
+                        direction={'row'}
+                        spacing={3}
                     >
-                        Fulfill Order
-                    </Button>
+
+                        <Button
+                            variant="contained"
+                            sx={{maxHeight:'40px'}}
+                            onClick={() =>
+                                setFulfillDialogOpen(true)
+                            }
+                        >
+                            Fulfill Order
+                        </Button>
+
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            sx={{ maxHeight: '40px' }}
+                            onClick={() =>
+                                setRefundDialogOpen(true)
+                            }
+                            disabled={
+                                order.payment_status !== 'paid' &&
+                                order.payment_status !== 'partially_refunded'
+                            }
+                        >
+                            Refund
+                        </Button>
+
+                    </Stack>
+
+
+
 
                 </div>
 
@@ -2941,6 +3071,178 @@ export default function AdminOrderDetailsPage() {
             </Dialog>
 
 
+
+
+            <Dialog
+                open={refundDialogOpen}
+                onClose={(event, reason) => {
+
+                    if (reason === 'backdropClick') {
+                        return;
+                    }
+
+                    if (!creatingRefund) {
+                        setRefundDialogOpen(false);
+                    }
+
+                }}
+                fullWidth
+                maxWidth="sm"
+            >
+
+                <DialogTitle>
+                    Refund Order #{order.order_number}
+                </DialogTitle>
+
+                <DialogContent dividers>
+
+                    <Stack spacing={3}>
+
+                        <Alert severity="warning">
+                            Refunds are processed through Whop and cannot
+                            be automatically reversed.
+                        </Alert>
+
+                        <Box>
+
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                            >
+                                Order Total
+                            </Typography>
+
+                            <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 600 }}
+                            >
+                                {formatMoney(order.grand_total)}
+                            </Typography>
+
+                        </Box>
+
+
+                        <TextField
+                            fullWidth
+                            required
+                            type="number"
+                            label="Refund Amount"
+                            value={refundAmount}
+                            disabled={creatingRefund}
+                            onChange={(event) => {
+
+                                const value =
+                                    event.target.value;
+
+                                if (value === '') {
+
+                                    setRefundAmount('');
+
+                                    return;
+
+                                }
+
+                                const amount =
+                                    Number(value);
+
+                                if (
+                                    !Number.isFinite(amount) ||
+                                    amount < 0
+                                ) {
+                                    return;
+                                }
+
+                                setRefundAmount(value);
+
+                            }}
+                            inputProps={{
+                                min: 0.01,
+                                step: 0.01,
+                            }}
+                            InputProps={{
+                                startAdornment: (
+                                    <Typography
+                                        sx={{
+                                            mr: 1,
+                                            color: 'text.secondary',
+                                        }}
+                                    >
+                                        {order.currency}
+                                    </Typography>
+                                ),
+                            }}
+                        />
+
+
+                        <TextField
+                            fullWidth
+                            multiline
+                            minRows={3}
+                            label="Refund Note"
+                            placeholder="Reason for refund..."
+                            value={refundReason}
+                            disabled={creatingRefund}
+                            onChange={(event) =>
+                                setRefundReason(
+                                    event.target.value
+                                )
+                            }
+                        />
+
+                    </Stack>
+
+                </DialogContent>
+
+
+                <DialogActions
+                    sx={{
+                        minHeight: '60px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                    }}
+                >
+
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={() =>
+                            setRefundDialogOpen(false)
+                        }
+                        disabled={creatingRefund}
+                    >
+                        Cancel
+                    </Button>
+
+
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleCreateRefund}
+                        disabled={
+                            creatingRefund ||
+                            !refundAmount ||
+                            Number(refundAmount) <= 0
+                        }
+                    >
+
+                        {creatingRefund ? (
+
+                            <CircularProgress
+                                size={20}
+                                color="inherit"
+                            />
+
+                        ) : (
+
+                            'Issue Refund'
+
+                        )}
+
+                    </Button>
+
+                </DialogActions>
+
+            </Dialog>
 
 
 
