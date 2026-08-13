@@ -324,6 +324,7 @@ export default function AdminOrderDetailsPage() {
 
             case 'paid':
             case 'completed':
+            case 'succeeded':
             case 'fulfilled':
             case 'delivered':
 
