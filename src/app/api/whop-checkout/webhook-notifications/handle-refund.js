@@ -95,13 +95,7 @@ export async function handleRefundCreated(
     // ============================================================
 
 
-    const refundedAt = new Date(
-        webhookTimestamp
-    )
-        .toISOString()
-        .slice(0, 19)
-        .replace('T', ' ');
-
+  
     const [
         result
     ] = await connection.execute(
