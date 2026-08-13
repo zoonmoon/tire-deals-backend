@@ -65,16 +65,7 @@ export async function handleWhopWebhook(
         }
 
 
-        if (
-            webhookData.type?.startsWith("refund.")
-        ) {
 
-            await logAllRefundEvents(
-                connection,
-                webhookData
-            );
-
-        }
 
 
     } finally {
