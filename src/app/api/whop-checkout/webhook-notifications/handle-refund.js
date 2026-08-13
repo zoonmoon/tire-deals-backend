@@ -94,6 +94,14 @@ export async function handleRefundCreated(
     // This makes the refund webhook idempotent.
     // ============================================================
 
+
+    const refundedAt = new Date(
+        webhookTimestamp
+    )
+        .toISOString()
+        .slice(0, 19)
+        .replace('T', ' ');
+
     const [
         result
     ] = await connection.execute(
@@ -106,7 +114,7 @@ export async function handleRefundCreated(
 
             status = ?,
 
-            refunded_at = ?
+            refunded_at = NOW()
 
         WHERE payment_id = ?
 
@@ -129,7 +137,6 @@ export async function handleRefundCreated(
 
             refundData.status,
 
-            refundData.created_at,
 
             payment.id
 
