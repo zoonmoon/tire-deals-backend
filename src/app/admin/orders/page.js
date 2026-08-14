@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+
+import FilterListIcon from '@mui/icons-material/FilterList';
 import {
     Alert,
     Box,
@@ -344,6 +346,10 @@ export default function OrdersPage() {
     // ============================================================
 
     const [appliedSearch, setAppliedSearch] =
+        useState('');
+
+
+    const [displayFilters, setDisplayFilters] =
         useState('');
 
 
@@ -894,6 +900,12 @@ export default function OrdersPage() {
     }
 
 
+    const toggleFiltersDisplay = () => {
+        setDisplayFilters(!displayFilters)
+    }
+
+    
+
     // ============================================================
     // RENDER
     // ============================================================
@@ -948,18 +960,42 @@ export default function OrdersPage() {
                 </Box>
 
 
-                <Button
-                    variant="outlined"
-                    startIcon={
-                        <RefreshOutlinedIcon />
-                    }
-                    onClick={
-                        handleRefresh
-                    }
-                    disabled={loading}
+                <Stack
+                
+                        direction={'row'}
+                        spacing={3}
                 >
-                    Refresh
-                </Button>
+
+
+                    <Button
+                        variant="outlined"
+                        startIcon={
+                            <FilterListIcon />
+                        }
+                        onClick={
+                            toggleFiltersDisplay
+                        }
+                    >
+                        Filter
+                    </Button>
+
+
+                    <Button
+                        variant="outlined"
+                        startIcon={
+                            <RefreshOutlinedIcon />
+                        }
+                        onClick={
+                            handleRefresh
+                        }
+                        disabled={loading}
+                    >
+                        Refresh
+                    </Button>
+
+                </Stack>
+
+
 
             </Box>
 
@@ -970,8 +1006,11 @@ export default function OrdersPage() {
 
             <Paper
                 elevation={0}
+
+
                 sx={{
                     p: 2,
+                    display: displayFilters ?'block':'none',
                     mb: 3,
                     border: '1px solid',
                     borderColor: 'divider',
@@ -979,7 +1018,7 @@ export default function OrdersPage() {
             >
 
                 <Stack
-                    spacing={2}
+                    spacing={3}
                 >
 
                     {/* ========================================== */}
@@ -998,7 +1037,7 @@ export default function OrdersPage() {
                     >
 
                         <TextField
-                            fullWidth
+                            sx={{minWidth:'350px'}}
                             size="small"
                             label="Search orders"
                             placeholder="Order number or customer email"
@@ -1056,6 +1095,7 @@ export default function OrdersPage() {
                                 lg: 'repeat(5, 1fr)',
                             },
                             gap: 2,
+                            marginTop:'10px'
                         }}
                     >
 
@@ -1630,7 +1670,7 @@ export default function OrdersPage() {
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
+                        gap:'20px',
                         px: 2,
                         py: 1.5,
                         borderTop: '1px solid',

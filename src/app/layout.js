@@ -22,7 +22,10 @@ import { Toaster } from 'react-hot-toast';
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+      
+        style={{background:'rgba(0,0,0,0.05)'}}
+      className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
 
  

@@ -1,64 +1,151 @@
 import mysql from 'mysql2/promise';
-import { MYSQL_CONFIG } from '../../setup-database/mysql-db/utils';
+
+import { MYSQL_CONFIG } from '@/app/api/setup-database/mysql-db/utils';
+
+import {
+    getAuthenticatedAdmin,
+} from '../auth/utils/manage-cookie';
 
 
 export async function GET(request) {
 
-    const { searchParams } = new URL(request.url);
-
-    // =========================
-    // Pagination
-    // =========================
-
-    const page = Math.max(
-        parseInt(searchParams.get('page') || '1', 10),
-        1
-    );
-
-    const limit = Math.min(
-        Math.max(
-            parseInt(searchParams.get('limit') || '50', 10),
-            1
-        ),
-        100
-    );
-
-    const offset = (page - 1) * limit;
-
-
-    // =========================
-    // Filters
-    // =========================
-
-    const search = searchParams.get('search')?.trim() || '';
-
-    const status = searchParams.get('status')?.trim() || '';
-
-    const mappingStatus =
-        searchParams.get('mapping_status')?.trim() || '';
-
-    const connection = await mysql.createConnection(
-        MYSQL_CONFIG
-    );
+    let connection;
 
 
     try {
 
-        // =========================
-        // Build WHERE conditions
-        // =========================
+        // ============================================================
+        // ADMIN AUTHENTICATION
+        // ============================================================
+
+        const admin =
+            await getAuthenticatedAdmin();
+
+
+        if (!admin) {
+
+            return Response.json(
+                {
+                    success: false,
+                    message: 'Authentication required.',
+                },
+                {
+                    status: 401,
+                }
+            );
+
+        }
+
+
+        // ============================================================
+        // URL PARAMETERS
+        // ============================================================
+
+        const { searchParams } =
+            new URL(request.url);
+
+
+        // ============================================================
+        // PAGINATION
+        // ============================================================
+
+        let page =
+            parseInt(
+                searchParams.get('page') || '1',
+                10
+            );
+
+
+        let limit =
+            parseInt(
+                searchParams.get('limit') || '25',
+                10
+            );
+
+
+        // ------------------------------------------------------------
+        // VALIDATE PAGE
+        // ------------------------------------------------------------
+
+        if (
+            !Number.isInteger(page) ||
+            page < 1
+        ) {
+
+            page = 1;
+
+        }
+
+
+        // ------------------------------------------------------------
+        // VALIDATE LIMIT
+        // ------------------------------------------------------------
+
+        if (
+            !Number.isInteger(limit) ||
+            limit < 1 ||
+            limit > 100
+        ) {
+
+            limit = 25;
+
+        }
+
+
+        const offset =
+            (page - 1) * limit;
+
+
+        // ============================================================
+        // FILTERS
+        // ============================================================
+
+        const search =
+            String(
+                searchParams.get('search') || ''
+            ).trim();
+
+
+        const status =
+            String(
+                searchParams.get('status') || ''
+            ).trim();
+
+
+        const mappingStatus =
+            String(
+                searchParams.get('mapping_status') || ''
+            ).trim();
+
+
+        // ============================================================
+        // DATABASE CONNECTION
+        // ============================================================
+
+        connection =
+            await mysql.createConnection(
+                MYSQL_CONFIG
+            );
+
+
+        // ============================================================
+        // BUILD WHERE CLAUSE
+        // ============================================================
 
         const conditions = [];
 
-        const values = [];
+        const parameters = [];
 
-        // Search
+
+        // ============================================================
+        // SEARCH
         //
-        // Search by:
-        // manufacturer
-        // item
-        // size
-        // description
+        // Searches:
+        // - manufacturer
+        // - item
+        // - size
+        // - description
+        // ============================================================
 
         if (search) {
 
@@ -71,9 +158,12 @@ export async function GET(request) {
                 )
             `);
 
-            const searchValue = `%${search}%`;
 
-            values.push(
+            const searchValue =
+                `%${search}%`;
+
+
+            parameters.push(
                 searchValue,
                 searchValue,
                 searchValue,
@@ -82,10 +172,10 @@ export async function GET(request) {
 
         }
 
-        // Product status
-        //
-        // active
-        // archived
+
+        // ============================================================
+        // PRODUCT STATUS
+        // ============================================================
 
         if (status) {
 
@@ -93,17 +183,17 @@ export async function GET(request) {
                 `status = ?`
             );
 
-            values.push(status);
+
+            parameters.push(
+                status
+            );
 
         }
 
 
-        // OpenSearch mapping status
-        //
-        // pending
-        // matched
-        // review
-        // not_found
+        // ============================================================
+        // OPENSEARCH MAPPING STATUS
+        // ============================================================
 
         if (mappingStatus) {
 
@@ -111,14 +201,17 @@ export async function GET(request) {
                 `opensearch_mapping_status = ?`
             );
 
-            values.push(mappingStatus);
+
+            parameters.push(
+                mappingStatus
+            );
 
         }
 
 
-        // =========================
-        // WHERE clause
-        // =========================
+        // ============================================================
+        // WHERE CLAUSE
+        // ============================================================
 
         const whereClause =
             conditions.length > 0
@@ -126,85 +219,124 @@ export async function GET(request) {
                 : '';
 
 
-        // =========================
-        // Get total count
-        // =========================
+        // ============================================================
+        // FETCH ONE EXTRA ROW
+        //
+        // Example:
+        //
+        // limit = 25
+        // fetch 26
+        //
+        // 25 rows -> no next page
+        // 26 rows -> next page exists
+        // ============================================================
 
-        const [countRows] = await connection.execute(
-            `
-            SELECT COUNT(*) AS total
-            FROM tire_inventory
-            ${whereClause}
-            `,
-            values
-        );
-
-
-        const total = Number(
-            countRows[0].total
-        );
+        const fetchLimit =
+            limit + 1;
 
 
-        // =========================
-        // Get products
-        // =========================
+        // ============================================================
+        // QUERY
+        // ============================================================
 
-
-
-        const [products] = await connection.execute(
-            `
+        const query = `
             SELECT
+
                 id,
+
                 manufacturer,
+
                 item,
+
                 size,
+
                 description,
+
                 opensearch_id,
+
                 price,
+
                 fet,
+
                 quantity,
+
                 opensearch_mapping_status,
+
                 status,
+
                 created_at,
+
                 updated_at
+
             FROM tire_inventory
 
             ${whereClause}
 
             ORDER BY id DESC
 
-            LIMIT ${limit} OFFSET ${offset}
-            `,
-            values
-        );
+            LIMIT ${fetchLimit}
+
+            OFFSET ${offset}
+        `;
 
 
+        // ============================================================
+        // EXECUTE QUERY
+        // ============================================================
 
-        // =========================
-        // Pagination
-        // =========================
+        const [rows] =
+            await connection.execute(
+                query,
+                parameters
+            );
 
-        const totalPages = Math.ceil(
-            total / limit
-        );
 
+        // ============================================================
+        // PAGINATION
+        // ============================================================
+
+        const hasNext =
+            rows.length > limit;
+
+
+        const hasPrevious =
+            page > 1;
+
+
+        // ============================================================
+        // REMOVE EXTRA ROW
+        // ============================================================
+
+        const products =
+            rows.slice(
+                0,
+                limit
+            );
+
+
+        // ============================================================
+        // SUCCESS
+        // ============================================================
 
         return Response.json({
+
+            success: true,
 
             products,
 
             pagination: {
+
                 page,
+
                 limit,
-                total,
-                totalPages,
 
-                hasNextPage:
-                    page < totalPages,
+                has_previous:
+                    hasPrevious,
 
-                hasPreviousPage:
-                    page > 1
-            }
+                has_next:
+                    hasNext,
+
+            },
 
         });
 
@@ -212,28 +344,31 @@ export async function GET(request) {
     } catch (error) {
 
         console.error(
-            'Failed to fetch tire inventory:',
+            'Admin products error:',
             error
         );
 
 
         return Response.json(
-
             {
-                error:
-                    'Failed to fetch products'
+                success: false,
+
+                message:
+                    'Unable to retrieve products.',
             },
-
             {
-                status: 500
+                status: 500,
             }
-
         );
 
 
     } finally {
 
-        await connection.end();
+        if (connection) {
+
+            await connection.end();
+
+        }
 
     }
 
