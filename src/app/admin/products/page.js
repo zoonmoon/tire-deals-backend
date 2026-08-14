@@ -485,7 +485,7 @@ export default function ProductsPage() {
     ) => {
 
         router.push(
-            `/products/${productId}`
+            `/admin/products/${productId}`
         );
 
     };
