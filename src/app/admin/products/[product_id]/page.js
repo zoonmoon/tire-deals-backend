@@ -1322,7 +1322,7 @@ export default function ProductPage() {
                         }}
                     >
                         This product is not currently
-                        mapped to an OpenSearch document.
+                        mapped to an AutoSync tire.
                     </Alert>
 
                 )}
