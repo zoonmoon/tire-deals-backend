@@ -41,6 +41,16 @@ export async function createOrderForWhopSession(){
         shipping_country: "US",
 
 
+
+        delivery_method: "ship_to_local_installer", 
+        delivery_location_id: "74216",
+
+
+        appointment_booking_date: "August 21, 2026, Monday",
+
+        appointment_booking_time_range: "Morning",
+
+        
         items: [
 
             {
@@ -68,8 +78,7 @@ export async function createOrderForWhopSession(){
                 selected_vehicle: null
 
             },
-
-
+            
             {
 
                 type: "shipping",
@@ -102,6 +111,7 @@ export async function createOrderForWhopSession(){
         ]
 
     });
+
     
     return order 
 

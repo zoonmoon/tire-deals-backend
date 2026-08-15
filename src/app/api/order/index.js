@@ -97,6 +97,10 @@ export async function createOrder(data) {
 
             delivery_method = 'ship_to_customer',
 
+            appointment_booking_date = null, 
+
+            appointment_booking_time_range  = null, 
+
             delivery_location_id = null , 
 
             // --------------------------------------------------------
@@ -351,7 +355,7 @@ export async function createOrder(data) {
                 const itemSubtotal =
 
                     productPrice * quantity;
-
+                
 
                 // ----------------------------------------------------
                 // FET
@@ -698,7 +702,11 @@ export async function createOrder(data) {
 
                 delivery_method, 
                 
-                delivery_location_id
+                delivery_location_id,
+
+                appointment_booking_date,
+
+                appointment_booking_time_range
 
             )
 
@@ -710,8 +718,9 @@ export async function createOrder(data) {
 
                 ?, ?, ?, ?, ?, ?, ?, ?, ?,
 
-
                 ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+
+                ?, ?,
 
                 ?, ?
 
@@ -785,9 +794,9 @@ export async function createOrder(data) {
 
                 shipping_country,
 
-                delivery_method, 
+                delivery_method, delivery_location_id,
 
-                delivery_location_id
+                appointment_booking_date, appointment_booking_time_range
 
             ]
 

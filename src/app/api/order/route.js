@@ -45,6 +45,10 @@ export async function GET(){
             shipping_country: "US",
 
             delivery_method: "ship_to_local_installer", 
+
+            appointment_booking_date: "August 21, 2026, Monday",
+
+            appointment_booking_time_range: "Morning",
             
             delivery_location_id: "74216",
             
