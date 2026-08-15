@@ -20,6 +20,9 @@ function isOriginAllowed(origin) {
 export function proxy(request) {
 
     console.log("insid erpxoy")
+
+console.log("🔥🔥🔥 PROXY FILE LOADED 🔥🔥🔥")
+
   // Check the origin from the request
   const origin = request.headers.get('origin') ?? ''
   const isAllowedOrigin = isOriginAllowed(origin)
