@@ -9,17 +9,21 @@ const corsOptions = {
 }
 
 function isOriginAllowed(origin) {
+
+    console.log("origin ", origin)
   return (
     allowedOrigins.includes(origin) ||
-    /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)
+    origin.endsWith('.vercel.app')
   )
 }
 
 export function proxy(request) {
+
+    console.log("insid erpxoy")
   // Check the origin from the request
   const origin = request.headers.get('origin') ?? ''
   const isAllowedOrigin = isOriginAllowed(origin)
-    
+
   // Handle preflighted requests
   const isPreflight = request.method === 'OPTIONS'
 
@@ -35,8 +39,14 @@ export function proxy(request) {
   // Handle simple requests
   const response = NextResponse.next()
 
+
+  console.log("hello karuna")
+
   if (isAllowedOrigin) {
     response.headers.set('Access-Control-Allow-Origin', origin)
+  }else{
+      console.log("hello karuna inside else")
+
   }
 
   Object.entries(corsOptions).forEach(([key, value]) => {
