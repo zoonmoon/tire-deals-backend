@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 const allowedOrigins = [
   "https://artyxpress.com",
 ];
@@ -15,14 +17,13 @@ export default function middleware(request) {
     allowedOrigins.includes(origin) ||
     /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin);
 
-  const isPreflight = request.method === "OPTIONS";
-
-  if (isPreflight) {
+  // Handle preflight
+  if (request.method === "OPTIONS") {
     if (!isAllowedOrigin) {
-      return new Response(null, { status: 403 });
+      return new NextResponse(null, { status: 403 });
     }
 
-    return new Response(null, {
+    return new NextResponse(null, {
       status: 204,
       headers: {
         "Access-Control-Allow-Origin": origin,
@@ -31,9 +32,8 @@ export default function middleware(request) {
     });
   }
 
-  const response = Response.next
-    ? Response.next()
-    : new Response(null);
+  // Let the actual API request continue
+  const response = NextResponse.next();
 
   if (isAllowedOrigin) {
     response.headers.set("Access-Control-Allow-Origin", origin);
