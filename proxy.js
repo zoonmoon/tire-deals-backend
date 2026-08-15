@@ -11,45 +11,50 @@ const corsOptions = {
 }
 
 function isAllowedOrigin(origin) {
-  if (!origin) return false
-
   return (
-    allowedOrigins.includes(origin) ||
+    origin === 'https://artyxpress.com' ||
     /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)
   )
 }
 
 export function proxy(request) {
-  const origin = request.headers.get('origin') ?? ''
-  const isAllowedOrigin = isAllowedOrigin(origin)
+  const origin = request.headers.get('origin') || ''
+  const allowed = isAllowedOrigin(origin)
 
-  // Handle preflight requests
-  const isPreflight = request.method === 'OPTIONS'
+  console.log('CORS:', {
+    origin,
+    allowed,
+    path: request.nextUrl.pathname,
+  })
 
-  if (isPreflight) {
-    const preflightHeaders = {
-      ...(isAllowedOrigin && {
-        'Access-Control-Allow-Origin': origin,
-      }),
-      ...corsOptions,
+  if (request.method === 'OPTIONS') {
+    if (!allowed) {
+      return new NextResponse(null, { status: 403 })
     }
 
     return new NextResponse(null, {
       status: 204,
-      headers: preflightHeaders,
+      headers: {
+        'Access-Control-Allow-Origin': origin,
+        ...corsOptions,
+      },
     })
   }
 
-  // Let the actual API request continue
   const response = NextResponse.next()
 
-  if (isAllowedOrigin) {
+  if (allowed) {
     response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+    )
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization'
+    )
   }
-
-  Object.entries(corsOptions).forEach(([key, value]) => {
-    response.headers.set(key, value)
-  })
 
   return response
 }
