@@ -1078,6 +1078,10 @@ export const contactInquiriesSchema = {
         type: "date"
       },
 
+      is_viewed: {
+        type: "boolean"
+      }, 
+
       updated_at: {
         type: "date"
       }

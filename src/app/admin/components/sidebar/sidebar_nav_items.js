@@ -6,6 +6,8 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+
 export const adminNavigationItems = [
 
     {
@@ -26,6 +28,13 @@ export const adminNavigationItems = [
     },
 
     {
+        label: 'Contact Inquiries',
+        href: '/admin/contact-us-inquiries',
+        icon: SupportAgentIcon,
+    },
+
+
+    {
         label: 'Customers',
         href: '/admin/customers',
         icon: PeopleOutlinedIcon,
@@ -37,11 +46,7 @@ export const adminNavigationItems = [
         icon: BuildOutlinedIcon,
     },
 
-    {
-        label: 'Shipping',
-        href: '/admin/shipping',
-        icon: LocalShippingOutlinedIcon,
-    },
+
 
     {
         label: 'Settings',

@@ -67,9 +67,8 @@ export async function POST(request) {
 
       subject: subject?.trim() || "",
       message: message.trim(),
-
+      
       status: "new",
-
       created_at: now,
       updated_at: now
     };
