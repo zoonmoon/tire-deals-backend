@@ -173,7 +173,7 @@ export async function GET(request) {
 
         body: {
 
-          size: 10000,
+          size: 1000,
 
           track_total_hits: true,
 

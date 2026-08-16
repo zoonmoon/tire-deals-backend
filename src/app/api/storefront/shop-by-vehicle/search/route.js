@@ -22,16 +22,25 @@ const normalize = (value) => {
 // ======================================================
 // GET /api/vehicles/search?query=toyota camry
 //
-// Searches vehicle_key using wildcard.
+// Searches vehicle_search.
 //
-// Examples:
+// EVERY search term must match.
 //
-// ?query=toyota
-// ?query=toyota camry
-// ?query=2023 toyota camry
+// Each individual term:
 //
-// Each search term must exist somewhere inside
-// vehicle_key.
+//     fuzzy OR wildcard
+//
+// Example:
+//
+// ?query=porsc carre 2004
+//
+// becomes:
+//
+//     (porsc fuzzy OR *porsc*)
+//     AND
+//     (carre fuzzy OR *carre*)
+//     AND
+//     (2004 fuzzy OR *2004*)
 // ======================================================
 
 export async function GET(request) {
@@ -78,17 +87,18 @@ export async function GET(request) {
 
 
     // ==================================================
-    // Normalize each search term separately
+    // Normalize search terms
     //
     // Example:
     //
-    // "Toyota Camry"
+    // "Porsc Carre 2004"
     //
     // becomes:
     //
     // [
-    //   "toyota",
-    //   "camry"
+    //   "porsc",
+    //   "carre",
+    //   "2004"
     // ]
     // ==================================================
 
@@ -100,39 +110,86 @@ export async function GET(request) {
 
 
     // ==================================================
-    // Build wildcard conditions
+    // Build conditions
     //
-    // Every search term must match somewhere inside
-    // vehicle_key.
+    // EVERY term is required.
     //
-    // Example:
+    // For EACH term:
     //
-    // "toyota camry"
-    //
-    // becomes:
-    //
-    // *toyota*
-    //
-    // AND
-    //
-    // *camry*
+    // fuzzy OR wildcard
     // ==================================================
 
-    const wildcardConditions =
+    const termConditions =
       searchTerms.map(term => ({
 
-        fuzzy: {
+        bool: {
 
-          make: {
+          should: [
 
-            value:
-              `${term}`
-          }
+            // ==========================================
+            // Fuzzy matching
+            //
+            // Handles typos.
+            //
+            // porche -> porsche
+            // carrear -> carrera
+            // ==========================================
+
+            {
+              match: {
+
+                vehicle_search: {
+
+                  query:
+                    term,
+
+                  fuzziness:
+                    2
+
+                }
+
+              }
+
+            },
+
+
+            // ==========================================
+            // Wildcard matching
+            //
+            // Handles partial/substring input.
+            //
+            // porsc -> porsche
+            // carr  -> carrera
+            // ==========================================
+
+            {
+              wildcard: {
+
+                vehicle_search: {
+
+                  value:
+                    `*${term}*`
+
+                }
+
+              }
+
+            }
+
+          ],
+
+          // At least ONE of fuzzy/wildcard
+          // must match for this term.
+
+          minimum_should_match:
+            1
 
         }
 
       }));
 
+
+    console.log(termConditions) 
 
     // ==================================================
     // Search vehicles
@@ -149,12 +206,20 @@ export async function GET(request) {
 
           track_total_hits: true,
 
+
+          // ==================================================
+          // OUTER BOOL
+          //
+          // ALL search terms must match.
+          // ==================================================
+
           query: {
 
-            fuzzy: {
-                make: {
-                    value: searchTerms.join(" ")
-                }
+            bool: {
+
+              must:
+                termConditions
+
             }
 
           },
@@ -219,6 +284,8 @@ export async function GET(request) {
 
             "doors",
 
+            "vehicle_search",
+
             "vehicle_key"
 
           ]
@@ -243,7 +310,7 @@ export async function GET(request) {
     // ==================================================
     // Calculate duplicate submodels
     //
-    // Duplicate detection is based on:
+    // Duplicate detection:
     //
     // YEAR + MAKE + MODEL + SUBMODEL
     // ==================================================
@@ -283,7 +350,7 @@ export async function GET(request) {
 
 
     // ==================================================
-    // Build results
+    // Build frontend results
     // ==================================================
 
     const options =
@@ -359,9 +426,9 @@ export async function GET(request) {
 
         const label =
           [
-            year,
             make,
             model,
+            year,
             submodelLabel
 
           ]
@@ -377,9 +444,7 @@ export async function GET(request) {
 
           // Actual AutoSync vehicle ID
 
-          key:
-            vehicle.id,
-
+   
 
           // Complete vehicle label
 

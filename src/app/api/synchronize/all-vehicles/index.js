@@ -1,5 +1,6 @@
 import openSearchClient from "../../setup-database/_lib/route";
 
+import { generateVehicleSearch } from "./create_searchable_field";
 
 const INDEX_NAME = "all_vehicles";
 
@@ -8,10 +9,9 @@ const AUTOSYNC_URL =
   "https://api.autosyncstudio.com/vehicles";
 
 
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 10;
 
-const MAX_RETRIES = 5;
-
+const MAX_RETRIES = 15;
 
 
 function sleep(ms){
@@ -358,7 +358,7 @@ function transformVehicle(
 
   const doors = vehicle.Doors ? `${vehicle.Doors} doors` : "";
 
-  const searchQuery = `${make} ${model} ${submodel} ${year} ${body} ${doors}`
+  const searchQuery = generateVehicleSearch(vehicle)
 
 
 
@@ -380,6 +380,7 @@ function transformVehicle(
     vehicle_key:
       searchQuery.trim(), 
 
+    vehicle_search: searchQuery, 
 
 
     ymm_key:
