@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
+// 
+
 export default function BlogPage({ params }) {
     const [blog, setBlog] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -53,6 +55,8 @@ export default function BlogPage({ params }) {
                         {blog.excerpt}
                     </p>
                 )}
+
+
 
                 {blog.featuredImage?.url && (
                     <img
