@@ -15,6 +15,7 @@
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@opensearch-project/opensearch": "^3.6.0",
+    "@strapi/blocks-react-renderer": "^1.0.2",
     "@whop/checkout": "^0.3.0",
     "@whop/sdk": "^0.0.40",
     "basic-ftp": "^6.0.2",
