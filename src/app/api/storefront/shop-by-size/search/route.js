@@ -118,11 +118,7 @@ export async function GET(request) {
     // ]
     // ==================================================
 
-    const searchTerms =
-      query
-        .split(/\s+/)
-        .map(normalize)
-        .filter(Boolean);
+    const searchTerm = normalize(query)
 
 
     // ==================================================
@@ -144,24 +140,7 @@ export async function GET(request) {
     // *goodrich*
     // ==================================================
 
-    const wildcardConditions =
-      searchTerms.map(term => ({
 
-        wildcard: {
-
-          size_normalized: {
-
-            value:
-              `*${term}*`,
-
-            case_insensitive:
-              true
-
-          }
-
-        }
-
-      }));
 
 
     // ==================================================
@@ -179,28 +158,22 @@ export async function GET(request) {
 
           track_total_hits: true,
 
-          query: {
+   
+            "query": {
+                "bool": {
+                    "must": [
+                        ...GLOBAL_INVENTORY_FILTERS,
+                        {
+                            "match": {
+                                "size_search": {
+                                    "query": searchTerm
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
 
-            bool: {
-
-              // ========================================
-              // Global inventory filters
-              // ========================================
-
-              filter:
-                GLOBAL_INVENTORY_FILTERS,
-
-
-              // ========================================
-              // Every search term must match
-              // ========================================
-
-              must:
-                wildcardConditions
-
-            }
-
-          },
 
 
           // ============================================
