@@ -240,6 +240,64 @@ status: {
     type: "keyword"
 },
 
+
+
+// ===========================
+// Rebates / Promotions
+// ===========================
+
+rebates: {
+  type: "nested",
+  properties: {
+
+    amount: {
+      type: "float"
+    },
+
+    description: {
+      type: "text"
+    },
+
+    description_preview: {
+      type: "text"
+    },
+
+    qty_required: {
+      type: "integer"
+    },
+
+    url: {
+      type: "keyword"
+    },
+
+    preview_img_url: {
+      type: "keyword"
+    },
+
+    banner_img_url: {
+      type: "keyword"
+    },
+
+    horizontal_img_url: {
+      type: "keyword"
+    },
+
+    start_date: {
+      type: "date",
+      format: "yyyy-MM-dd"
+    },
+
+    end_date: {
+      type: "date",
+      format: "yyyy-MM-dd"
+    }
+  }
+},
+
+
+
+
+
       
       // ===========================
       // Flexible Attributes

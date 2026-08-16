@@ -412,10 +412,9 @@ function transformVehicle(
     doors:
       vehicle.Doors,
 
-
+    
     bed:
       vehicle.Bed,
-
 
 
     // Specs

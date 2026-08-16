@@ -30,6 +30,7 @@ async function fetchTiresPage(page, attempt = 1) {
       `&i-tags` +
       `&i-price=true` +
       `&i-img` +
+      `&i-rebates` +
       `&i-specs` +
       `&p-size=${PAGE_SIZE}` +
       `&p-number=${page}` +
@@ -170,9 +171,55 @@ const normalize = (value) => {
 };
 
 
+
+const rebates = Array.isArray(tire.Rebates)
+  ? tire.Rebates.map((rebate) => {
+      const info = Array.isArray(rebate.Info)
+        ? rebate.Info[0]
+        : null;
+
+      return {
+        amount: info?.Amount ?? null,
+
+        description: info?.Description ?? null,
+
+        description_preview:
+          rebate.DescriptionPreview ?? null,
+
+        qty_required:
+          rebate.QtyRequired ?? null,
+
+        url:
+          rebate.Url ?? null,
+
+        preview_img_url:
+          rebate.PreviewImgUrl ?? null,
+
+        banner_img_url:
+          rebate.BannerImgUrl ?? null,
+
+        horizontal_img_url:
+          rebate.HorizontalImgUrl ?? null,
+
+        start_date:
+          rebate.StartDate ?? null,
+
+        end_date:
+          rebate.EndDate ?? null
+      };
+    })
+  : [];
+
+const contains_rebates = rebates.length > 0;
+
+
   return {
     
+    rebates, 
+    
+    contains_rebates,
 
+    
     // Identity
 
     uid: tire.Uid,

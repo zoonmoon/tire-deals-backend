@@ -16,6 +16,69 @@ export async function GET() {
 
     // 
 
+const rebateMapping = {
+  properties: {
+
+    contains_rebates: {
+      type: "boolean"
+    },
+
+    rebates: {
+      type: "nested",
+      properties: {
+
+        amount: {
+          type: "float"
+        },
+
+        description: {
+          type: "text"
+        },
+
+        description_preview: {
+          type: "text"
+        },
+
+        qty_required: {
+          type: "integer"
+        },
+
+        url: {
+          type: "keyword"
+        },
+
+        preview_img_url: {
+          type: "keyword"
+        },
+
+        banner_img_url: {
+          type: "keyword"
+        },
+
+        horizontal_img_url: {
+          type: "keyword"
+        },
+
+        start_date: {
+          type: "date",
+          format: "yyyy-MM-dd"
+        },
+
+        end_date: {
+          type: "date",
+          format: "yyyy-MM-dd"
+        }
+      }
+    }
+  }
+};
+    await openSearchClient.indices.putMapping({
+      index: "all_tires",
+      body: rebateMapping
+    });
+
+    return 
+
 
 
     const contactUS = await openSearchClient.indices.exists({ index: "contact_us_inquiries" });
@@ -41,7 +104,7 @@ export async function GET() {
 
 
     return 
-    
+
     const rebates = await openSearchClient.indices.exists({ index: "rebates" });
 
     if (!rebates.body) {
