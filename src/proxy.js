@@ -10,7 +10,6 @@ const corsOptions = {
 
 function isOriginAllowed(origin) {
 
-    console.log("origin ", origin)
   return (
     allowedOrigins.includes(origin) ||
     origin.endsWith('.vercel.app')
@@ -19,9 +18,6 @@ function isOriginAllowed(origin) {
 
 export function proxy(request) {
 
-    console.log("insid erpxoy")
-
-console.log("🔥🔥🔥 PROXY FILE LOADED 🔥🔥🔥")
 
   // Check the origin from the request
   const origin = request.headers.get('origin') ?? ''
@@ -43,13 +39,9 @@ console.log("🔥🔥🔥 PROXY FILE LOADED 🔥🔥🔥")
   const response = NextResponse.next()
 
 
-  console.log("hello karuna")
 
   if (isAllowedOrigin) {
     response.headers.set('Access-Control-Allow-Origin', origin)
-  }else{
-      console.log("hello karuna inside else")
-
   }
 
   Object.entries(corsOptions).forEach(([key, value]) => {

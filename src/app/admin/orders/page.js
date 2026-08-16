@@ -975,7 +975,7 @@ export default function OrdersPage() {
                 >
 
                     <TextField
-                        sx={{minWidth:'350px'}}
+                        sx={{minWidth:'300px'}}
                         size="small"
                         label="Search orders"
                         placeholder="Order number or customer email"
