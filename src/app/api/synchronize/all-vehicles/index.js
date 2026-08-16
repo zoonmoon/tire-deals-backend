@@ -347,6 +347,21 @@ function transformVehicle(
     vehicle.Model || "";
 
 
+  const submodel = 
+  vehicle.Submodel || ""
+
+
+  const year = vehicle.Year || "" ; 
+
+
+  const body = vehicle.Body || "" 
+
+  const doors = vehicle.Doors ? `${vehicle.Doors} doors` : "";
+
+  const searchQuery = `${make} ${model} ${submodel} ${year} ${body} ${doors}`
+
+
+
 
   return {
 
@@ -363,10 +378,7 @@ function transformVehicle(
 
 
     vehicle_key:
-      `${vehicle.Year}-${make}-${model}-${vehicle.Submodel || ""}`
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g,"-"),
+      searchQuery.trim(), 
 
 
 
@@ -412,7 +424,7 @@ function transformVehicle(
     doors:
       vehicle.Doors,
 
-    
+
     bed:
       vehicle.Bed,
 

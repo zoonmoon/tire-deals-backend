@@ -1,11 +1,11 @@
 import openSearchClient from "../../setup-database/_lib/route";
-
+import { generateSizeSearch } from "./create_searchable_field";
 const INDEX_NAME = "all_tires";
 
 const AUTOSYNC_URL = "https://api.autosyncstudio.com/tires";
 
 const PAGE_SIZE = 500;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 10;
 
 
 
@@ -210,7 +210,19 @@ const rebates = Array.isArray(tire.Rebates)
     })
   : [];
 
-const contains_rebates = rebates.length > 0;
+  const contains_rebates = rebates.length > 0;
+
+
+  const normalizedSize =   `${normalize(tire.Size)} ${normalize(tire.DisplayName)}`;  
+
+
+
+const size_search =
+  `${normalizedSize || ""} ` +
+  `${tire.DisplayName || ""} ` +
+  `${tire.Size || ""} ` +
+  `${generateSizeSearch(tire) || ""}`;
+
 
 
   return {
@@ -219,6 +231,7 @@ const contains_rebates = rebates.length > 0;
     
     contains_rebates,
 
+    size_search: size_search.trim(), 
     
     // Identity
 
@@ -245,6 +258,9 @@ const contains_rebates = rebates.length > 0;
 
 
     // Size
+
+  size_normalized:
+  `${normalize(tire.Size)} ${normalize(tire.DisplayName)}`,
 
     size: tire.Size,
 

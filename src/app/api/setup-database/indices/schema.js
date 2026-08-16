@@ -8,6 +8,10 @@ export const allTiresSchema = {
       // Identity
       // ===========================
 
+      size_search: {
+        type: "text"
+      },
+
       uid: {
         type: "keyword"   // OpenSearch _id
       },
