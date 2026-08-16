@@ -33,21 +33,6 @@ export const adminNavigationItems = [
         icon: SupportAgentIcon,
     },
 
-
-    {
-        label: 'Customers',
-        href: '/admin/customers',
-        icon: PeopleOutlinedIcon,
-    },
-
-    {
-        label: 'Installers',
-        href: '/admin/installers',
-        icon: BuildOutlinedIcon,
-    },
-
-
-
     {
         label: 'Settings',
         href: '/admin/settings',

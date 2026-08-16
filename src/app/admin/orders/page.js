@@ -960,6 +960,65 @@ export default function OrdersPage() {
                 </Box>
 
 
+
+                <Box
+                    sx={{
+                        background:'white',
+                        display: 'flex',
+                        gap: 1,
+                        padding:'15px',
+                        flexDirection: {
+                            xs: 'column',
+                            sm: 'row',
+                        },
+                    }}
+                >
+
+                    <TextField
+                        sx={{minWidth:'350px'}}
+                        size="small"
+                        label="Search orders"
+                        placeholder="Order number or customer email"
+                        value={search}
+                        onChange={
+                            event =>
+                                setSearch(
+                                    event.target.value
+                                )
+                        }
+                        onKeyDown={
+                            handleSearchKeyDown
+                        }
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment
+                                    position="start"
+                                >
+                                    <SearchOutlinedIcon
+                                        fontSize="small"
+                                    />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+
+
+                    <Button
+                        variant="contained"
+                        onClick={
+                            handleSearch
+                        }
+                        disabled={loading}
+                        sx={{
+                            minWidth: 110,
+                        }}
+                    >
+                        Search
+                    </Button>
+
+                </Box>
+
+
                 <Stack
                 
                         direction={'row'}
@@ -1009,7 +1068,7 @@ export default function OrdersPage() {
 
 
                 sx={{
-                    p: 2,
+                    p: 3,
                     display: displayFilters ?'block':'none',
                     mb: 3,
                     border: '1px solid',
@@ -1025,7 +1084,7 @@ export default function OrdersPage() {
                     {/* SEARCH */}
                     {/* ========================================== */}
 
-                    <Box
+                    {/* <Box
                         sx={{
                             display: 'flex',
                             gap: 1,
@@ -1078,7 +1137,7 @@ export default function OrdersPage() {
                             Search
                         </Button>
 
-                    </Box>
+                    </Box> */}
 
 
                     {/* ========================================== */}
