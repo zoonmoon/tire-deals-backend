@@ -102,6 +102,25 @@ export async function GET(request) {
 
     }
 
+    if (query.length < 3) {
+
+      return NextResponse.json(
+
+        {
+          success: false,
+
+          error:
+            "at least 3 characters required for search"
+        },
+
+        {
+          status: 400
+        }
+
+      );
+
+    }
+
 
     // ==================================================
     // Normalize each search term separately
