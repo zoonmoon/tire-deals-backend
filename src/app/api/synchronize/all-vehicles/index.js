@@ -9,7 +9,7 @@ const AUTOSYNC_URL =
   "https://api.autosyncstudio.com/vehicles";
 
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 100;
 
 const MAX_RETRIES = 15;
 
@@ -674,7 +674,7 @@ async function bulkUploadToOpenSearch(
 export async function syncAllVehiclesFromAutoSync(){
 
 
-  let page = 1;
+  let page = 50;
 
   let totalImported = 0;
 
@@ -736,9 +736,15 @@ export async function syncAllVehiclesFromAutoSync(){
 
 
 
+    
+      // console.log("data.MoreItems")
+      // console.log(data)
+
+
+
     if(!data.MoreItems){
 
-      break;
+      // break;
 
     }
 

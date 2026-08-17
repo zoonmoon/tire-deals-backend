@@ -4,8 +4,8 @@ const INDEX_NAME = "all_tires";
 
 const AUTOSYNC_URL = "https://api.autosyncstudio.com/tires";
 
-const PAGE_SIZE = 500;
-const MAX_RETRIES = 10;
+const PAGE_SIZE = 100;
+const MAX_RETRIES = 15;
 
 
 

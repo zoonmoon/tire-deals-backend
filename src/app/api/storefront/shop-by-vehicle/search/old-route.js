@@ -143,7 +143,7 @@ export async function GET(request) {
                   query:
                     term,
 
-                  fuzziness: /^\d+$/.test(term) ? 0 : 2
+                  fuzziness: 2
 
 
                 }
