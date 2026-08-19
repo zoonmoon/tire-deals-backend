@@ -7,11 +7,175 @@ import {
     IconButton,
     Avatar,
     Typography,
+    Menu,
+    MenuItem,
+    Divider,
+    ListItemIcon,
 } from '@mui/material';
 
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 
 export default function AdminHeader({ admin }) {
+
+    const router = useRouter();
+
+
+    // ==================================================
+    // ADMIN MENU
+    // ==================================================
+
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const open = Boolean(anchorEl);
+
+
+    // ==================================================
+    // ADMIN MENU HANDLERS
+    // ==================================================
+
+    const handleAdminClick = (event) => {
+
+        setAnchorEl(event.currentTarget);
+
+    };
+
+
+    const handleClose = () => {
+
+        setAnchorEl(null);
+
+    };
+
+
+    // ==================================================
+    // RESET PASSWORD
+    // ==================================================
+
+    const handleResetPassword = async () => {
+
+        handleClose();
+
+
+        try {
+
+            const response =
+                await fetch(
+                    '/api/admin/auth/log-out',
+                    {
+                        method: 'POST',
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                console.error(
+                    'Admin logout failed:',
+                    data.message
+                );
+
+                return;
+
+            }
+
+
+            // ==================================================
+            // LOGOUT SUCCESSFUL
+            // ==================================================
+
+            router.push(
+                '/auth/forgot-password'
+            );
+
+            router.refresh();
+
+
+        } catch (error) {
+
+            console.error(
+                'Admin logout error:',
+                error
+            );
+
+        }
+
+    };
+
+
+    // ==================================================
+    // LOGOUT
+    // ==================================================
+
+    const handleLogout = async () => {
+
+        handleClose();
+
+
+        try {
+
+            const response =
+                await fetch(
+                    '/api/admin/auth/log-out',
+                    {
+                        method: 'POST',
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                console.error(
+                    'Admin logout failed:',
+                    data.message
+                );
+
+                return;
+
+            }
+
+
+            // ==================================================
+            // LOGOUT SUCCESSFUL
+            // ==================================================
+
+            router.push(
+                '/'
+            );
+
+            router.refresh();
+
+
+        } catch (error) {
+
+            console.error(
+                'Admin logout error:',
+                error
+            );
+
+        }
+
+    };
+
 
     return (
 
@@ -25,6 +189,7 @@ export default function AdminHeader({ admin }) {
         >
 
             <Toolbar>
+
 
                 {/* ================================================== */}
                 {/* LOGO */}
@@ -69,12 +234,21 @@ export default function AdminHeader({ admin }) {
                 {/* ================================================== */}
 
                 <Box
+                    onClick={handleAdminClick}
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
                         ml: 2,
                         gap: 1,
                         cursor: 'pointer',
+                        borderRadius: 1,
+                        px: 1,
+                        py: 0.5,
+
+                        '&:hover': {
+                            backgroundColor:
+                                'rgba(255,255,255,0.08)',
+                        },
                     }}
                 >
 
@@ -84,8 +258,14 @@ export default function AdminHeader({ admin }) {
                             height: 36,
                         }}
                     >
-                        {admin?.name?.charAt(0)?.toUpperCase() || 'A'}
+                        {
+                            admin?.name
+                                ?.charAt(0)
+                                ?.toUpperCase()
+                            || 'A'
+                        }
                     </Avatar>
+
 
                     <Box>
 
@@ -99,6 +279,7 @@ export default function AdminHeader({ admin }) {
                             {admin?.name || 'Admin'}
                         </Typography>
 
+
                         <Typography
                             variant="caption"
                             sx={{
@@ -107,10 +288,95 @@ export default function AdminHeader({ admin }) {
                         >
                             Administrator
                         </Typography>
-                            
+
                     </Box>
 
                 </Box>
+
+
+                {/* ================================================== */}
+                {/* ADMIN MENU */}
+                {/* ================================================== */}
+
+                <Menu
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                        autoFocus: false,
+                        disableListWrap: true,
+                    }}
+                    slotProps={{
+                        paper: {
+                            sx: {
+
+                                '& .MuiMenuItem-root:focus': {
+                                    backgroundColor:
+                                        'transparent',
+                                },
+
+                                '& .MuiMenuItem-root:hover': {
+                                    backgroundColor:
+                                        'action.hover',
+                                },
+
+                            },
+                        },
+                    }}
+                >
+
+
+                    {/* ================================================== */}
+                    {/* RESET PASSWORD */}
+                    {/* ================================================== */}
+
+                    <MenuItem
+                        onClick={
+                            handleResetPassword
+                        }
+                    >
+
+                        <ListItemIcon>
+
+                            <LockOutlinedIcon
+                                fontSize="small"
+                            />
+
+                        </ListItemIcon>
+
+                        Reset Password
+
+                    </MenuItem>
+
+
+                    <Divider />
+
+
+                    {/* ================================================== */}
+                    {/* LOG OUT */}
+                    {/* ================================================== */}
+
+                    <MenuItem
+                        onClick={
+                            handleLogout
+                        }
+                    >
+
+                        <ListItemIcon>
+
+                            <LogoutOutlinedIcon
+                                fontSize="small"
+                            />
+
+                        </ListItemIcon>
+
+                        Log Out
+
+                    </MenuItem>
+
+
+                </Menu>
+
 
             </Toolbar>
 

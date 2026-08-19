@@ -16,6 +16,7 @@ import {
     Typography,
     Paper,
 } from '@mui/material';
+import Link from 'next/link';
 
 
 export default function AdminLoginPage() {
@@ -207,6 +208,33 @@ export default function AdminLoginPage() {
                         }}
                     />
 
+
+
+<Box
+    sx={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        mb: 3,
+    }}
+>
+
+ 
+
+    <Link
+        component="button"
+        type="button"
+        underline="hover"
+        href='/auth/forgot-password'
+        style={{
+            fontSize: '0.875rem',
+            color:'blue'
+        }}
+    >
+        Forgot Password?
+    </Link>
+
+
+</Box>
 
                     <Button
                         fullWidth

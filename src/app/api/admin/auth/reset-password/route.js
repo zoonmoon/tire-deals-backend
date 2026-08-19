@@ -203,29 +203,6 @@ export async function POST(request) {
 
 
         // ============================================================
-        // CHECK EXPIRATION
-        // ============================================================
-
-        if (
-            new Date(token.expires_at)
-            <= new Date()
-        ) {
-
-            return Response.json(
-                {
-                    success: false,
-                    message:
-                        'This password reset code has expired. Please request a new code.'
-                },
-                {
-                    status: 400
-                }
-            );
-
-        }
-
-
-        // ============================================================
         // HASH SUBMITTED CODE
         // ============================================================
 
