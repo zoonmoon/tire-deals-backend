@@ -344,7 +344,7 @@ export default function AdminHeader({ admin }) {
 
                         </ListItemIcon>
 
-                        Reset Password
+                        Change Password
 
                     </MenuItem>
 

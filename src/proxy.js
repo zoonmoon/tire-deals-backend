@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const allowedOrigins = ['https://artyxpress.com']
+const allowedOrigins = ['https://artyxpress.com', 'tire.remote30.com', "https://tire.remote30.com"]
 
 const corsOptions = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -12,7 +12,8 @@ function isOriginAllowed(origin) {
 
   return (
     allowedOrigins.includes(origin) ||
-    origin.endsWith('.vercel.app')
+    origin.endsWith('.vercel.app') || 
+    origin.endsWith('remote30.com')
   )
 }
 
