@@ -28,6 +28,7 @@ export async function GET(request) {
                 "coupon_code"
             );
 
+        // 
 
         const subtotal =
             searchParams.get(
@@ -103,7 +104,7 @@ export async function GET(request) {
             "Coupon validation API error:",
             error
         );
-        
+
 
         return NextResponse.json(
             {
