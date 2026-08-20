@@ -1,6 +1,8 @@
 "use client";
 
 import React, {
+    useCallback,
+    useEffect,
     useState,
 } from "react";
 
@@ -23,13 +25,21 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import SaveIcon from "@mui/icons-material/Save";
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 
-export default function CreateCouponPage() {
+export default function EditCouponPage() {
 
     const router =
         useRouter();
+
+
+    const params =
+        useParams();
+
+
+    const couponId =
+        params?.coupon_id;
 
 
     // ============================================================
@@ -51,8 +61,6 @@ export default function CreateCouponPage() {
 
             usage_limit: "",
 
-            usage_limit_per_customer: "",
-
             starts_at: "",
 
             expires_at: "",
@@ -67,6 +75,10 @@ export default function CreateCouponPage() {
     // ============================================================
 
     const [loading, setLoading] =
+        useState(true);
+
+
+    const [saving, setSaving] =
         useState(false);
 
 
@@ -76,6 +88,237 @@ export default function CreateCouponPage() {
 
     const [success, setSuccess] =
         useState("");
+
+
+    const [usedCount, setUsedCount] =
+        useState(0);
+
+
+    // ============================================================
+    // FORMAT DATETIME FOR INPUT
+    // ============================================================
+
+    const formatDateTimeLocal =
+        (value) => {
+
+            if (!value) {
+
+                return "";
+
+            }
+
+
+            const date =
+                new Date(value);
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return "";
+
+            }
+
+
+            const year =
+                date.getFullYear();
+
+
+            const month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const hours =
+                String(
+                    date.getHours()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const minutes =
+                String(
+                    date.getMinutes()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        };
+
+
+    // ============================================================
+    // FETCH COUPON
+    // ============================================================
+
+    const fetchCoupon =
+        useCallback(
+            async () => {
+
+                if (!couponId) {
+
+                    return;
+
+                }
+
+
+                try {
+
+                    setLoading(true);
+
+                    setError("");
+
+
+                    const response =
+                        await fetch(
+                            `/api/admin/coupons/${couponId}`,
+                            {
+                                method: "GET",
+
+                                credentials:
+                                    "include",
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        !response.ok
+                    ) {
+
+                        throw new Error(
+                            data?.message ||
+                            "Unable to retrieve coupon."
+                        );
+
+                    }
+
+
+                    const coupon =
+                        data.coupon;
+
+
+                    if (!coupon) {
+
+                        throw new Error(
+                            "Coupon not found."
+                        );
+
+                    }
+
+
+                    setForm({
+
+                        code:
+                            coupon.code ||
+                            "",
+
+                        type:
+                            coupon.type ||
+                            "percentage",
+
+                        value:
+                            coupon.value ??
+                            "",
+
+                        minimum_order_amount:
+                            coupon.minimum_order_amount ??
+                            "",
+
+                        maximum_discount_amount:
+                            coupon.maximum_discount_amount ??
+                            "",
+
+                        usage_limit:
+                            coupon.usage_limit ??
+                            "",
+
+                        starts_at:
+                            formatDateTimeLocal(
+                                coupon.starts_at
+                            ),
+
+                        expires_at:
+                            formatDateTimeLocal(
+                                coupon.expires_at
+                            ),
+
+                        status:
+                            coupon.status ||
+                            "active",
+
+                    });
+
+
+                    setUsedCount(
+                        Number(
+                            coupon.used_count ||
+                            0
+                        )
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Fetch coupon error:",
+                        error
+                    );
+
+
+                    setError(
+                        error.message ||
+                        "Unable to retrieve coupon."
+                    );
+
+
+                } finally {
+
+                    setLoading(false);
+
+                }
+
+            },
+            [
+                couponId,
+            ]
+        );
+
+
+    useEffect(
+        () => {
+
+            fetchCoupon();
+
+        },
+        [
+            fetchCoupon,
+        ]
+    );
 
 
     // ============================================================
@@ -93,9 +336,11 @@ export default function CreateCouponPage() {
 
             setForm(
                 (current) => ({
+
                     ...current,
 
-                    [name]: value,
+                    [name]:
+                        value,
 
                 })
             );
@@ -124,7 +369,7 @@ export default function CreateCouponPage() {
 
 
             // ====================================================
-            // BASIC VALIDATION
+            // CODE
             // ====================================================
 
             const code =
@@ -144,19 +389,14 @@ export default function CreateCouponPage() {
             }
 
 
-            if (!form.value) {
-
-                setError(
-                    "Discount value is required."
-                );
-
-                return;
-
-            }
-
+            // ====================================================
+            // VALUE
+            // ====================================================
 
             const value =
-                Number(form.value);
+                Number(
+                    form.value
+                );
 
 
             if (
@@ -174,7 +414,8 @@ export default function CreateCouponPage() {
 
 
             if (
-                form.type === "percentage" &&
+                form.type ===
+                "percentage" &&
                 value > 100
             ) {
 
@@ -187,24 +428,170 @@ export default function CreateCouponPage() {
             }
 
 
+            // ====================================================
+            // USAGE LIMIT
+            // ====================================================
+
+            let usageLimit =
+                null;
+
+
             if (
-                form.starts_at &&
-                form.expires_at &&
-                new Date(form.starts_at) >=
-                new Date(form.expires_at)
+                form.usage_limit !==
+                ""
             ) {
 
-                setError(
-                    "Expiration date must be after the start date."
-                );
+                usageLimit =
+                    Number(
+                        form.usage_limit
+                    );
 
-                return;
+
+                if (
+                    !Number.isInteger(
+                        usageLimit
+                    ) ||
+                    usageLimit < 1
+                ) {
+
+                    setError(
+                        "Usage limit must be a positive integer."
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    usageLimit <
+                    usedCount
+                ) {
+
+                    setError(
+                        `Usage limit cannot be lower than the current used count (${usedCount}).`
+                    );
+
+                    return;
+
+                }
 
             }
 
 
             // ====================================================
-            // PREPARE PAYLOAD
+            // MINIMUM ORDER
+            // ====================================================
+
+            let minimumOrderAmount =
+                null;
+
+
+            if (
+                form.minimum_order_amount !==
+                ""
+            ) {
+
+                minimumOrderAmount =
+                    Number(
+                        form.minimum_order_amount
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        minimumOrderAmount
+                    ) ||
+                    minimumOrderAmount < 0
+                ) {
+
+                    setError(
+                        "Invalid minimum order amount."
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // ====================================================
+            // MAXIMUM DISCOUNT
+            // ====================================================
+
+            let maximumDiscountAmount =
+                null;
+
+
+            if (
+                form.maximum_discount_amount !==
+                ""
+            ) {
+
+                maximumDiscountAmount =
+                    Number(
+                        form.maximum_discount_amount
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        maximumDiscountAmount
+                    ) ||
+                    maximumDiscountAmount < 0
+                ) {
+
+                    setError(
+                        "Invalid maximum discount amount."
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // ====================================================
+            // DATES
+            // ====================================================
+
+            if (
+                form.starts_at &&
+                form.expires_at
+            ) {
+
+                const startDate =
+                    new Date(
+                        form.starts_at
+                    );
+
+
+                const expiryDate =
+                    new Date(
+                        form.expires_at
+                    );
+
+
+                if (
+                    startDate >=
+                    expiryDate
+                ) {
+
+                    setError(
+                        "Expiration date must be after the start date."
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            // ====================================================
+            // PAYLOAD
             // ====================================================
 
             const payload = {
@@ -217,32 +604,13 @@ export default function CreateCouponPage() {
                 value,
 
                 minimum_order_amount:
-                    form.minimum_order_amount
-                        ? Number(
-                            form.minimum_order_amount
-                        )
-                        : null,
+                    minimumOrderAmount,
 
                 maximum_discount_amount:
-                    form.maximum_discount_amount
-                        ? Number(
-                            form.maximum_discount_amount
-                        )
-                        : null,
+                    maximumDiscountAmount,
 
                 usage_limit:
-                    form.usage_limit
-                        ? Number(
-                            form.usage_limit
-                        )
-                        : null,
-
-                usage_limit_per_customer:
-                    form.usage_limit_per_customer
-                        ? Number(
-                            form.usage_limit_per_customer
-                        )
-                        : null,
+                    usageLimit,
 
                 starts_at:
                     form.starts_at
@@ -261,19 +629,19 @@ export default function CreateCouponPage() {
 
 
             // ====================================================
-            // CREATE
+            // UPDATE
             // ====================================================
 
             try {
 
-                setLoading(true);
+                setSaving(true);
 
 
                 const response =
                     await fetch(
-                        "/api/admin/coupons",
+                        `/api/admin/coupons/${couponId}`,
                         {
-                            method: "POST",
+                            method: "PUT",
 
                             headers: {
                                 "Content-Type":
@@ -287,7 +655,6 @@ export default function CreateCouponPage() {
                                 JSON.stringify(
                                     payload
                                 ),
-
                         }
                     );
 
@@ -296,44 +663,33 @@ export default function CreateCouponPage() {
                     await response.json();
 
 
-                if (!response.ok) {
+                if (
+                    !response.ok
+                ) {
 
                     throw new Error(
                         data?.message ||
                         data?.error ||
-                        "Unable to create coupon."
+                        "Unable to update coupon."
                     );
 
                 }
 
 
                 setSuccess(
-                    "Coupon created successfully."
+                    "Coupon updated successfully."
                 );
 
 
                 // ==================================================
-                // REDIRECT
+                // GO BACK TO DETAIL PAGE
                 // ==================================================
 
                 setTimeout(
                     () => {
 
-                        if (
-                            data?.coupon?.id
-                        ) {
-
-                            router.push(
-                                `/admin/coupons/${data.coupon.id}`
-                            );
-
-                            return;
-
-                        }
-
-
                         router.push(
-                            "/admin/coupons"
+                            `/admin/coupons/${couponId}`
                         );
 
                     },
@@ -344,24 +700,120 @@ export default function CreateCouponPage() {
             } catch (error) {
 
                 console.error(
-                    "Create coupon error:",
+                    "Update coupon error:",
                     error
                 );
 
 
                 setError(
                     error.message ||
-                    "Unable to create coupon."
+                    "Unable to update coupon."
                 );
 
 
             } finally {
 
-                setLoading(false);
+                setSaving(false);
 
             }
 
         };
+
+
+    // ============================================================
+    // LOADING
+    // ============================================================
+
+    if (loading) {
+
+        return (
+
+            <Box
+                sx={{
+                    width: "100%",
+
+                    minHeight: 400,
+
+                    display: "flex",
+
+                    alignItems: "center",
+
+                    justifyContent: "center",
+                }}
+            >
+
+                <Typography
+                    color="text.secondary"
+                >
+                    Loading coupon...
+                </Typography>
+
+            </Box>
+
+        );
+
+    }
+
+
+    // ============================================================
+    // ERROR
+    // ============================================================
+
+    if (error && !form.code) {
+
+        return (
+
+            <Box
+                sx={{
+                    width: "100%",
+
+                    maxWidth: 900,
+
+                    mx: "auto",
+
+                    p: 3,
+                }}
+            >
+
+                <Alert
+                    severity="error"
+                    sx={{
+                        mb: 2,
+                    }}
+                >
+                    {error}
+                </Alert>
+
+
+                <Button
+                    variant="outlined"
+
+                    startIcon={
+                        <ArrowBackIcon />
+                    }
+
+                    onClick={() =>
+                        router.push(
+                            "/admin/coupons"
+                        )
+                    }
+
+                    sx={{
+                        textTransform:
+                            "none",
+
+                        fontWeight:
+                            600,
+                    }}
+                >
+                    Back to Coupons
+                </Button>
+
+            </Box>
+
+        );
+
+    }
 
 
     // ============================================================
@@ -395,21 +847,22 @@ export default function CreateCouponPage() {
                     sm: "row",
                 }}
 
+                justifyContent="space-between"
+
                 alignItems={{
                     xs: "stretch",
                     sm: "center",
                 }}
 
-
                 spacing={2}
 
                 sx={{
                     mb: 3,
-                    flexDirection:'row-reverse'
                 }}
             >
 
-                <Button
+
+               <Button
                     variant={'text'}
 
                     startIcon={
@@ -418,7 +871,7 @@ export default function CreateCouponPage() {
 
                     onClick={() =>
                         router.push(
-                            "/admin/coupons"
+                            `/admin/coupons/${couponId}`
                         )
                     }
 
@@ -430,9 +883,8 @@ export default function CreateCouponPage() {
                             600,
                     }}
                 >
-                    
-                </Button>
 
+                </Button>
 
                 <Box>
 
@@ -440,7 +892,7 @@ export default function CreateCouponPage() {
                         variant="h5"
                         fontWeight={600}
                     >
-                        Create Coupon
+                        Edit Coupon
                     </Typography>
 
 
@@ -451,13 +903,13 @@ export default function CreateCouponPage() {
                             mt: 0.5,
                         }}
                     >
-                        Create a new discount coupon
+                        Update coupon settings and availability
                     </Typography>
 
                 </Box>
 
 
-
+ 
 
             </Stack>
 
@@ -500,6 +952,7 @@ export default function CreateCouponPage() {
 
             <Paper
                 component="form"
+
                 onSubmit={
                     handleSubmit
                 }
@@ -514,7 +967,7 @@ export default function CreateCouponPage() {
                 >
 
                     {/* ================================================== */}
-                    {/* BASIC INFORMATION */}
+                    {/* COUPON INFORMATION */}
                     {/* ================================================== */}
 
                     <Box>
@@ -605,6 +1058,69 @@ export default function CreateCouponPage() {
                             </FormControl>
 
                         </Stack>
+
+                    </Box>
+
+
+                    {/* ================================================== */}
+                    {/* STATUS */}
+                    {/* ================================================== */}
+
+                    <Box>
+
+                        <Typography
+                            variant="subtitle1"
+                            fontWeight={600}
+                            sx={{
+                                mb: 2,
+                            }}
+                        >
+                            Status
+                        </Typography>
+
+
+                        <FormControl
+                            sx={{
+                                minWidth: 220,
+                            }}
+                        >
+
+                            <InputLabel>
+                                Status
+                            </InputLabel>
+
+
+                            <Select
+                                name="status"
+
+                                value={
+                                    form.status
+                                }
+
+                                label="Status"
+
+                                onChange={
+                                    handleChange
+                                }
+                            >
+
+                                <MenuItem value="active">
+                                    Active
+                                </MenuItem>
+
+
+                                <MenuItem value="inactive">
+                                    Inactive
+                                </MenuItem>
+
+                            </Select>
+
+
+                            <FormHelperText>
+                                Inactive coupons cannot be used.
+                            </FormHelperText>
+
+                        </FormControl>
 
                     </Box>
 
@@ -752,7 +1268,7 @@ export default function CreateCouponPage() {
 
 
                     {/* ================================================== */}
-                    {/* USAGE LIMITS */}
+                    {/* USAGE */}
                     {/* ================================================== */}
 
                     <Box>
@@ -764,9 +1280,9 @@ export default function CreateCouponPage() {
                                 mb: 2,
                             }}
                         >
-                            Usage Limits
+                            Usage
                         </Typography>
-                            
+
 
                         <Stack
                             direction={{
@@ -795,39 +1311,35 @@ export default function CreateCouponPage() {
                                 }
 
                                 inputProps={{
-                                    min: 1,
+                                    min:
+                                        Math.max(
+                                            1,
+                                            usedCount
+                                        ),
 
                                     step: 1,
                                 }}
 
-                                helperText="Leave empty for unlimited"
+                                helperText={
+                                    usedCount > 0
+                                        ? `Currently used ${usedCount} time${usedCount === 1 ? "" : "s"}`
+                                        : "Leave empty for unlimited"
+                                }
                             />
 
 
                             <TextField
                                 fullWidth
 
-                                type="number"
-
-                                label="Usage Limit Per Customer"
-
-                                name="usage_limit_per_customer"
+                                label="Used Count"
 
                                 value={
-                                    form.usage_limit_per_customer
+                                    usedCount
                                 }
 
-                                onChange={
-                                    handleChange
-                                }
+                                disabled
 
-                                inputProps={{
-                                    min: 1,
-
-                                    step: 1,
-                                }}
-
-                                helperText="Leave empty for unlimited"
+                                helperText="This value is managed automatically."
                             />
 
                         </Stack>
@@ -919,67 +1431,7 @@ export default function CreateCouponPage() {
                     </Box>
 
 
-                    {/* ================================================== */}
-                    {/* STATUS */}
-                    {/* ================================================== */}
 
-                    <Box>
-
-                        <Typography
-                            variant="subtitle1"
-                            fontWeight={600}
-                            sx={{
-                                mb: 2,
-                            }}
-                        >
-                            Status
-                        </Typography>
-
-
-                        <FormControl
-                            sx={{
-                                minWidth: 220,
-                            }}
-                        >
-
-                            <InputLabel>
-                                Status
-                            </InputLabel>
-
-
-                            <Select
-                                name="status"
-
-                                value={
-                                    form.status
-                                }
-
-                                label="Status"
-
-                                onChange={
-                                    handleChange
-                                }
-                            >
-
-                                <MenuItem value="active">
-                                    Active
-                                </MenuItem>
-
-
-                                <MenuItem value="inactive">
-                                    Inactive
-                                </MenuItem>
-
-                            </Select>
-
-
-                            <FormHelperText>
-                                Inactive coupons cannot be used.
-                            </FormHelperText>
-
-                        </FormControl>
-
-                    </Box>
 
 
                     {/* ================================================== */}
@@ -1002,12 +1454,12 @@ export default function CreateCouponPage() {
                             variant="outlined"
 
                             disabled={
-                                loading
+                                saving
                             }
 
                             onClick={() =>
                                 router.push(
-                                    "/admin/coupons"
+                                    `/admin/coupons/${couponId}`
                                 )
                             }
 
@@ -1029,11 +1481,11 @@ export default function CreateCouponPage() {
                             variant="contained"
 
                             disabled={
-                                loading
+                                saving
                             }
 
                             startIcon={
-                                loading
+                                saving
                                     ? null
                                     : <SaveIcon />
                             }
@@ -1046,12 +1498,12 @@ export default function CreateCouponPage() {
                                     600,
 
                                 minWidth:
-                                    140,
+                                    150,
                             }}
                         >
-                            {loading
-                                ? "Creating..."
-                                : "Create Coupon"}
+                            {saving
+                                ? "Saving..."
+                                : "Save Changes"}
                         </Button>
 
                     </Stack>
