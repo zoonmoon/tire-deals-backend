@@ -84,6 +84,8 @@ export async function GET() {
 
                 id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
+                coupon_code VARCHAR(100) NULL,
+
                 order_number VARCHAR(100) NOT NULL,
 
                 -- NULL for guest checkout

@@ -4,6 +4,8 @@ import { MYSQL_CONFIG } from '../utils';
 
 export async function GET() {
 
+    return 
+    
     let connection;
 
     try {
