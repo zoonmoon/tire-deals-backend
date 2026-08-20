@@ -2,6 +2,7 @@
 import mysql from "mysql2/promise";
 import { MYSQL_CONFIG } from "../setup-database/mysql-db/utils";
 import { DELIVERY_METHODS } from "./delivery_methods";
+import { validateCoupon } from "./verify-coupon-code";
 
 /**
  * Create Order
@@ -103,6 +104,8 @@ export async function createOrder(data) {
 
             delivery_location_id = null , 
 
+            coupon_code = null, 
+
             // --------------------------------------------------------
             // ORDER ITEMS
             // --------------------------------------------------------
@@ -110,6 +113,17 @@ export async function createOrder(data) {
             items = []
 
         } = data;
+
+
+
+        if(coupon_code){
+
+            let validateReponse = await validateCoupon(
+                connection, 
+                coupon_code, 
+            )
+
+        }
 
 
         if(!DELIVERY_METHODS.includes(delivery_method.trim())){
@@ -161,7 +175,8 @@ export async function createOrder(data) {
             `ORD-${Date.now()}-${Math.floor(
                 Math.random() * 100000
             )}`;
-
+        
+        
 
         // ============================================================
         // PREPARE CALCULATED VALUES
@@ -174,6 +189,7 @@ export async function createOrder(data) {
         let shippingTotal = 0;
 
         let taxTotal = 0;
+        
 
 
         const validatedItems = [];
@@ -506,19 +522,19 @@ export async function createOrder(data) {
                 // Discounts and credits are negative amounts
                 // ----------------------------------------------------
 
-                if (
+                // if (
 
-                    type === "discount" ||
+                //     type === "discount" ||
 
-                    type === "credit"
+                //     type === "credit"
 
-                ) {
+                // ) {
 
-                    itemTotal =
+                //     itemTotal =
 
-                        -Math.abs(itemTotal);
+                //         -Math.abs(itemTotal);
 
-                }
+                // }
 
 
                 // ----------------------------------------------------
@@ -534,13 +550,13 @@ export async function createOrder(data) {
                 }
 
 
-                if (type === "discount") {
+                // if (type === "discount") {
 
-                    discountTotal +=
+                //     discountTotal +=
 
-                        Math.abs(itemSubtotal);
+                //         Math.abs(itemSubtotal);
 
-                }
+                // }
 
 
                 if (
@@ -598,6 +614,37 @@ export async function createOrder(data) {
 
 
         // ============================================================
+        // VALIDATE COUPON
+        // ============================================================
+
+        if (coupon_code) {
+
+            const couponResult =
+                await validateCoupon(
+                    connection,
+                    coupon_code,
+                    subtotal
+                );
+
+
+            if (!couponResult.valid) {
+
+                throw new Error(
+                    couponResult.message
+                );
+
+            }
+
+            // ========================================================
+            // APPLY COUPON DISCOUNT
+            // ========================================================
+
+            discountTotal +=
+                couponResult.coupon.discount_amount;
+
+        }
+
+        // ============================================================
         // CALCULATE GRAND TOTAL
         // ============================================================
 
@@ -611,7 +658,6 @@ export async function createOrder(data) {
 
             discountTotal;
 
-
         // ============================================================
         // VALIDATE GRAND TOTAL
         // ============================================================
@@ -624,7 +670,6 @@ export async function createOrder(data) {
 
         }
 
-
         // ============================================================
         // CREATE ORDER
         // ============================================================
@@ -634,8 +679,6 @@ export async function createOrder(data) {
             `
 
             INSERT INTO orders (
-
-               
 
                 order_number,
 
@@ -706,7 +749,9 @@ export async function createOrder(data) {
 
                 appointment_booking_date,
 
-                appointment_booking_time_range
+                appointment_booking_time_range,
+
+                coupon_code
 
             )
 
@@ -722,7 +767,9 @@ export async function createOrder(data) {
 
                 ?, ?,
 
-                ?, ?
+                ?, ?,
+
+                ?
 
 
             )

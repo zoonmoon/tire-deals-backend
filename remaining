@@ -8,3 +8,5 @@
 
 When frontend gets connected to digitalocean, change the next.config.mjs to setup cors site url to the 
 live url of frontend host
+
+Process webhooks in background

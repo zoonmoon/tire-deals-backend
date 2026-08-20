@@ -10,6 +10,7 @@ import {
     Alert,
     Box,
     Button,
+    CircularProgress,
     FormControl,
     FormHelperText,
     InputLabel,
@@ -742,12 +743,8 @@ export default function EditCouponPage() {
                 }}
             >
 
-                <Typography
-                    color="text.secondary"
-                >
-                    Loading coupon...
-                </Typography>
-
+                <CircularProgress />
+                
             </Box>
 
         );

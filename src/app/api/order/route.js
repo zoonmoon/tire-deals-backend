@@ -51,6 +51,8 @@ export async function GET(){
             appointment_booking_time_range: "Morning",
             
             delivery_location_id: "74216",
+
+            coupon_code: "SAVE34" ,
             
             items: [
 

@@ -83,11 +83,11 @@ export async function GET() {
             CREATE TABLE orders (
 
                 id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-
-                coupon_code VARCHAR(100) NULL,
+                
+                coupon_code VARCHAR(255) NULL,
 
                 order_number VARCHAR(100) NOT NULL,
-
+                
                 -- NULL for guest checkout
                 customer_id BIGINT UNSIGNED NULL,
 
