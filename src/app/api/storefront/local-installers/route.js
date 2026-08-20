@@ -9,6 +9,7 @@ const DEFAULT_RADIUS = "10mi";
 const DEFAULT_SIZE = 500;
 
 export async function GET(request) {
+  
   try {     
     // ======================================================
     // Query parameters

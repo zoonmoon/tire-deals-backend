@@ -47,18 +47,16 @@ export async function GET(){
             delivery_method: "ship_to_local_installer", 
 
             appointment_booking_date: "August 21, 2026, Monday",
-
+            
             appointment_booking_time_range: "Morning",
             
             delivery_location_id: "74216",
-
+            
             coupon_code: "SAVE20" ,
             
             items: [
-                
-                {
 
-                    type: "product",
+                {
 
                     tire_inventory_id: 5,
 
@@ -68,11 +66,9 @@ export async function GET(){
                         "2021 BMW M340i xDrive"
 
                 },
-
-
+                
                 {
 
-                    type: "product",
 
                     tire_inventory_id: 9,
 
@@ -82,35 +78,6 @@ export async function GET(){
 
                 },
 
-
-                {
-
-                    type: "shipping",
-
-                    name: "UPS Ground",
-
-                    quantity: 1,
-
-                    unit_price: 35,
-
-                    tax_total: 0
-
-                },
-
-
-                {
-
-                    type: "fee",
-
-                    name: "Installation Fee",
-
-                    quantity: 1,
-
-                    unit_price: 50,
-
-                    tax_total: 4
-
-                }
 
             ]
 

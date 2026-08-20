@@ -3,6 +3,7 @@ import mysql from "mysql2/promise";
 import { MYSQL_CONFIG } from "../setup-database/mysql-db/utils";
 import { DELIVERY_METHODS } from "./delivery_methods";
 import { validateCoupon } from "./verify-coupon-code";
+import { getInstaller } from "../storefront/local-installers/[installer_id]";
 
 /**
  * Create Order
@@ -170,6 +171,12 @@ export async function createOrder(data) {
             )}`;
         
         
+        // ============================================================
+        // INSTALLER
+        // ============================================================
+
+
+
 
         // ============================================================
         // PREPARE CALCULATED VALUES
@@ -244,8 +251,7 @@ export async function createOrder(data) {
                     );
 
                 }
-                
-                
+
 
                 // ----------------------------------------------------
                 // Get current inventory
@@ -454,156 +460,153 @@ export async function createOrder(data) {
 
             }
 
+        }
 
-            // ========================================================
-            // NON-PRODUCT LINE ITEM
-            //
-            // Examples:
-            //
-            // shipping
-            // fee
-            // discount
-            // surcharge
-            // credit
-            // other
-            // ========================================================
 
-            else {
+        if (
+            delivery_method === "ship_to_local_installer" ||
+            delivery_method === "ship_to_mobile_installer"
+        ) {
 
+            if (!delivery_location_id) {
 
-                if (!name) {
-
-                    throw new Error(
-
-                        `Name is required for ${type} line item`
-
-                    );
-
-                }
-
-
-                const itemUnitPrice =
-
-                    Number(unit_price);
-
-
-                const itemSubtotal =
-
-                    itemUnitPrice * quantity;
-
-
-                const itemFet =
-
-                    Number(fet);
-
-
-                const itemTaxTotal =
-
-                    Number(tax_total);
-
-
-                let itemTotal =
-
-                    itemSubtotal +
-
-                    itemFet +
-
-                    itemTaxTotal;
-
-
-                // ----------------------------------------------------
-                // Discounts and credits are negative amounts
-                // ----------------------------------------------------
-
-                // if (
-
-                //     type === "discount" ||
-
-                //     type === "credit"
-
-                // ) {
-
-                //     itemTotal =
-
-                //         -Math.abs(itemTotal);
-
-                // }
-
-
-                // ----------------------------------------------------
-                // Order totals
-                // ----------------------------------------------------
-
-                if (type === "shipping") {
-
-                    shippingTotal +=
-
-                        Math.abs(itemSubtotal);
-
-                }
-
-
-                // if (type === "discount") {
-
-                //     discountTotal +=
-
-                //         Math.abs(itemSubtotal);
-
-                // }
-
-
-                if (
-
-                    type !== "discount" &&
-
-                    type !== "credit"
-
-                ) {
-
-                    subtotal += itemSubtotal;
-
-                }
-
-
-                taxTotal += itemTaxTotal;
-
-
-                // ----------------------------------------------------
-                // Save non-product item
-                // ----------------------------------------------------
-
-                validatedItems.push({
-
-                    tire_inventory_id: null,
-
-                    name,
-
-                    type,
-
-                    selected_vehicle: null,
-
-                    quantity,
-
-                    unit_price:
-                        itemUnitPrice,
-
-                    fet:
-                        itemFet,
-
-                    subtotal:
-                        itemSubtotal,
-
-                    tax_total:
-                        itemTaxTotal,
-
-                    total:
-                        itemTotal
-
-                });
+                throw new Error(
+                    "Installer is required for this delivery method."
+                );
 
             }
 
+
+            const installer =
+                await getInstaller(
+                    delivery_location_id
+                );
+
+
+            if (!installer) {
+
+                throw new Error(
+                    "Selected installer was not found."
+                );
+
+            }
+
+            // ============================================================
+            // TOTAL TIRES
+            // ============================================================
+
+            const totalTires =
+                validatedItems
+                .filter(item => item.type === "product" && item.tire_inventory_id !== null)
+                .reduce(
+                    (total, item) =>
+                        total +
+                        Number(item.quantity || 0),
+                    0
+                );
+
+
+            if (
+                !Number.isInteger(totalTires) ||
+                totalTires < 1
+            ) {
+
+                throw new Error(
+                    "At least one tire is required for installation."
+                );
+
+            }
+
+
+            // ============================================================
+            // INSTALLATION PRICE
+            //
+            // Stored in cents PER TIRE.
+            //
+            // Example:
+            // 1500 cents = $15.00 / tire
+            // 3 tires    = $45.00
+            // ============================================================
+
+            const installationPricePerTireInCents =
+                Number(
+                    installer.installation_price || 0
+                );
+
+
+            if (
+                !Number.isFinite(
+                    installationPricePerTireInCents
+                ) ||
+                installationPricePerTireInCents < 0
+            ) {
+
+                throw new Error(
+                    "Invalid installation price."
+                );
+
+            }
+
+
+            const installationPricePerTire =
+                installationPricePerTireInCents /
+                100;
+
+
+            const installationTotal =
+                installationPricePerTire *
+                totalTires;
+
+
+            // ============================================================
+            // INSTALLATION LINE ITEM
+            // ============================================================
+
+            const installationItem = {
+
+                tire_inventory_id:
+                    null,
+
+                name:
+                    "Installation Fee",
+
+                type:
+                    "installation_fee",
+
+                selected_vehicle:
+                    null,
+
+                quantity:
+                    totalTires,
+
+                unit_price:
+                    installationPricePerTire,
+
+                fet:
+                    0,
+
+                subtotal:
+                    installationTotal,
+
+                tax_total:
+                    0,
+
+                total:
+                    installationTotal,
+
+            };
+
+
+            validatedItems.push(
+                installationItem
+            );
+
+
+            subtotal +=
+                installationTotal;
+
         }
+
 
 
         // ============================================================
@@ -858,6 +861,9 @@ export async function createOrder(data) {
         // ============================================================
         // CREATE ORDER ITEMS
         // ============================================================
+
+
+
 
         const createdItems = [];
 
