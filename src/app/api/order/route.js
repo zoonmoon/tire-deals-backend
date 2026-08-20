@@ -35,9 +35,9 @@ export async function GET(){
             shipping_last_name: "Doe",
 
             shipping_address1: "123 Main Street",
-
+            
             shipping_city: "New York",
-
+            
             shipping_state: "NY",
 
             shipping_postcode: "10001",
@@ -52,10 +52,10 @@ export async function GET(){
             
             delivery_location_id: "74216",
 
-            coupon_code: "SAVE34" ,
+            coupon_code: "SAVE20" ,
             
             items: [
-
+                
                 {
 
                     type: "product",

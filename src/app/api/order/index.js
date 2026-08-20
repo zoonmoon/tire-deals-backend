@@ -116,14 +116,7 @@ export async function createOrder(data) {
 
 
 
-        if(coupon_code){
 
-            let validateReponse = await validateCoupon(
-                connection, 
-                coupon_code, 
-            )
-
-        }
 
 
         if(!DELIVERY_METHODS.includes(delivery_method.trim())){
@@ -626,21 +619,26 @@ export async function createOrder(data) {
                     subtotal
                 );
 
+            
 
             if (!couponResult.valid) {
 
-                throw new Error(
-                    couponResult.message
-                );
+                // throw new Error(
+                //     couponResult.message
+                // );
+
+            }else{
+
+                // ========================================================
+                // APPLY COUPON DISCOUNT
+                // ========================================================
+
+                discountTotal +=
+                    couponResult.coupon.discount_amount;
 
             }
 
-            // ========================================================
-            // APPLY COUPON DISCOUNT
-            // ========================================================
 
-            discountTotal +=
-                couponResult.coupon.discount_amount;
 
         }
 
@@ -843,7 +841,9 @@ export async function createOrder(data) {
 
                 delivery_method, delivery_location_id,
 
-                appointment_booking_date, appointment_booking_time_range
+                appointment_booking_date, appointment_booking_time_range,
+
+                coupon_code
 
             ]
 
