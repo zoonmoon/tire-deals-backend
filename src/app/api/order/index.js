@@ -23,6 +23,8 @@ import { getInstaller } from "../storefront/local-installers/[installer_id]";
  *
  * @returns {Promise<Object>}
  */
+
+
 export async function createOrder(data) {
 
     const connection = await mysql.createConnection(
@@ -191,6 +193,7 @@ export async function createOrder(data) {
         let taxTotal = 0;
         
 
+        let selectedInstaller = null 
 
         const validatedItems = [];
 
@@ -491,6 +494,8 @@ export async function createOrder(data) {
 
             }
 
+            selectedInstaller = installer
+
             // ============================================================
             // TOTAL TIRES
             // ============================================================
@@ -606,6 +611,8 @@ export async function createOrder(data) {
                 installationTotal;
 
         }
+
+
 
 
 
@@ -961,11 +968,10 @@ export async function createOrder(data) {
 
         await connection.commit();
 
-
         // ============================================================
         // RETURN
         // ============================================================
-
+        
         return {
 
             success: true,
@@ -975,6 +981,8 @@ export async function createOrder(data) {
             orderNumber,
 
             currency,
+
+            selectedInstaller,
 
             totals: {
 

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export default function WhopCheckoutWidget() {
 
 	const [isLoading, setIsLoading] = useState(true) 
-
+		
 	const [checkoutConfig, setCheckoutConfig] = useState(false)
 
 	const createCheckoutConfig = async  () => {
@@ -42,18 +42,18 @@ export default function WhopCheckoutWidget() {
 	if(!checkoutConfig) return ("failed")
 	
 	console.log(checkoutConfig)
-	
+
 	return (
 		<div style={{width:"400px"}}>
-			
-		<WhopCheckoutEmbed
-		    sessionId={checkoutConfig.id}			
-			returnUrl="https://yoursite.com/checkout/complete"
-			onComplete={(paymentId) => {
-				console.log("Payment complete:", paymentId);
-			}}
 
-		/>
+			<WhopCheckoutEmbed
+				sessionId={checkoutConfig.id}			
+				returnUrl="https://yoursite.com/checkout/complete"
+				onComplete={(paymentId) => {
+					console.log("Payment complete:", paymentId);
+				}}
+
+			/>
 
 		</div>
 

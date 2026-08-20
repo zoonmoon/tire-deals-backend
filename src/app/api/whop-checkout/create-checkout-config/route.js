@@ -1,46 +1,71 @@
 import Whop from "@whop/sdk";
 
+
 const client = new Whop({
   apiKey: process.env.WHOP_API_KEY,
 });
 
+
 import { createOrderForWhopSession } from "./create_order";
 
-export async function GET(){
 
-    try{
+export async function POST(request) {
+
+    try {
         
-        let order  = await createOrderForWhopSession() 
+        const data = await request.json();
 
-        if(!order.orderNumber){
-            throw new Error("failed to create order") 
+        const order = await createOrderForWhopSession(data);
+
+        if (!order?.orderNumber) {
+            throw new Error("Failed to create order");
         }
-        
-        const checkoutConfig = await client.checkoutConfigurations.create(
-            {
+
+        const checkoutConfig =
+            await client.checkoutConfigurations.create({
                 plan: {
                     initial_price: 1,
                     company_id: process.env.WHOP_BUSINESS_ID,
-                    currency: "usd" ,
+                    currency: "usd",
                     plan_type: "one_time",
                 },
+
                 metadata: {
                     order_number: order.orderNumber,
+                },
+            });
+
+        console.log(checkoutConfig);
+
+        return new Response(
+            JSON.stringify({
+                checkoutConfig,
+                order
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
                 },
             }
         );
 
+    } catch (error) {
+
+        console.error(error);
+
         return new Response(
-            JSON.stringify({checkoutConfig}),
-            {status: 200}
+            JSON.stringify({
+                error: "Internal Server Error",
+            }),
+            {
+                status: 500,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
 
-    }catch(error){
-        
-        console.log(error)
-        
-        return new Response("Internal Server Error", {status: 500});
-    
     }
 
 }
