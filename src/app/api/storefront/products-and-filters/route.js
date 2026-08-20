@@ -1739,16 +1739,18 @@ export async function GET(request) {
             doors: vehicle.doors,
           }
         : null,
-
-
+    
       // Vehicle fitments
 
       vehicleFitments,
 
       // Tires
 
-
-      tires: tires.map(t => ({...t, thumbnail: ( t?.img_url_base || "") + ( t?.img_thumb || "") })),
+      tires: tires.map(t => ({
+        ...t, 
+        tire_inventory_id: t.mysql_id,  
+        thumbnail: ( t?.img_url_base || "") + ( t?.img_thumb || "") 
+      })),
 
       // Pagination
 
