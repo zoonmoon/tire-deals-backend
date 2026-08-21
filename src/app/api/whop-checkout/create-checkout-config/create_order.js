@@ -336,7 +336,7 @@ function validateOrderData(data) {
         "billing"
     );
 
-    
+
     // ============================================================
     // CUSTOMER SHIPPING ADDRESS
     //
@@ -380,9 +380,9 @@ function validateOrderData(data) {
             "delivery_location_id"
         );
 
-    }
+    }   
 
-
+    
     // ============================================================
     // APPOINTMENT
     //

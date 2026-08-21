@@ -481,7 +481,7 @@ export async function createOrder(data) {
                 );
 
             }
-            
+
 
             const installer =
                 await getInstaller(
@@ -577,7 +577,7 @@ export async function createOrder(data) {
 
                 name:
                     "Installation Fee",
-
+                
                 type:
                     "installation_fee",
 
