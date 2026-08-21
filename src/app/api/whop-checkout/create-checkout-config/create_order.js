@@ -424,7 +424,7 @@ function validateOrderData(data) {
 export async function createOrderForWhopSession(data) {
 
     // ============================================================
-    // VALIDATE ORDER DATA
+    // VALIDATE ORDER DATA ---------------
     // ============================================================
 
     validateOrderData(
