@@ -14,7 +14,7 @@ const INDEX_NAME = "all_installers";
 //     ...installer data
 // }
 //
-// Returns null if installer does not exist.
+// Returns null -- if installer does not exist.
 // ============================================================
 
 export async function getInstaller(

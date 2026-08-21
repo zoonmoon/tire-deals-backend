@@ -244,7 +244,7 @@ export async function createOrder(data) {
             ...new Set(inventoryIds)
         ];
 
-        
+
         const placeholders = uniqueInventoryIds
             .map(() => "?")
             .join(",");
@@ -326,7 +326,6 @@ export async function createOrder(data) {
                 );
 
             }
-
 
             // ========================================================
             // PRODUCT
