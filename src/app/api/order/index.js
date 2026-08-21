@@ -199,10 +199,97 @@ export async function createOrder(data) {
 
 
         // ============================================================
+        // NORMALIZE + VALIDATE ITEMS
+        // ============================================================
+
+        const normalizedItems = items.map(item => ({
+
+            ...item,
+
+            type: item.type || "product"
+
+        }));
+
+
+        // ============================================================
+        // COLLECT PRODUCT INVENTORY IDS
+        // ============================================================
+
+
+        const inventoryIds = normalizedItems
+            .filter(
+                item =>
+                    item.type === "product" &&
+                    item.tire_inventory_id
+            )
+            .map(
+                item => item.tire_inventory_id
+            );
+
+
+        if (inventoryIds.length === 0) {
+
+            throw new Error(
+                "Order must contain at least one product."
+            );
+
+        }
+
+
+        // ============================================================
+        // FETCH ALL INVENTORY AT ONCE
+        // ============================================================
+
+        const uniqueInventoryIds = [
+            ...new Set(inventoryIds)
+        ];
+
+        
+        const placeholders = uniqueInventoryIds
+            .map(() => "?")
+            .join(",");
+
+
+        const [inventoryRows] =
+            await connection.execute(
+
+                `
+                SELECT
+                    id,
+                    manufacturer,
+                    item,
+                    price,
+                    size,
+                    fet,
+                    quantity,
+                    status
+                FROM tire_inventory
+                WHERE id IN (${placeholders})
+                FOR UPDATE
+                `,
+
+                uniqueInventoryIds
+
+            );
+
+
+        // ============================================================
+        // CREATE INVENTORY MAP
+        // ============================================================
+
+        const inventoryMap = new Map(
+            inventoryRows.map(inventory => [
+                Number(inventory.id),
+                inventory
+            ])
+        );
+
+
+        // ============================================================
         // VALIDATE EVERY LINE ITEM
         // ============================================================
 
-        for (const item of items) {
+        for (const item of normalizedItems) {
 
             const {
 
@@ -229,7 +316,10 @@ export async function createOrder(data) {
             // VALIDATE QUANTITY
             // ========================================================
 
-            if (!Number.isInteger(quantity) || quantity <= 0) {
+            if (
+                !Number.isInteger(quantity) ||
+                quantity <= 0
+            ) {
 
                 throw new Error(
                     `Invalid quantity for item: ${name || type}`
@@ -237,15 +327,12 @@ export async function createOrder(data) {
 
             }
 
+
             // ========================================================
-            // PRODUCT LINE ITEM
+            // PRODUCT
             // ========================================================
 
             if (type === "product") {
-
-                // ----------------------------------------------------
-                // Product must have inventory ID
-                // ----------------------------------------------------
 
                 if (!tire_inventory_id) {
 
@@ -256,92 +343,43 @@ export async function createOrder(data) {
                 }
 
 
-                // ----------------------------------------------------
-                // Get current inventory
-                //
-                // FOR UPDATE locks this inventory row until the
-                // transaction commits or rolls back.
-                // ----------------------------------------------------
+                // ====================================================
+                // GET INVENTORY FROM MAP
+                // ====================================================
 
-                const [inventoryRows] = await connection.execute(
+                const inventory =
+                    inventoryMap.get(
+                        Number(tire_inventory_id)
+                    );
 
-                    `
 
-                    SELECT
-
-                        id,
-
-                        manufacturer,
-
-                        item,
-
-                        price,
-
-                        fet,
-
-                        quantity,
-
-                        status
-
-                    FROM tire_inventory
-
-                    WHERE id = ?
-
-                    FOR UPDATE
-
-                    `,
-
-                    [
-                        tire_inventory_id
-                    ]
-
-                );
-
-                // ----------------------------------------------------
-                // Product not found
-                // ----------------------------------------------------
-
-                if (inventoryRows.length === 0) {
+                if (!inventory) {
 
                     throw new Error(
-
                         `Product not found: ${tire_inventory_id}`
-
                     );
 
                 }
 
-
-                const inventory = inventoryRows[0];
-
-
-                // ----------------------------------------------------
-                // Product must be active
-                // ----------------------------------------------------
 
                 if (inventory.status !== "active") {
 
                     throw new Error(
-
                         `Product is not available: ${tire_inventory_id}`
-
                     );
 
                 }
 
 
-                // ----------------------------------------------------
-                // Validate inventory quantity
-                // ----------------------------------------------------
-
-                if (inventory.quantity < quantity) {
+                if (
+                    Number(inventory.quantity) <
+                    Number(quantity)
+                ) {
 
                     throw new Error(
 
                         `Insufficient inventory for product ${tire_inventory_id}. ` +
-
                         `Available: ${inventory.quantity}, ` +
-
                         `Requested: ${quantity}`
 
                     );
@@ -349,83 +387,40 @@ export async function createOrder(data) {
                 }
 
 
-                // ----------------------------------------------------
-                // IMPORTANT:
-                //
-                // Use the database price.
-                //
-                // Never trust the price sent from frontend.
-                // ----------------------------------------------------
+                // ====================================================
+                // USE DATABASE VALUES
+                // ====================================================
 
                 const productPrice =
-
                     Number(inventory.price);
 
-
                 const productFet =
-
                     Number(inventory.fet);
 
-                // ----------------------------------------------------
-                // Product subtotal
-                // ----------------------------------------------------
 
                 const itemSubtotal =
-
                     productPrice * quantity;
-                
-
-                // ----------------------------------------------------
-                // FET
-                //
-                // Current assumption:
-                // FET is stored per unit in tire_inventory.
-                // ----------------------------------------------------
 
                 const itemFet =
-
                     productFet * quantity;
 
-
-                // ----------------------------------------------------
-                // Tax
-                //
-                // For now, tax_total is supplied by the caller.
-                //
-                // In production, this should be calculated by your
-                // server-side tax logic.
-                // ----------------------------------------------------
-
                 const itemTaxTotal =
-
                     Number(tax_total);
 
-
-                // ----------------------------------------------------
-                // Final product line total
-                // ----------------------------------------------------
-
                 const itemTotal =
-
                     itemSubtotal +
-
                     itemFet +
-
                     itemTaxTotal;
 
-
-                // ----------------------------------------------------
-                // Add to order totals
-                // ----------------------------------------------------
 
                 subtotal += itemSubtotal;
 
                 taxTotal += itemTaxTotal;
 
 
-                // ----------------------------------------------------
-                // Save validated item
-                // ----------------------------------------------------
+                // ====================================================
+                // ADD VALIDATED ITEM
+                // ====================================================
 
                 validatedItems.push({
 
@@ -433,8 +428,7 @@ export async function createOrder(data) {
                         inventory.id,
 
                     name:
-
-                        `${inventory.manufacturer} ${inventory.item}`,
+                        `${inventory.manufacturer} ${inventory.size} - ${inventory.item}`,
 
                     type: "product",
 
@@ -460,9 +454,19 @@ export async function createOrder(data) {
 
                 });
 
-
             }
 
+        }
+
+
+        const hasProduct = validatedItems.some(
+            item => item.type === "product"
+        );
+
+        if (!hasProduct) {
+            throw new Error(
+                "Order must contain at least one product."
+            );
         }
 
 
@@ -611,9 +615,6 @@ export async function createOrder(data) {
                 installationTotal;
 
         }
-
-
-
 
 
         // ============================================================
@@ -871,87 +872,127 @@ export async function createOrder(data) {
 
 
 
+        // ============================================================
+        // CREATE ORDER ITEMS
+        // ============================================================
 
-        const createdItems = [];
+        const values = validatedItems.flatMap(item => [
 
+            orderId,
 
-        for (const item of validatedItems) {
+            item.tire_inventory_id,
 
+            item.name,
 
-            const [itemResult] = await connection.execute(
+            item.type,
 
-                `
+            item.selected_vehicle,
 
-                INSERT INTO order_items (
+            item.quantity,
 
-                    order_id,
+            item.unit_price,
 
-                    tire_inventory_id,
+            item.fet,
 
-                    name,
+            item.subtotal,
 
-                    type,
+            item.tax_total,
 
-                    selected_vehicle,
+            item.total
 
-                    quantity,
-
-                    unit_price,
-
-                    fet,
-
-                    subtotal,
-
-                    tax_total,
-
-                    total
-
-                )
-
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
-                `,
-
-                [
-
-                    orderId,
-
-                    item.tire_inventory_id,
-
-                    item.name,
-
-                    item.type,
-
-                    item.selected_vehicle,
-
-                    item.quantity,
-
-                    item.unit_price,
-
-                    item.fet,
-
-                    item.subtotal,
-
-                    item.tax_total,
-
-                    item.total
-
-                ]
-
-            );
+        ]);
 
 
-            createdItems.push({
+        const placeholders2 = validatedItems
+            .map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            .join(", ");
 
-                id:
 
-                    itemResult.insertId,
+        await connection.execute(
 
-                ...item
+            `
 
-            });
+            INSERT INTO order_items (
 
-        }
+                order_id,
+
+                tire_inventory_id,
+
+                name,
+
+                type,
+
+                selected_vehicle,
+
+                quantity,
+
+                unit_price,
+
+                fet,
+
+                subtotal,
+
+                tax_total,
+
+                total
+
+            )
+
+            VALUES ${placeholders2}
+
+            `,
+
+            values
+
+        );
+
+
+        // ============================================================
+        // FETCH CREATED ORDER ITEMS
+        // ============================================================
+
+        const [createdItems] = await connection.execute(
+
+            `
+
+            SELECT
+
+                id,
+
+                order_id,
+
+                tire_inventory_id,
+
+                name,
+
+                type,
+
+                selected_vehicle,
+
+                quantity,
+
+                unit_price,
+
+                fet,
+
+                subtotal,
+
+                tax_total,
+
+                total
+
+            FROM order_items
+
+            WHERE order_id = ?
+
+            ORDER BY id ASC
+
+            `,
+
+            [orderId]
+
+        );
+
 
 
         // ============================================================

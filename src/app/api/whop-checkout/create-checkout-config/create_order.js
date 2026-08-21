@@ -2,95 +2,77 @@ import { createOrder } from "../../order";
 
 import { DELIVERY_METHODS } from "../../order/delivery_methods";
 
+
 // {
 
-//         customer_id: null,
+//     customer_id: null,
 
-//         customer_email: "test@example.com",
+//     customer_email: "test@example.com",
 
-//         currency: "USD",
+//     currency: "USD",
 
+//     billing_first_name: "John",
+//     billing_last_name: "Doe",
+//     billing_address1: "123 Main Street",
+//     billing_city: "New York",
+//     billing_state: "NY",
+//     billing_postcode: "10001",
+//     billing_country: "US",
 
-//         billing_first_name: "John",
+//     shipping_first_name: "John",
+//     shipping_last_name: "Doe",
+//     shipping_address1: "123 Main Street",
+//     shipping_city: "New York",
+//     shipping_state: "NY",
+//     shipping_postcode: "10001",
+//     shipping_country: "US",
 
-//         billing_last_name: "Doe",
+//     delivery_method: "ship_to_local_installer",
 
-//         billing_address1: "123 Main Street",
+//     appointment_booking_date: "2026-08-21",
 
-//         billing_city: "New York",
+//     appointment_booking_time_range: "Morning",
 
-//         billing_state: "NY",
+//     delivery_location_id: "74216",
 
-//         billing_postcode: "10001",
+//     coupon_code: "SAVE20",
 
-//         billing_country: "US",
+//     items: [
 
+//         {
+//             tire_inventory_id: 5,
+//             quantity: 2,
+//             selected_vehicle:
+//                 "2021 BMW M340i xDrive"
+//         },
 
-//         shipping_first_name: "John",
+//         {
+//             tire_inventory_id: 9,
+//             quantity: 1,
+//             selected_vehicle: null
+//         }
 
-//         shipping_last_name: "Doe",
+//     ]
 
-//         shipping_address1: "123 Main Street",
-        
-//         shipping_city: "New York",
-        
-//         shipping_state: "NY",
-
-//         shipping_postcode: "10001",
-
-//         shipping_country: "US",
-
-
-
-//         delivery_method: "ship_to_local_installer", 
-
-//         appointment_booking_date: "August 21, 2026, Monday",
-        
-//         appointment_booking_time_range: "Morning",
-        
-//         delivery_location_id: "74216",
-        
-//         coupon_code: "SAVE20" ,
-        
-//         items: [
-
-//             {
-
-//                 tire_inventory_id: 5,
-
-//                 quantity: 2,
-
-//                 selected_vehicle:
-//                     "2021 BMW M340i xDrive"
-
-//             },
-            
-//             {
-
-
-//                 tire_inventory_id: 9,
-
-//                 quantity: 1,
-
-//                 selected_vehicle: null
-
-//             },
-
-//         ]
-
-//     }
-
+// }
 
 
 function requireField(value, fieldName) {
+
     if (
         value === null ||
         value === undefined ||
         String(value).trim() === ""
     ) {
-        throw new Error(`${fieldName} is required.`);
+
+        throw new Error(
+            `${fieldName} is required.`
+        );
+
     }
+
 }
+
 
 function validateAddress(data, prefix) {
 
@@ -128,6 +110,7 @@ function validateAddress(data, prefix) {
         data[`${prefix}_country`],
         `${prefix}_country`
     );
+
 }
 
 
@@ -138,41 +121,182 @@ function validateAppointmentDate(value) {
         "appointment_booking_date"
     );
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+    const dateRegex =
+        /^\d{4}-\d{2}-\d{2}$/;
+
 
     if (!dateRegex.test(value)) {
+
         throw new Error(
             "appointment_booking_date must be in YYYY-MM-DD format."
         );
+
     }
 
-    const [year, month, day] = value.split("-").map(Number);
+
+    const [
+        year,
+        month,
+        day
+    ] = value
+        .split("-")
+        .map(Number);
+
 
     const date = new Date(
-        Date.UTC(year, month - 1, day)
+        Date.UTC(
+            year,
+            month - 1,
+            day
+        )
     );
-    
+
+
     if (
         date.getUTCFullYear() !== year ||
         date.getUTCMonth() !== month - 1 ||
         date.getUTCDate() !== day
     ) {
+
         throw new Error(
             "Invalid appointment booking date."
         );
+
     }
+
 }
+
+
+function validateOrderItems(items) {
+
+    // ============================================================
+    // ITEMS MUST BE AN ARRAY
+    // ============================================================
+
+    if (
+        !Array.isArray(items) ||
+        items.length === 0
+    ) {
+
+        throw new Error(
+            "Order must contain at least one item."
+        );
+
+    }
+
+
+    // ============================================================
+    // VALIDATE EVERY ITEM
+    // ============================================================
+
+    for (
+        const [
+            index,
+            item
+        ] of items.entries()
+    ) {
+
+
+        // ========================================================
+        // ITEM MUST BE AN OBJECT
+        // ========================================================
+
+        if (
+            !item ||
+            typeof item !== "object" ||
+            Array.isArray(item)
+        ) {
+
+            throw new Error(
+                `Invalid order item at index ${index}.`
+            );
+
+        }
+
+
+        // ========================================================
+        // TIRE INVENTORY ID
+        // ========================================================
+
+        requireField(
+            item.tire_inventory_id,
+            `items[${index}].tire_inventory_id`
+        );
+
+
+        // ========================================================
+        // TIRE INVENTORY ID MUST BE POSITIVE INTEGER
+        // ========================================================
+
+        if (
+            !Number.isInteger(
+                Number(item.tire_inventory_id)
+            ) ||
+            Number(item.tire_inventory_id) <= 0
+        ) {
+
+            throw new Error(
+                `items[${index}].tire_inventory_id must be a positive integer.`
+            );
+
+        }
+
+
+        // ========================================================
+        // QUANTITY REQUIRED
+        // ========================================================
+
+        if (
+            item.quantity === null ||
+            item.quantity === undefined
+        ) {
+
+            throw new Error(
+                `items[${index}].quantity is required.`
+            );
+
+        }
+
+
+        // ========================================================
+        // QUANTITY MUST BE POSITIVE INTEGER
+        // ========================================================
+
+        if (
+            !Number.isInteger(item.quantity) ||
+            item.quantity <= 0
+        ) {
+
+            throw new Error(
+                `items[${index}].quantity must be a positive integer.`
+            );
+
+        }
+
+    }
+
+}
+
 
 function validateOrderData(data) {
 
     const {
+
         customer_email,
+
         delivery_method,
+
         delivery_location_id,
+
         appointment_booking_date,
+
         appointment_booking_time_range,
+
         items
+
     } = data;
+
 
     // ============================================================
     // CUSTOMER EMAIL
@@ -183,6 +307,7 @@ function validateOrderData(data) {
         "customer_email"
     );
 
+
     // ============================================================
     // DELIVERY METHOD
     // ============================================================
@@ -192,10 +317,13 @@ function validateOrderData(data) {
             delivery_method?.trim()
         )
     ) {
+
         throw new Error(
             `Invalid delivery method. Supported values: ${DELIVERY_METHODS.join(", ")}`
         );
+
     }
+
 
     // ============================================================
     // BILLING ADDRESS
@@ -208,11 +336,11 @@ function validateOrderData(data) {
         "billing"
     );
 
+
     // ============================================================
     // CUSTOMER SHIPPING ADDRESS
     //
-    // Required only when the customer's address is the
-    // actual installation/shipping destination.
+    // Required for:
     //
     // ship_to_customer
     // ship_to_mobile_installer
@@ -222,11 +350,14 @@ function validateOrderData(data) {
         delivery_method === "ship_to_customer" ||
         delivery_method === "ship_to_mobile_installer"
     ) {
+
         validateAddress(
             data,
             "shipping"
         );
+
     }
+
 
     // ============================================================
     // DELIVERY LOCATION
@@ -236,9 +367,6 @@ function validateOrderData(data) {
     // ship_to_local_installer
     // ship_to_mobile_installer
     // ship_to_fedex_pickup
-    //
-    // The meaning of delivery_location_id depends on the
-    // delivery method.
     // ============================================================
 
     if (
@@ -246,25 +374,39 @@ function validateOrderData(data) {
         delivery_method === "ship_to_mobile_installer" ||
         delivery_method === "ship_to_fedex_pickup"
     ) {
+
         requireField(
             delivery_location_id,
             "delivery_location_id"
         );
+
     }
 
+
+    // ============================================================
+    // APPOINTMENT
+    //
+    // Required for:
+    //
+    // ship_to_local_installer
+    // ship_to_mobile_installer
+    // ============================================================
 
     if (
         delivery_method === "ship_to_local_installer" ||
         delivery_method === "ship_to_mobile_installer"
     ) {
+
         validateAppointmentDate(
             appointment_booking_date
         );
+
 
         requireField(
             appointment_booking_time_range,
             "appointment_booking_time_range"
         );
+
     }
 
 
@@ -272,23 +414,34 @@ function validateOrderData(data) {
     // ORDER ITEMS
     // ============================================================
 
-    if (
-        !Array.isArray(items) ||
-        items.length === 0
-    ) {
-        throw new Error(
-            "Order must contain at least one item."
-        );
-    }
+    validateOrderItems(
+        items
+    );
+
 }
+
 
 export async function createOrderForWhopSession(data) {
 
-    // Validate the Whop order/session payload first.
-    validateOrderData(data);
+    // ============================================================
+    // VALIDATE ORDER DATA
+    // ============================================================
 
-    // Only validated data reaches the actual order creation service.
-    const order = await createOrder(data);
+    validateOrderData(
+        data
+    );
+
+
+    // ============================================================
+    // CREATE ORDER
+    // ============================================================
+
+    const order =
+        await createOrder(
+            data
+        );
+
 
     return order;
+
 }

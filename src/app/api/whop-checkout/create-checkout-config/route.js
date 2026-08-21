@@ -56,7 +56,8 @@ export async function POST(request) {
 
         return new Response(
             JSON.stringify({
-                error: "Internal Server Error",
+                success:false,
+                error: error.message,
             }),
             {
                 status: 500,
