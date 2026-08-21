@@ -5,7 +5,8 @@ import {
   allVehiclesSchema, 
   localInstallersSchema, 
   rebatesSchema, 
-  contactInquiriesSchema
+  contactInquiriesSchema,
+  cartsSchema
 
 } from "./schema";
 import openSearchClient from "../_lib/route";
@@ -14,64 +15,90 @@ export async function GET() {
    
   try {
 
+    
+
+    const carts = await openSearchClient.indices.exists({ index: "carts" });
+
+    if (!carts.body) {
+
+      await openSearchClient.indices.create({
+        index: "carts",
+        body: cartsSchema,
+      });
+
+      // 
+
+      console.log("cartsSchema index created ✅");
+
+    } else {
+
+      console.log("cartsSchema index already exists");
+
+    }
+
+    return 
+
+
+
+
     // 
 
-const rebateMapping = {
-  properties: {
-
-    contains_rebates: {
-      type: "boolean"
-    },
-
-    rebates: {
-      type: "nested",
+    const rebateMapping = {
       properties: {
 
-        amount: {
-          type: "float"
+        contains_rebates: {
+          type: "boolean"
         },
 
-        description: {
-          type: "text"
-        },
+        rebates: {
+          type: "nested",
+          properties: {
 
-        description_preview: {
-          type: "text"
-        },
+            amount: {
+              type: "float"
+            },
 
-        qty_required: {
-          type: "integer"
-        },
+            description: {
+              type: "text"
+            },
 
-        url: {
-          type: "keyword"
-        },
+            description_preview: {
+              type: "text"
+            },
 
-        preview_img_url: {
-          type: "keyword"
-        },
+            qty_required: {
+              type: "integer"
+            },
 
-        banner_img_url: {
-          type: "keyword"
-        },
+            url: {
+              type: "keyword"
+            },
 
-        horizontal_img_url: {
-          type: "keyword"
-        },
+            preview_img_url: {
+              type: "keyword"
+            },
 
-        start_date: {
-          type: "date",
-          format: "yyyy-MM-dd"
-        },
+            banner_img_url: {
+              type: "keyword"
+            },
 
-        end_date: {
-          type: "date",
-          format: "yyyy-MM-dd"
+            horizontal_img_url: {
+              type: "keyword"
+            },
+
+            start_date: {
+              type: "date",
+              format: "yyyy-MM-dd"
+            },
+
+            end_date: {
+              type: "date",
+              format: "yyyy-MM-dd"
+            }
+          }
         }
       }
-    }
-  }
-};
+    };
     await openSearchClient.indices.putMapping({
       index: "all_tires",
       body: rebateMapping

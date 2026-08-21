@@ -1150,3 +1150,63 @@ export const contactInquiriesSchema = {
     }
   }
 };
+
+
+export const cartsSchema = {
+  mappings: {
+    properties: {
+      // =========================
+      // IDENTITY
+      // =========================
+
+      cart_id: {
+        type: "keyword"
+      },
+
+      customer_id: {
+        type: "keyword"
+      },
+
+      // =========================
+      // DELIVERY
+      // =========================
+
+      delivery_method: {
+        type: "keyword"
+      },
+
+      delivery_location_id: {
+        type: "keyword"
+      },
+
+      // =========================
+      // ITEMS
+      // =========================
+
+      items: {
+        type: "nested",
+        properties: {
+          tire_inventory_id: {
+            type: "keyword"
+          },
+
+          quantity: {
+            type: "keyword"
+          }
+        }
+      },
+
+      // =========================
+      // DATES
+      // =========================
+
+      created_at: {
+        type: "date"
+      },
+
+      updated_at: {
+        type: "date"
+      }
+    }
+  }
+};

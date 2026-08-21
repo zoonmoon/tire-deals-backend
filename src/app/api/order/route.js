@@ -4,6 +4,8 @@ import { createOrder } from ".";
 
 export async function GET(){
 
+    return 
+    
     try{
 
         const order = await createOrder({
