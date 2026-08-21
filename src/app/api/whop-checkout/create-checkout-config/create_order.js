@@ -336,7 +336,7 @@ function validateOrderData(data) {
         "billing"
     );
 
-
+    
     // ============================================================
     // CUSTOMER SHIPPING ADDRESS
     //
@@ -371,8 +371,8 @@ function validateOrderData(data) {
 
     if (
         delivery_method === "ship_to_local_installer" ||
-        delivery_method === "ship_to_mobile_installer" ||
-        delivery_method === "ship_to_fedex_pickup"
+        delivery_method === "ship_to_mobile_installer" 
+        // delivery_method === "ship_to_fedex_pickup"
     ) {
 
         requireField(

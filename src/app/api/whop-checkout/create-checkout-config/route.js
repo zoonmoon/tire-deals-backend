@@ -17,7 +17,6 @@ export async function POST(request) {
 
         const data = await request.json();
 
-
         // ============================================================
         // CREATE ORDER
         // ============================================================
