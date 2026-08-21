@@ -13,7 +13,7 @@ export function generateCartId() {
     return crypto
         .randomBytes(15)
         .toString("base64url")
-        .slice(0, 20);
+        .slice(0, 30);
 
 }
 
@@ -69,7 +69,7 @@ export async function getCartId() {
     });
 
     return cartId;
-    
+
 }
 
 
